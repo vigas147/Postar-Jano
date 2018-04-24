@@ -8,14 +8,26 @@ use Google\Spreadsheet\ServiceRequestFactory;
 
 #Load secrets
 Secrets::load();
+putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/secrets/google_client_secret.json');
+
+#Mustache templating form html generation
+$m = new Mustache_Engine(array(
+    'escape' => function($value) {
+        return htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
+    },
+));
+
+#register new loader
+$loader = new Mustache_Loader_FilesystemLoader(dirname(__FILE__).'/templates');
+
+#loads tempate
+$tpl = $loader->load('mail');
 
 $spreadsheet_name = $argv[1];
 
 # MAILGUN
 $mgClient = new Mailgun($_ENV['secrets']['MAILGUN_API_KEY']);
 $domain = "mailgun.sbb.sk";
-
-putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/secrets/google_client_secret.json');
 
 $client = new Google_Client;
 $client->useApplicationDefaultCredentials();
