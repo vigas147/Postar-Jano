@@ -157,6 +157,10 @@ class ComposerStaticInitd8e76c92ebba6ebb292213c28bcdf58d
     public static $prefixesPsr0 = array (
         'M' => 
         array (
+            'Mustache' => 
+            array (
+                0 => __DIR__ . '/..' . '/mustache/mustache/src',
+            ),
             'Mailgun' => 
             array (
                 0 => __DIR__ . '/..' . '/mailgun/mailgun-php/src',
