@@ -86,13 +86,14 @@ foreach ($listFeed->getEntries() as $entry){
             'organizator_telefon' => $akcia['organizator']['telefon'],
             'organizator_meno_sklonovane' => $akcia['organizator']['meno_sklonovane'],
             'fotka_url' =>  $akcia['organizator']['foto'],
+            'event' => $akcia['event_name'],
         );
 
         try {
             $mail_result = $mgClient->sendMessage("$domain",
                       array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                             'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
-                            'subject' => 'Salezko - Prijatie prihlášky',
+                            'subject' => 'Salezko - Prijatie prihlášky na ' . $akcia['event_name'],
                             'html'    => $m->render($tpl_prihlaska, $email_data)
                         ));
             $entry->update(['postarjano' => 'poslané']);
@@ -112,7 +113,8 @@ foreach ($listFeed->getEntries() as $entry){
             'priezvisko' => $values['priezvisko'],
             'pohlavie' => $pohlavie_text,
             'datum' => date('d.m.Y'),
-            'cas' => date('H:i:s')
+            'cas' => date('H:i:s'),
+            'event' => $akcia['event_name'],
         );
 
         try {
