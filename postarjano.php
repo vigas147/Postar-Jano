@@ -71,7 +71,7 @@ foreach ($listFeed->getEntries() as $entry){
             'priezvisko' => $values['priezvisko'],
             'pohlavie' => $values['pohlavie'],
             'adresa1' => $values['adresaulicaorientačnéčíslo'],
-            'adresa2' => $values['adresamestoobecnieskartka'],
+            'adresa2' => $values['adresamestoobecnieskratka'],
             'datumnarodenia' => $values['dátumnarodenia'],
             'skola' => $values['škola'],
             'rocnik' => $values['triedaukončenýročník'],
