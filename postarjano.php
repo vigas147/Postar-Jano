@@ -121,7 +121,7 @@ foreach ($listFeed->getEntries() as $entry){
             $mail_result = $mgClient->sendMessage("$domain",
                 array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                     'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
-                    'subject' => 'Salezko - Prijatie platby za prihlášku',
+                    'subject' => 'Salezko - Prijatie platby za prihlášku na ' . $akcia['event_name'],
                     'html'    => $m->render($tpl_platba, $email_data),
                 ));
             $entry->update(['datumzaplatenia' => date('d.m. H:i:s')]);
