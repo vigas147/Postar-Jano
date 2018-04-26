@@ -112,7 +112,6 @@ foreach ($listFeed->getEntries() as $entry){
             'meno' => $values['meno'],
             'priezvisko' => $values['priezvisko'],
             'pohlavie' => $pohlavie_text,
-            'event' => $akcia['event_name'],
         );
 
         try {
