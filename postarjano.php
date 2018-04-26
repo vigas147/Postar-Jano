@@ -10,6 +10,8 @@ use Google\Spreadsheet\ServiceRequestFactory;
 Secrets::load();
 putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/secrets/google_client_secret.json');
 
+$akcia = $_ENV['secrets']['akcie'][$argv[1]];
+
 #Mustache templating form html generation
 $m = new Mustache_Engine(array(
     'escape' => function($value) {
@@ -22,8 +24,7 @@ $loader = new Mustache_Loader_FilesystemLoader(dirname(__FILE__).'/templates');
 
 #loads tempate
 $tpl_platba = $loader->load('potvrdenieplatby');
-
-$spreadsheet_name = $argv[1];
+$tpl_prihlaska = $loader->load('potvrdenieudajov');
 
 # MAILGUN
 $mgClient = new Mailgun($_ENV['secrets']['MAILGUN_API_KEY']);
@@ -47,7 +48,7 @@ ServiceRequestFactory::setInstance(
 // Get our spreadsheet
 $spreadsheet = (new Google\Spreadsheet\SpreadsheetService)
    ->getSpreadsheetFeed()
-   ->getByTitle($spreadsheet_name);
+   ->getByTitle($akcia['spreadsheet_name']);
  
 // Get the first worksheet (tab)
 $worksheets = $spreadsheet->getWorksheetFeed()->getEntries();
@@ -64,12 +65,36 @@ foreach ($listFeed->getEntries() as $entry){
 
     #Posle email o zaregistrovani prihlasky
 	if ($values['postarjano'] ===  '') {
+        
+        $email_data = array(
+            'meno' => $values['meno'],
+            'priezvisko' => $values['priezvisko'],
+            'pohlavie' => $values['pohlavie'],
+            'adresa1' => $values['adresaulicaorientačnéčíslo'],
+            'adresa2' => $values['adresamestoobecnieskartka'],
+            'datumnarodenia' => $values['dátumnarodenia'],
+            'skola' => $values['škola'],
+            'rocnik' => $values['triedaukončenýročník'],
+            'lieky' => (strlen($values['prosímuveďteakéliekyužívavašedieťa']) > 1) ? $values['prosímuveďteakéliekyužívavašedieťa'] : 'žiadne',
+            'obmedzenia' => (strlen($values['prosímuveďteakézdravotnéťažkostialeboobmedzeniamávašedieťa']) > 1) ? $values['prosímuveďteakézdravotnéťažkostialeboobmedzeniamávašedieťa'] : 'žiadne',
+            'preukaz' => $values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'],
+            'telefon' => $values['telefónnečíslo'],
+            'preukaz_platba' => ($values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'] === 'Áno') ? 'a preukázali sa platným členským preukazom' : '',
+            'cena' => ($values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'] === 'Áno') ? $akcia['cena_preukaz'] : $akcia['cena'],
+            'organizator_meno' => $akcia['organizator']['meno'],
+            'organizator_email' => $akcia['organizator']['email'],
+            'organizator_telefon' => $akcia['organizator']['telefon'],
+            'organizator_meno_sklonovane' => $akcia['organizator']['meno_sklonovane'],
+            'fotka_url' =>  $akcia['organizator']['foto'],
+        );
+
         try {
             $mail_result = $mgClient->sendMessage("$domain",
                       array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                             'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
                             'subject' => 'Salezko - Prijatie prihlášky',
-                            'text'    =>  date("h:i:sa")));
+                            'html'    => $m->render($tpl_prihlaska, $email_data)
+                        ));
             $entry->update(['postarjano' => 'poslané']);
         } catch (Exception $e){
             $error = $e->getMessage().PHP_EOL;
@@ -95,7 +120,6 @@ foreach ($listFeed->getEntries() as $entry){
                 array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                     'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
                     'subject' => 'Salezko - Prijatie platby za prihlášku',
-                    'text'    => date("h:i:sa"),
                     'html'    => $m->render($tpl_platba, $email_data),
                 ));
             $entry->update(['datumzaplatenia' => date('d.m. H:i:s')]);
