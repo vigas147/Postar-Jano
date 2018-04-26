@@ -104,7 +104,7 @@ foreach ($listFeed->getEntries() as $entry){
     }
     
     #Posle email o prijati platby
-    if ($values['postarjano'] ===  'poslané' AND strlen($values['zaplatene']) >= 2) {
+    if ($values['postarjano'] ===  'poslané' AND strlen($values['zaplatene']) >= 2 AND $values['datumzaplatenia'] === '') {
         
         $pohlavie_text = ($values['pohlavie'] === 'chlapec') ? 'vášho syna' : 'vašu dcéru';
 
