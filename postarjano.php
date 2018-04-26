@@ -21,7 +21,7 @@ $m = new Mustache_Engine(array(
 $loader = new Mustache_Loader_FilesystemLoader(dirname(__FILE__).'/templates');
 
 #loads tempate
-$tpl = $loader->load('mail');
+$tpl_platba = $loader->load('potvrdenieplatby');
 
 $spreadsheet_name = $argv[1];
 
@@ -78,17 +78,30 @@ foreach ($listFeed->getEntries() as $entry){
     }
     
     #Posle email o prijati platby
-    if ($values['postarjano'] ===  'poslané' AND $values['zaplatene'] === 'áno') {
+    if ($values['postarjano'] ===  'poslané' AND strlen($values['zaplatene']) >= 2) {
+        
+        $pohlavie_text = ($values['pohlavie'] === 'chlapec') ? 'vášho syna' : 'vašu dcéru';
+
+        $email_data = array(
+            'meno' => $values['meno'],
+            'priezvisko' => $values['priezvisko'],
+            'pohlavie' => $pohlavie_text,
+            'datum' => date('d.m.Y'),
+            'cas' => date('H:i:s')
+        );
+
         try {
             $mail_result = $mgClient->sendMessage("$domain",
-                      array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
-                            'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
-                            'subject' => 'Salezko - Prijatie platby za prihlášku',
-                            'text'    =>  date("h:i:sa")));
-            $entry->update(['zaplatene' => 'áno - ' . date('Y-m-d H:i:s')]);
+                array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
+                    'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
+                    'subject' => 'Salezko - Prijatie platby za prihlášku',
+                    'text'    => date("h:i:sa"),
+                    'html'    => $m->render($tpl_platba, $email_data),
+                ));
+            $entry->update(['datumzaplatenia' => date('d.m. H:i:s')]);
         } catch (Exception $e){
             $error = $e->getMessage().PHP_EOL;
-            $entry->update(['zaplatene' => 'áno - ' . $error]);
+            $entry->update(['datumzaplatenia' => $error]);
         }
 	}
 }
