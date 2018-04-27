@@ -99,6 +99,7 @@ foreach ($listFeed->getEntries() as $entry){
             $entry->update(['postarjano' => 'poslané']);
         } catch (Exception $e){
             $error = $e->getMessage().PHP_EOL;
+            echo "Error in " . $akcia['event_name'] . " - " . $error;
             $entry->update(['postarjano' => $error]);
         }
     }
@@ -124,6 +125,7 @@ foreach ($listFeed->getEntries() as $entry){
             $entry->update(['datumzaplatenia' => date('d.m. H:i:s')]);
         } catch (Exception $e){
             $error = $e->getMessage().PHP_EOL;
+            echo "Error in " . $akcia['event_name'] . " - " . $error;
             $entry->update(['datumzaplatenia' => $error]);
         }
 	}
