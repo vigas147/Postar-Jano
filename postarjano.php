@@ -64,7 +64,7 @@ foreach ($listFeed->getEntries() as $entry){
     $values = $entry->getValues();
 
     #Posle email o zaregistrovani prihlasky
-	if ($values['postarjano'] ===  '') {
+	if ($values['postarjano'] ===  '' AND strlen($values['meno']) > 0) {
         
         $email_data = array(
             'meno' => $values['meno'],
