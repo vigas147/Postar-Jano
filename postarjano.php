@@ -58,6 +58,15 @@ $cellFeed = $worksheet->getCellFeed();
 
 $rows = $cellFeed->toArray();
 
+$api_json = array(
+    'percent' => round(((count($rows) - 1)/$akcia['kapacita'])*100),
+    'timestamp' => date('d.m. H:i:s'),
+);
+
+$fp = fopen(__DIR__ . '/api/'.$argv[1].'.json', 'w');
+fwrite($fp, json_encode($api_json));
+fclose($fp);
+
 $listFeed = $worksheet->getListFeed();
 
 foreach ($listFeed->getEntries() as $entry){
