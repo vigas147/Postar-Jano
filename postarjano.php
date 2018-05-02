@@ -88,7 +88,7 @@ foreach ($listFeed->getEntries() as $entry){
             'obmedzenia' => (strlen($values['prosímuveďteakézdravotnéťažkostialeboobmedzeniamávašedieťa']) > 1) ? $values['prosímuveďteakézdravotnéťažkostialeboobmedzeniamávašedieťa'] : 'žiadne',
             'preukaz' => $values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'],
             'telefon' => $values['telefónnečíslo'],
-            'preukaz_platba' => ($values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'] === 'Áno') ? 'a preukázali sa platným členským preukazom' : '',
+            'preukaz_platba' => ($values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'] === 'Áno') ? ' a preukázali sa platným členským preukazom' : '',
             'cena' => ($values['mávášsyndcéraaktuálnyčlenskýpreukazsalezkanarok2018'] === 'Áno') ? $akcia['cena_preukaz'] : $akcia['cena'],
             'organizator_meno' => $akcia['organizator']['meno'],
             'organizator_email' => $akcia['organizator']['email'],
