@@ -5,6 +5,7 @@
         "mailgun/mailgun-php": "^2.5",
         "php-http/curl-client": "^1.7",
         "guzzlehttp/psr7": "^1.4",
-        "mustache/mustache": "^2.12"
+        "mustache/mustache": "^2.12",
+        "setasign/fpdi-tcpdf": "2.0"
     }
 }
