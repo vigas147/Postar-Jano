@@ -23,7 +23,7 @@ $m = new Mustache_Engine(array(
 $loader = new Mustache_Loader_FilesystemLoader(dirname(__FILE__).'/templates');
 
 #loads tempate
-$tpl = $loader->load('terminyplatby');
+$tpl = $loader->load('terminyplatbyupozornenie');
 
 # MAILGUN
 $mgClient = new Mailgun($_ENV['secrets']['MAILGUN_API_KEY']);
@@ -63,26 +63,20 @@ foreach ($listFeed->getEntries() as $entry){
     $values = $entry->getValues();
     
     #Posle email o prijati platby
-    if ($values['postarjano'] ===  'poslané' AND $values['emailterminyplatby'] == '') {
-
-        $pohlavie_text = ($values['pohlavie'] === 'chlapec') ? 'vášho syna(' . $values['meno'] . ')' : 'vašu dcéru(' . $values['meno'] . ')';
-
-        $email_data = array(
-            'pohlavie_text' => $pohlavie_text, 
-        );
+    if ($values['postarjano'] ===  'poslané' AND $values['emailplatbaupozorenie'] == '' AND $values['datumzaplatenia'] == '') {
 
         try {
             $mail_result = $mgClient->sendMessage("$domain",
                 array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                     'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
-                    'subject' => 'Salezko - Termíny zaplatenia za ' . $akcia['event_name'],
-                    'html'    => $m->render($tpl, $email_data),
+                    'subject' => 'Salezko - Upozorenie na zaplatenie za ' . $akcia['event_name'],
+                    'html'    => $m->render($tpl),
                 ));
-            $entry->update(['emailterminyplatby' => 'poslané']);
+            $entry->update(['emailplatbaupozorenie' => 'poslané']);
         } catch (Exception $e){
             $error = $e->getMessage().PHP_EOL;
             echo "Error in " . $akcia['event_name'] . " - " . $error;
-            $entry->update(['emailterminyplatby' => $error]);
+            $entry->update(['emailplatbaupozorenie' => $error]);
         }
 	}
 }
