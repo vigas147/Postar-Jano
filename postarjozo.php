@@ -73,7 +73,7 @@ foreach ($listFeed->getEntries() as $entry){
                     'html'    => $m->render($tpl),
                 ),
                 array(
-                    'attachment' => array('INFOLIST.pdf', 'Vyhlasenie.pdf')
+                    'attachment' => array('INFOLIST_pobytovy.pdf', 'spracovanie_udajov.pdf')
                 ));
             $entry->update(['infomail' => 'poslané']);
         } catch (Exception $e){
