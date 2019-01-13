@@ -10,7 +10,7 @@ use Google\Spreadsheet\ServiceRequestFactory;
 Secrets::load();
 putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/secrets/google_client_secret.json');
 
-$akcia = $_ENV['secrets']['akcie']['zazitkovy'];
+$akcia = $_ENV['secrets']['akcie']['primestak'];
 
 $client = new Google_Client;
 $client->useApplicationDefaultCredentials();
@@ -62,7 +62,7 @@ class Pdf extends Fpdi\TcpdfFpdi
     function Header()
     {
         if (is_null($this->tplId)) {
-            $this->setSourceFile('tlacivo_prezencna_listina_normalized.pdf');
+            $this->setSourceFile('prezencka_denny_tabor_2018.pdf');
             $this->tplId = $this->importPage(1);
         }
         $size = $this->useImportedPage($this->tplId);
@@ -78,40 +78,29 @@ class Pdf extends Fpdi\TcpdfFpdi
 $pdf = new Pdf();
 // $pdf->SetMargins(PDF_MARGIN_LEFT, 40, PDF_MARGIN_RIGHT);
 // $pdf->SetAutoPageBreak(true, 40);
-$pdf->SetFont('freeserif', '', 14);
+$pdf->SetFont('freeserif', '', 10);
 
 $pocet_ucastnikov = count($rows) - 1;
+$pocet_stran = ceil($pocet_ucastnikov / 10);
 
 $counter = 0;
 $pageNumber = 1;
 
 // print_r($ucastnici);
 // add a page
-$pdf->AddPage(); 
-
-//Add first page number
-$pdf->Text(178, 71, $pageNumber);
-$pdf->Text(60, 72, $akcia['datum']['zaciatok']->format('d.m.') . ' - ' . $akcia['datum']['koniec']->format('d.m.Y'));
-$pdf->Text(108, 269, $akcia['organizator']['meno']);
+$pdf->AddPage('L', 'A4');
 
 foreach ($ucastnici as $values){
     $counter++;
+    $pdf->SetFont('freeserif', '', 12);
     $datum_narodenia = DateTime::createFromFormat('d.m.Y', $values['dátumnarodenia']);
-    $datum_koniec = $akcia['datum']['koniec'];
-    $pdf->Text(30, (85 + 8.6*$counter), $values['meno'] . ' ' . $values['priezvisko']);
-    $pdf->Text(90, (85 + 8.6*$counter), $values['adresamestoobecnieskratka']);
-    $pdf->Text(135, (85 + 8.6*$counter), $datum_narodenia->format('Y'));
-    $pdf->Text(155, (85 + 8.6*$counter), $datum_koniec->diff($datum_narodenia)->y);
-    if ($counter == 20) {
+    $pdf->Text(21, (53 + 8.2*$counter), $values['meno'] . ' ' . $values['priezvisko']);
+    $pdf->Text(86, (53 + 8.2*$counter), $values['adresamestoobecnieskratka']);
+    $pdf->Text(118, (53 + 8.2*$counter), $datum_narodenia->format('Y'));
+    if ($counter == 10) {
         $counter = 0;
         // add a page
-        $pdf->AddPage(); 
-        
-        //Add page number
-        $pageNumber++;
-        $pdf->Text(178, 71, $pageNumber);
-        $pdf->Text(60, 72, $akcia['datum']['zaciatok']->format('d.m.') . ' - ' . $akcia['datum']['koniec']->format('d.m.Y'));
-        $pdf->Text(108, 269, $akcia['organizator']['meno']);
+        $pdf->AddPage('L', 'A4');
     }
 }
 
