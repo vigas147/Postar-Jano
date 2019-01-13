@@ -12,17 +12,17 @@ putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/secrets/google_client_sec
 
 $akcia = $_ENV['secrets']['akcie'][$argv[1]];
 
-#Mustache templating form html generation
-$m = new Mustache_Engine(array(
+#Mustache templating for html generation
+$mustache = new Mustache_Engine(array(
     'escape' => function($value) {
         return htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
     },
 ));
 
-#register new loader
+#register new mustache template loader
 $loader = new Mustache_Loader_FilesystemLoader(dirname(__FILE__).'/templates');
 
-#loads tempate
+#load tempates
 $tpl_platba = $loader->load('potvrdenieplatby');
 $tpl_prihlaska = $loader->load('potvrdenieudajov');
 
@@ -58,6 +58,7 @@ $cellFeed = $worksheet->getCellFeed();
 
 $rows = $cellFeed->toArray();
 
+// Calculation of availability for site to display
 $api_json = array(
     'percent' => round(((count($rows) - 1)/$akcia['kapacita'])*100),
     'timestamp' => date('d.m. H:i:s'),
@@ -103,7 +104,7 @@ foreach ($listFeed->getEntries() as $entry){
                       array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                             'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
                             'subject' => 'Salezko - Prijatie prihlášky na ' . $akcia['event_name'],
-                            'html'    => $m->render($tpl_prihlaska, $email_data)
+                            'html'    => $mustache->render($tpl_prihlaska, $email_data)
                         ));
             $entry->update(['postarjano' => 'poslané']);
         } catch (Exception $e){
@@ -129,7 +130,7 @@ foreach ($listFeed->getEntries() as $entry){
                 array('from'    => 'Salezko <robot@mailgun.sbb.sk>',
                     'to'      => $values['menoapriezvisko'].' <'.$values['email'].'>',
                     'subject' => 'Salezko - Prijatie platby za prihlášku na ' . $akcia['event_name'],
-                    'html'    => $m->render($tpl_platba, $email_data),
+                    'html'    => $mustache->render($tpl_platba, $email_data),
                 ));
             $entry->update(['datumzaplatenia' => date('d.m. H:i:s')]);
         } catch (Exception $e){
