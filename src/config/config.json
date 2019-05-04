@@ -1,0 +1,5 @@
+{
+    "secrets": {
+        "MAILGUN_API_KEY": "abc"
+    }
+}

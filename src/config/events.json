@@ -1,0 +1,21 @@
+[
+    {
+        "identifier": "test",
+        "name": "Testovaci tabor",
+        "spreadsheetId": "id209i0",
+        "capacity": 100,
+        "date": {
+            "start": "",
+            "end": ""
+        },
+        "price": 140,
+        "priceDiscounted": 100,
+        "responsiblePerson": {
+            "meno": "John Doe",
+            "meno_sklonovane": "John Doe",
+            "email": "test@gmail.com",
+            "telefon": "+421 99999999",
+            "foto": ""
+        }
+    }
+]
