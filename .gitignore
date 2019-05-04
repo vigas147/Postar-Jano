@@ -2,3 +2,7 @@
 secrets/
 
 node_modules/
+
+dist/
+
+src/config/google_client_secret\.json
