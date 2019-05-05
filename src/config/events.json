@@ -2,7 +2,9 @@
     {
         "identifier": "test",
         "name": "Testovaci tabor",
-        "spreadsheetId": "id209i0",
+        "prefix": 13,
+        "spreadsheetId": "abc",
+        "IBAN": "SK74 0000 0000 0000 0000 0000",
         "capacity": 100,
         "date": {
             "start": "",
@@ -11,11 +13,18 @@
         "price": 140,
         "priceDiscounted": 100,
         "responsiblePerson": {
-            "meno": "John Doe",
-            "meno_sklonovane": "John Doe",
-            "email": "test@gmail.com",
-            "telefon": "+421 99999999",
-            "foto": ""
+            "name": "John Doe",
+            "menoSklonovane": "John Doewed",
+            "email": "john.doe@example.com",
+            "phone": "+421 000 000 000",
+            "foto": "https://example.com/example.jpg"
+        },
+        "mailgun": {
+            "domain": "mailgun.example.com",
+            "from": "Example <robot@mailgun.example.com>",
+            "subject": "Example - Prijatie prihlášky na",
+            "confirmTemplate": "leto.html",
+            "paymentTemplate": "payment.html"
         }
     }
 ]
