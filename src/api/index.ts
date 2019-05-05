@@ -10,6 +10,12 @@ const cache = apicache.middleware;
 
 const PORT = 5000;
 
+app.use((_req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get("/postarjano/api/availability/:eventName", cache("2 hours"), (req, res) => {
     let event;
 
