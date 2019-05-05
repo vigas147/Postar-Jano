@@ -19,28 +19,32 @@ app.get("/postarjano/api/availability/:eventName", cache("2 hours"), (req, res) 
             event = evnt;
         }
     }
-
-    // Create a document object using the ID of the spreadsheet - obtained from its URL.
-    const doc = new GoogleSpreadsheet(event.spreadsheetId);
-    // Authenticate with the Google Spreadsheets API.
-    doc.useServiceAccountAuth(googleSecret, async (authErr) => {
-        if (authErr) {
-            console.error(authErr);
-        }
-        // Get all of the rows from the spreadsheet.
-        await doc.getRows(1, async (err, rows) => {
-            if (err) {
-                console.error(err);
+    if (event) {
+        // Create a document object using the ID of the spreadsheet - obtained from its URL.
+        const doc = new GoogleSpreadsheet(event.spreadsheetId);
+        // Authenticate with the Google Spreadsheets API.
+        doc.useServiceAccountAuth(googleSecret, async (authErr) => {
+            if (authErr) {
+                console.error(authErr);
             }
+            // Get all of the rows from the spreadsheet.
+            await doc.getRows(1, async (err, rows) => {
+                if (err) {
+                    console.error(err);
+                }
 
-            const registrationCount = rows.filter((row) => row.postarjano === "poslane").length;
+                const registrationCount = rows.filter((row) => row.postarjano === "poslane").length;
 
-            res.json({
-                success: "true",
-                percentage: (registrationCount / event.capacity) * 100,
+                res.json({
+                    success: "true",
+                    percentage: (registrationCount / event.capacity) * 100,
+                });
             });
         });
-    });
+    } else {
+        res.status(400);
+        res.send("No event found!");
+    }
 });
 
 app.get("/postarjano", (_req, res) => {
