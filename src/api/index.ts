@@ -60,8 +60,8 @@ app.get("/postarjano", (_req, res) => {
 });
 
 https.createServer({
-    key: fs.readFileSync("server.key"),
-    cert: fs.readFileSync("server.cert"),
+    key: fs.readFileSync("privkey.pem"),
+    cert: fs.readFileSync("fullchain.pem"),
 }, app).listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
 });
