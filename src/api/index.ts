@@ -18,7 +18,7 @@ app.use((_req, res, next) => {
     next();
 });
 
-app.get("/postarjano/api/availability/:eventName", cache("2 hours"), (req, res) => {
+app.get("/postarjano/api/availability/:eventName", cache("30 minutes"), (req, res) => {
     let event;
 
     // Select event to process
