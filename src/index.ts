@@ -25,6 +25,7 @@ import googleSecret from "./config/google_client_secret.json";
     // Load templates
     const confirmTemplate = fs.readFileSync(`./templates/${event.mailgun.confirmTemplate}`, "utf8");
     const paymentTemplate = fs.readFileSync(`./templates/${event.mailgun.paymentTemplate}`, "utf8");
+    const queueTemplate = fs.readFileSync(`./templates/queue.html`, "utf8");
 
     // Create a document object using the ID of the spreadsheet - obtained from its URL.
     const doc = new GoogleSpreadsheet(event.spreadsheetId);
@@ -39,8 +40,19 @@ import googleSecret from "./config/google_client_secret.json";
             if (err) {
                 console.error(err);
             }
+
+            const girlCount = rows.filter((row) => row.pohlavie === "dievča" && row.postarjano === "poslane").length;
+
             for (const row of rows) {
-                sendConfirmation(row, event, confirmTemplate, mailgun);
+                if (event.identifier === "zazitkovy") {
+                    if (girlCount >= 24 && row.pohlavie === "dievča") {
+                        sendQueueConfirmation(row, event, queueTemplate, mailgun);
+                    } else {
+                        sendConfirmation(row, event, confirmTemplate, mailgun);
+                    }
+                } else {
+                    sendConfirmation(row, event, confirmTemplate, mailgun);
+                }
                 sendPayment(row, event, paymentTemplate, mailgun);
             }
         });
@@ -117,6 +129,30 @@ function sendPayment(row, event, template, mailgun: Mailgun.Mailgun) {
                 console.error(error, row);
             } else {
                 row.zaplateneDatum = moment().format("DD/MM/YYYY HH:mm:ss");
+                row.save();
+            }
+        });
+    }
+}
+
+function sendQueueConfirmation(row, event, template, mailgun: Mailgun.Mailgun) {
+    if (row.postarjano !== "poslane") {
+        const variableSymbol = `${event.prefix}${getRandomSymbol()}`;
+        row.variabilnysymbol = variableSymbol;
+        const html = mustache.render(template, getTemplateData(event, row, "0"));
+
+        const data = {
+            from: event.mailgun.from,
+            to: `${row.menoapriezvisko} <${row.email}>`,
+            subject: `${event.mailgun.subject} Zaradenie prihlášky do poradovníka na ${event.name}`,
+            html,
+        };
+
+        mailgun.messages().send(data, (error, _body) => {
+            if (error) {
+                console.error(error, row);
+            } else {
+                row.postarjano = "poslane";
                 row.save();
             }
         });
