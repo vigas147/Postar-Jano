@@ -95,6 +95,7 @@ function getTemplateData(event, row, variableSymbol: string) {
         fotkaUrl: person.foto,
         eventName: event.name,
         pohlavieSklonovane: row.pohlavie === "chlapec" ? "vášho syna" : "vašu dcéru",
+        organizatorSklonovane: event.responsiblePerson.menoSklonovane,
         // tslint:disable-next-line: max-line-length
         organizatorText: `Za túto akciu je ${person.sex === "M" ? "zodpovedný" : "zodpovedná"} ${person.name}. V prípade otázok ma neváhajte kontaktovať.<br>${person.email}<br>${person.phone}`,
     };
