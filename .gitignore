@@ -10,3 +10,5 @@ src/config/google_client_secret\.json
 server\.cert
 
 server\.key
+
+src/config/
