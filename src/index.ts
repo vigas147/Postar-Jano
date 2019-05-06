@@ -60,7 +60,7 @@ function sendConfirmation(row: any, event: any, infoConfirmTemplate: string, mai
         const data = {
             from: event.mailgun.from,
             to: `${row.menoapriezvisko} <${row.email}>`,
-            subject: `${event.mailgun.subject} ${event.name}`,
+            subject: `${event.mailgun.subject} Prijatie prihlášky na ${event.name}`,
             html,
         };
 
