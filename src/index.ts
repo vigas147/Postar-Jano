@@ -60,7 +60,7 @@ function sendConfirmation(row: any, event: any, infoConfirmTemplate: string, mai
         const data = {
             from: event.mailgun.from,
             to: `${row.menoapriezvisko} <${row.email}>`,
-            subject: `${event.mailgun.subject} ${event.name}`,
+            subject: `${event.mailgun.subject} Prijatie prihlášky na ${event.name}`,
             html,
         };
 
@@ -94,14 +94,31 @@ function getTemplateData(event, row, variableSymbol: string) {
         variableSymbol,
         fotkaUrl: person.foto,
         eventName: event.name,
+        pohlavieSklonovane: row.pohlavie === "chlapec" ? "vášho syna" : "vašu dcéru",
+        organizatorSklonovane: event.responsiblePerson.menoSklonovane,
         // tslint:disable-next-line: max-line-length
         organizatorText: `Za túto akciu je ${person.sex === "M" ? "zodpovedný" : "zodpovedná"} ${person.name}. V prípade otázok ma neváhajte kontaktovať.<br>${person.email}<br>${person.phone}`,
     };
 }
 
-function sendPayment(row, _event, _template, _mailgun) {
+function sendPayment(row, event, template, mailgun: Mailgun.Mailgun) {
     if (row.postarjano === "poslane" && (row.zaplatene.length && !(row.zaplatenedatum.length))) {
-        row.zaplateneDatum = moment().format("DD/MM/YYYY HH:mm:ss");
-        row.save();
+        const html = mustache.render(template, getTemplateData(event, row, "0"));
+
+        const data = {
+            from: event.mailgun.from,
+            to: `${row.menoapriezvisko} <${row.email}>`,
+            subject: `${event.mailgun.subject} Potvrdenie platby ${event.name}`,
+            html,
+        };
+
+        mailgun.messages().send(data, (error, _body) => {
+            if (error) {
+                console.error(error, row);
+            } else {
+                row.zaplateneDatum = moment().format("DD/MM/YYYY HH:mm:ss");
+                row.save();
+            }
+        });
     }
 }
