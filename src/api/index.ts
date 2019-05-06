@@ -1,6 +1,8 @@
 import apicache from "apicache";
 import express from "express";
+import fs from "fs";
 import GoogleSpreadsheet from "google-spreadsheet";
+import https from "https";
 
 import events from "../config/events.json";
 import googleSecret from "../config/google_client_secret.json";
@@ -57,6 +59,9 @@ app.get("/postarjano", (_req, res) => {
     res.redirect("https://github.com/MarekVigas/Postar-Jano");
 });
 
-app.listen(PORT, () => {
+https.createServer({
+    key: fs.readFileSync("server.key"),
+    cert: fs.readFileSync("server.cert"),
+}, app).listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
 });
