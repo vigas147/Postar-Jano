@@ -47,6 +47,8 @@ import googleSecret from "./config/google_client_secret.json";
                 if (event.identifier === "zazitkovy") {
                     if (girlCount >= 24 && row.pohlavie === "dievča") {
                         sendQueueConfirmation(row, event, queueTemplate, mailgun);
+                    } else if (rows.length >= event.capacity) {
+                        sendQueueConfirmation(row, event, queueTemplate, mailgun);
                     } else {
                         sendConfirmation(row, event, confirmTemplate, mailgun);
                     }
