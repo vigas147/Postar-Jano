@@ -1,6 +1,8 @@
 import apicache from "apicache";
 import express from "express";
+import fs from "fs";
 import GoogleSpreadsheet from "google-spreadsheet";
+import https from "https";
 
 import events from "../config/events.json";
 import googleSecret from "../config/google_client_secret.json";
@@ -12,11 +14,11 @@ const PORT = 5000;
 
 app.use((_req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
     next();
 });
 
-app.get("/postarjano/api/availability/:eventName", cache("2 hours"), (req, res) => {
+app.get("/postarjano/api/availability/:eventName", cache("30 minutes"), (req, res) => {
     let event;
 
     // Select event to process
@@ -57,6 +59,9 @@ app.get("/postarjano", (_req, res) => {
     res.redirect("https://github.com/MarekVigas/Postar-Jano");
 });
 
-app.listen(PORT, () => {
+https.createServer({
+    key: fs.readFileSync("server.key"),
+    cert: fs.readFileSync("server.cert"),
+}, app).listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
 });
