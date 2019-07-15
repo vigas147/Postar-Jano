@@ -32,6 +32,17 @@ import googleSecret from "./config/google_client_secret.json";
     // Load template
     const template = fs.readFileSync(`./templates/${args.template}`, "utf8");
 
+    const files = [];
+
+    for (const name of ["Infolist", "Vyhlasenie"]) {
+        const filename = `${name}.pdf`;
+        const data = fs.readFileSync(`./${filename}`);
+        files.push(new mailgun.Attachment({
+            data,
+            filename,
+            contentType: "application/pdf",
+        }));
+    }
     // Create a document object using the ID of the spreadsheet - obtained from its URL.
     const doc = new GoogleSpreadsheet(event.spreadsheetId);
 
@@ -47,7 +58,7 @@ import googleSecret from "./config/google_client_secret.json";
             }
 
             for (const row of rows) {
-                sendEmail(row, args.columnName, event, template, args.subject, mailgun);
+                sendEmail(row, args.columnName, event, template, args.subject, mailgun, files);
             }
         });
     });
@@ -68,8 +79,8 @@ function logArgs(args: any, withDescription: boolean) {
     }
 }
 
-function sendEmail(row: any, column: string, event: any, template: string, subject: string, mailgun: Mailgun.Mailgun): void {
-    if (row[column] !== "poslane") {
+function sendEmail(row: any, column: string, event: any, template: string, subject: string, mailgun: Mailgun.Mailgun, files: any[]): void {
+    if (row[column] !== "poslane" ) {
         const html = mustache.render(template, getTemplateData(event, row));
 
         const data = {
@@ -77,6 +88,7 @@ function sendEmail(row: any, column: string, event: any, template: string, subje
             to: `${row.menoapriezvisko} <${row.email}>`,
             subject: `${event.mailgun.subject} ${subject} ${event.name}`,
             html,
+            attachment: files,
         };
 
         mailgun.messages().send(data, (error, _body) => {
@@ -97,6 +109,9 @@ function getTemplateData(event, row) {
         priezvisko: row.priezvisko,
         pohlavie: row.pohlavie,
         datumNaordenia: row.dátumnarodenia,
+        adresaUlica: row.adresaulicaorientačnéčíslo,
+        adresaMesto: row.adresamestoobecnieskratka,
+        phone: row.telefónnečíslo.length > 0 ? row.telefónnečíslo : "Nevyplnené",
         fotkaUrl: person.foto,
         eventName: event.name,
         pohlavieSklonovane: row.pohlavie === "chlapec" ? "vášho syna" : "vašu dcéru",
