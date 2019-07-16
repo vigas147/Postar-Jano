@@ -32,17 +32,6 @@ import googleSecret from "./config/google_client_secret.json";
     // Load template
     const template = fs.readFileSync(`./templates/${args.template}`, "utf8");
 
-    const files = [];
-
-    for (const name of ["Infolist", "Vyhlasenie"]) {
-        const filename = `${name}.pdf`;
-        const data = fs.readFileSync(`./${filename}`);
-        files.push(new mailgun.Attachment({
-            data,
-            filename,
-            contentType: "application/pdf",
-        }));
-    }
     // Create a document object using the ID of the spreadsheet - obtained from its URL.
     const doc = new GoogleSpreadsheet(event.spreadsheetId);
 
@@ -58,7 +47,17 @@ import googleSecret from "./config/google_client_secret.json";
             }
 
             for (const row of rows) {
-                sendEmail(row, args.columnName, event, template, args.subject, mailgun, files);
+                const files = [];
+                const filename = `${row.variabilnysymbol}.pdf`;
+                const data = fs.readFileSync(`./potvrdenia/${filename}`);
+                files.push(new mailgun.Attachment({
+                    data,
+                    filename,
+                    contentType: "application/pdf",
+                }));
+                if (row.zaplatene.length > 0) {
+                    sendEmail(row, args.columnName, event, template, args.subject, mailgun, files);
+                }
             }
         });
     });

@@ -12,3 +12,5 @@ server\.cert
 server\.key
 
 src/config/
+
+potvrdenia/
