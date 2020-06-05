@@ -4,4 +4,7 @@ build:
 		-o "./registrations_api" \
 		"./cmd"
 
-.PHONY: build
+test:
+	go test ./...
+
+.PHONY: build test
