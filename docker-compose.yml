@@ -17,7 +17,7 @@ services:
  
   api:
     build:
-      context: ./src/api-go/
+      context: ./src/go-api/
     expose: 
       - "3000"
     ports: 
