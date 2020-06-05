@@ -1,0 +1,44 @@
+version: '2'
+
+services:
+  db:
+    image: postgres:13
+    restart: always
+    shm_size: '3gb'
+    volumes: 
+      - db-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file: 
+      - ./db.env
+    expose: 
+      - "5432"
+    ports: 
+      - "5432:5432"
+ 
+  api:
+    build:
+      context: ./src/api-go/
+    expose: 
+      - "3000"
+    ports: 
+      - "3000:3000"
+    env_file:
+      - ./api.env
+
+  nginx:
+    image: nginx:latest
+    volumes: 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certs/:/etc/nginx/ssl/
+    ports:
+      - "80:80"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  
+volumes: 
+  db-data:
+
