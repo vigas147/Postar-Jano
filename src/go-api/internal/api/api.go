@@ -14,7 +14,8 @@ func New() *API {
 	e := echo.New()
 	a := &API{Echo: e}
 
-	e.GET("/stats", a.ListStats)
+	api := e.Group("/api")
+	api.GET("/stats", a.ListStats)
 
 	return a
 }
