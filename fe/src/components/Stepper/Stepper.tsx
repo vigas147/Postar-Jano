@@ -7,6 +7,7 @@ import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
 import ParentInfo from '../ParentInfo/ParentInfo';
+import MedicineHealth from '../MedicineHalth/MedicineHealt';
 
 interface StepperProps {
     event: Event
@@ -103,6 +104,18 @@ class Stepper extends React.Component<StepperProps, StepperState> {
             case ActionType.SET_PARENT_EMAIL:
                 state.registraion.parent.email = value;
                 break;
+            case ActionType.SET_MEDICINE:
+                state.registraion.medicine.takes = value;
+                break;
+            case ActionType.SET_HEALTH:
+                state.registraion.health.hasProblmes = value;
+                break;
+            case ActionType.SET_DRUGS:
+                state.registraion.medicine.drugs = value;
+                break;
+            case ActionType.SET_PROBLEMS:
+                state.registraion.health.problems = value;
+                break;
             default:
                 break;
         }
@@ -135,20 +148,26 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                 />
                             }
                             {
-                                this.state.page == 2 && this.state.event.days.length > 1 && <DaySelector
+                                this.state.page == 2 && <MedicineHealth
+                                    registration={this.state.registraion}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page == 3 && this.state.event.days.length > 1 && <DaySelector
                                     event={this.state.event}
                                     registration={this.state.registraion}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 2 && this.state.event.days.length == 1 && <ParentInfo
+                                this.state.page == 3 && this.state.event.days.length == 1 && <ParentInfo
                                     registration={this.state.registraion}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 3 && this.state.event.days.length > 1 && <ParentInfo
+                                this.state.page == 4 && this.state.event.days.length > 1 && <ParentInfo
                                     registration={this.state.registraion}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />

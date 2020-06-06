@@ -98,4 +98,8 @@ export enum ActionType {
     SET_PARENT_SURNAME,
     SET_PARENT_PHONE,
     SET_PARENT_EMAIL,
+    SET_MEDICINE,
+    SET_HEALTH,
+    SET_PROBLEMS,
+    SET_DRUGS
 }
