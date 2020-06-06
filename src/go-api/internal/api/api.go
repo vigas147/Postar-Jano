@@ -7,6 +7,7 @@ import (
 	"github.com/MarekVigas/Postar-Jano/internal/mailer"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +22,14 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	e := echo.New()
 	a := &API{Echo: e, db: db, logger: logger, mailer: mailer}
 
-	api := e.Group("/api")
+	api := e.Group("/api", middleware.Recover(), middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Skipper: func(c echo.Context) bool {
+			if c.Request().URL.Path == "/api/stats" {
+				return true
+			}
+			return false
+		},
+	}))
 	api.GET("/status", a.Status)
 
 	api.POST("/registrations/:id", a.Register)
@@ -61,6 +69,8 @@ func (api *API) Send(c echo.Context) error {
 }
 
 func (api *API) ListStats(c echo.Context) error {
+	// List Signups JOIN DAYS JOIN EVENT
+
 	return c.JSON(http.StatusOK, echo.Map{"value": 42})
 }
 
@@ -69,6 +79,16 @@ func (api *API) StatByID(c echo.Context) error {
 }
 
 func (api *API) Register(c echo.Context) error {
+	// Validate input
+
+	// Insert into registrations (+ generate UUID)
+
+	// Insert into signups
+
+	// Check signups state
+
+	// Send confirmation mail
+
 	return nil
 }
 
