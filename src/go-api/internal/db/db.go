@@ -48,6 +48,10 @@ func connectionString() (string, error) {
 		return "", err
 	}
 
+	if err := add("POSTGRES_DB", "dbname"); err != nil {
+		return "", err
+	}
+
 	fmt.Fprint(&b, "sslmode=disable")
 
 	return b.String(), nil
