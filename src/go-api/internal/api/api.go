@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/MarekVigas/Postar-Jano/internal/mailer"
+
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
@@ -12,11 +14,12 @@ type API struct {
 	*echo.Echo
 	db     *sql.DB
 	logger *zap.Logger
+	mailer *mailer.Client
 }
 
-func New(logger *zap.Logger, db *sql.DB) *API {
+func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	e := echo.New()
-	a := &API{Echo: e, db: db, logger: logger}
+	a := &API{Echo: e, db: db, logger: logger, mailer: mailer}
 
 	api := e.Group("/api")
 	api.GET("/status", a.Status)
@@ -29,6 +32,9 @@ func New(logger *zap.Logger, db *sql.DB) *API {
 
 	api.GET("/events", a.ListEvents)
 	api.GET("/events/:id", a.EventByID)
+
+	//TODO: remove testing only
+	api.POST("/send", a.Send)
 
 	// TODO: will be delivered after Sunday :)
 	api.POST("/api/sign/in", a.SignIn)
@@ -43,6 +49,15 @@ func (api *API) Status(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"status": "err"})
 	}
 	return c.JSON(http.StatusOK, echo.Map{"status": "ok"})
+}
+
+func (api *API) Send(c echo.Context) error {
+	ctx := c.Request().Context()
+	if err := api.mailer.InfoMail(ctx); err != nil {
+		api.Logger.Error("Failed to send a mail.", zap.Error(err))
+		return echo.ErrInternalServerError
+	}
+	return c.JSON(http.StatusOK, echo.Map{"msg": "E-mail sent."})
 }
 
 func (api *API) ListStats(c echo.Context) error {
