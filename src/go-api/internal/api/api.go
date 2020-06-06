@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/MarekVigas/Postar-Jano/internal/mailer"
+	"github.com/MarekVigas/Postar-Jano/internal/repository"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -13,14 +14,14 @@ import (
 
 type API struct {
 	*echo.Echo
-	db     *sql.DB
+	repo   *repository.PostgresRepo
 	logger *zap.Logger
 	mailer *mailer.Client
 }
 
 func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	e := echo.New()
-	a := &API{Echo: e, db: db, logger: logger, mailer: mailer}
+	a := &API{Echo: e, repo: repository.NewPostgresRepo(db), logger: logger, mailer: mailer}
 
 	api := e.Group("/api", middleware.Recover(), middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper: func(c echo.Context) bool {
@@ -41,9 +42,6 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	api.GET("/events", a.ListEvents)
 	api.GET("/events/:id", a.EventByID)
 
-	//TODO: remove testing only
-	api.POST("/send", a.Send)
-
 	// TODO: will be delivered after Sunday :)
 	api.POST("/api/sign/in", a.SignIn)
 	api.GET("/registrations", a.ListRegistrations)
@@ -53,19 +51,10 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 }
 
 func (api *API) Status(c echo.Context) error {
-	if err := api.db.PingContext(c.Request().Context()); err != nil {
+	if err := api.repo.Ping(c.Request().Context()); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"status": "err"})
 	}
 	return c.JSON(http.StatusOK, echo.Map{"status": "ok"})
-}
-
-func (api *API) Send(c echo.Context) error {
-	ctx := c.Request().Context()
-	if err := api.mailer.InfoMail(ctx); err != nil {
-		api.Logger.Error("Failed to send a mail.", zap.Error(err))
-		return echo.ErrInternalServerError
-	}
-	return c.JSON(http.StatusOK, echo.Map{"msg": "E-mail sent."})
 }
 
 func (api *API) ListStats(c echo.Context) error {
@@ -101,7 +90,14 @@ func (api *API) FindRegistration(c echo.Context) error {
 }
 
 func (api *API) ListEvents(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+
+	events, err := api.repo.ListEvents(ctx)
+	if err != nil {
+		api.Logger.Error("Failed to list events.", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, events)
 }
 
 func (api *API) EventByID(c echo.Context) error {

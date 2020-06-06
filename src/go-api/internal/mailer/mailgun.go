@@ -3,11 +3,11 @@ package mailer
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/MarekVigas/Postar-Jano/internal/mailer/templates"
 
-	"github.com/labstack/echo/v4"
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/pkg/errors"
 
@@ -41,24 +41,14 @@ func NewClient(logger *zap.Logger) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) InfoMail(ctx context.Context) error {
+func (c *Client) ConfirmationMail(ctx context.Context, req *templates.ConfirmationReq) error {
 	var b bytes.Buffer
-	data := echo.Map{
-		"eventName": "test",
-		"name":      "meno",
-		"surname":   "priezvisko",
-		"street":    "ulica",
-		"town":      "mesto",
-		"birthday":  "18.8.1992",
-		"text":      "text",
-		"photoURL":  "http://example.com",
-	}
-
-	if err := templates.Info.Execute(&b, data); err != nil {
+	if err := templates.Confirmation.Execute(&b, req); err != nil {
 		return errors.WithStack(err)
 	}
 
-	return c.send(ctx, "leto2020@sbb.sk", "Info o tabore", b.String(), "Lukas Macko <llukas3@gmail.com>")
+	return c.send(ctx, "robot@mailgun.sbb.sk", "Info o letnej akcii v Salezku", b.String(),
+		fmt.Sprintf("%s %s <%s>", req.Name, req.Surname, req.Recipient))
 }
 
 func (c *Client) send(ctx context.Context, sender string, subject string, body string, recipient string) error {
