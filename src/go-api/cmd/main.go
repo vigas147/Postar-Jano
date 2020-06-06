@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/MarekVigas/Postar-Jano/internal/api"
+	"github.com/MarekVigas/Postar-Jano/internal/db"
 	"github.com/MarekVigas/Postar-Jano/internal/mailer"
 
 	_ "github.com/lib/pq"
@@ -123,17 +124,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	/*postgres, err := db.Connect()
+	postgres, err := db.Connect()
 	if err != nil {
 		log.Fatal(err)
-	}*/
+	}
 
 	mailer, err := mailer.NewClient(logger)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := api.New(logger, nil, mailer)
+	server := api.New(logger, postgres, mailer)
 
 	if err := Run(logger, runHTTP(logger, server)); err != nil {
 		logger.Fatal("Failed to run server.", zap.Error(err))
