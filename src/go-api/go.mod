@@ -3,7 +3,6 @@ module github.com/MarekVigas/Postar-Jano
 go 1.14
 
 require (
-	github.com/GlobalWebIndex/internal-pkg v0.129.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/labstack/echo/v4 v4.1.16
 	github.com/lib/pq v1.6.0
