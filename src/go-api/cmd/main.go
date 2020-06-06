@@ -12,6 +12,7 @@ import (
 
 	"github.com/MarekVigas/Postar-Jano/internal/api"
 	"github.com/MarekVigas/Postar-Jano/internal/db"
+	"github.com/MarekVigas/Postar-Jano/internal/mailer"
 
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
@@ -122,12 +123,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	postgres, err := db.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := api.New(logger, postgres)
+	mailer, err := mailer.NewClient(logger)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server := api.New(logger, postgres, mailer)
+
 	if err := Run(logger, runHTTP(logger, server)); err != nil {
 		logger.Fatal("Failed to run server.", zap.Error(err))
 	}
