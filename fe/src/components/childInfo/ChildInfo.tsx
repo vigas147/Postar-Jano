@@ -97,7 +97,7 @@ const ChildInfo: React.FC<ChildInfoProps> = (props) => {
             <IonRow>
                 <IonCol>
                     <h4>Zúčastnilo sa vaše dieťa minuloročných akcií ?</h4>
-                    <IonRadioGroup value={props.registration.child.attendedPreiousEvents} onIonChange={e => props.setValue(ActionType.SET_CHILD_ATTEND, e.detail.value)}>
+                    <IonRadioGroup value={props.registration.child.attendedPreviousEvents} onIonChange={e => props.setValue(ActionType.SET_CHILD_ATTEND, e.detail.value)}>
                         <IonItem>
                             <IonLabel>Áno</IonLabel>
                             <IonRadio slot="start" value={true} />

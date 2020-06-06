@@ -27,7 +27,7 @@ const defaultState: StepperState = {
             city: "",
             dateOfBirth: new Date(),
             finishedSchoolYear: null,
-            attendedPreiousEvents: null
+            attendedPreviousEvents: null
         },
         days: [],
         medicine: {
@@ -85,7 +85,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                 state.registraion.child.finishedSchoolYear = value;
                 break;
             case ActionType.SET_CHILD_ATTEND:
-                state.registraion.child.attendedPreiousEvents = value;
+                state.registraion.child.attendedPreviousEvents = value;
                 break;
             case ActionType.SET_DAYS:
                 state.registraion.days = value;

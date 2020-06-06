@@ -70,7 +70,7 @@ interface Child {
     city: string;
     dateOfBirth: Date;
     finishedSchoolYear: number | null;
-    attendedPreiousEvents: boolean | null;
+    attendedPreviousEvents: boolean | null;
 }
 
 interface Parent {
