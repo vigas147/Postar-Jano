@@ -62,7 +62,8 @@ func (c *Client) InfoMail(ctx context.Context) error {
 }
 
 func (c *Client) send(ctx context.Context, sender string, subject string, body string, recipient string) error {
-	msg := c.mailgun.NewMessage(sender, subject, body, recipient)
+	msg := c.mailgun.NewMessage(sender, subject, "", recipient)
+	msg.SetHtml(body)
 
 	resp, id, err := c.mailgun.Send(ctx, msg)
 	if err != nil {
@@ -70,5 +71,4 @@ func (c *Client) send(ctx context.Context, sender string, subject string, body s
 	}
 	c.logger.Info("Message sent", zap.String("id", id), zap.String("resp", resp))
 	return nil
-
 }
