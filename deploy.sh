@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 git pull
-docker-compose build --parallel --no-cache && 
+docker-compose build --parallel && 
 docker-compose down && 
 docker-compose up -d
