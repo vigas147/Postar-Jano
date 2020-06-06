@@ -28,7 +28,7 @@ services:
   nginx:
     build:
       context: ./
-      dockerfile: ./fe
+      dockerfile: ./fe/Dockerfile
     volumes: 
       - ./nginx/:/etc/nginx/
       - ./certs/:/etc/nginx/ssl/
