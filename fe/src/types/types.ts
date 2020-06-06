@@ -24,7 +24,7 @@ interface Capacity {
     girls_max: number;
 }
 
-interface Day {
+export interface Day {
     id: number;
     capacity: Capacity;
     description: string;
@@ -68,9 +68,9 @@ interface Child {
     surname: string;
     gender: Gender | null;
     city: string;
-    dateOfBirth: Date | null;
-    finishedSchoolYear: number | null;
-    attendedPreiousEvents: boolean | null;
+    dateOfBirth: Date;
+    finishedSchoolYear: string | null;
+    attendedPreviousEvents: boolean | null;
 }
 
 interface Parent {
@@ -83,4 +83,15 @@ interface Parent {
 export enum Gender {
     Male = "male",
     Female = "female"
+}
+
+export enum ActionType {
+    SET_CHILD_NAME,
+    SET_CHILD_SURNAME,
+    SET_CHILD_GENDER,
+    SET_CHILD_BIRTH,
+    SET_CHILD_CITY,
+    SET_CHILD_YEAR,
+    SET_CHILD_ATTEND,
+    SET_DAYS,
 }
