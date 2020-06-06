@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/MarekVigas/Postar-Jano/internal/api"
+	"github.com/MarekVigas/Postar-Jano/internal/db"
 
+	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 	"gopkg.in/tomb.v2"
 )
@@ -120,8 +122,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	postgres, err := db.Connect()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	server := api.New()
+	server := api.New(logger, postgres)
 	if err := Run(logger, runHTTP(logger, server)); err != nil {
 		logger.Fatal("Failed to run server.", zap.Error(err))
 	}
