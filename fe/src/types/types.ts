@@ -69,7 +69,7 @@ interface Child {
     gender: Gender | null;
     city: string;
     dateOfBirth: Date;
-    finishedSchoolYear: number | null;
+    finishedSchoolYear: string | null;
     attendedPreviousEvents: boolean | null;
 }
 
