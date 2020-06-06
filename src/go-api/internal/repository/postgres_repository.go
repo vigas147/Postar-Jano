@@ -62,3 +62,20 @@ func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error)
 
 	return events, nil
 }
+
+func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, error) {
+	var event model.Event
+	if err := sqlx.GetContext(ctx, repo.db, &event, `
+		SELECT 
+			ev.id,
+			ev.name,
+			o.name AS owner_name
+		FROM events ev
+		LEFT JOIN owners o ON o.id = ev.owner_id
+		WHERE ev.id = $1
+	`, id); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &event, nil
+}

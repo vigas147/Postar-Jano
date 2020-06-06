@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 
 	"github.com/MarekVigas/Postar-Jano/internal/mailer"
 	"github.com/MarekVigas/Postar-Jano/internal/repository"
@@ -101,7 +102,19 @@ func (api *API) ListEvents(c echo.Context) error {
 }
 
 func (api *API) EventByID(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+
+	id, err := strconv.ParseInt(c.Param("id"), 10, 32)
+	if err != nil {
+		return echo.ErrBadRequest
+	}
+
+	event, err := api.repo.FindEvent(ctx, int(id))
+	if err != nil {
+		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int64("id", id))
+		return err
+	}
+	return c.JSON(http.StatusOK, event)
 }
 
 func (api *API) SignIn(c echo.Context) error {
