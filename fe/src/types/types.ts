@@ -33,6 +33,7 @@ interface Day {
 interface Owner {
     name: string;
     surname: string;
+    photo: string;
     gender: Gender;
     email: string;
     phone: string;
