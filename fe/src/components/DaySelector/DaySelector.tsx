@@ -11,7 +11,7 @@ interface ChildInfoProps {
 
 const DaySelector: React.FC<ChildInfoProps> = (props) => {
     const { days } = props.event;
-    const [selected, setSelected] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string[]>([...props.registration.days.map(d => `${d}`)]);
 
     const handleSetSelected = (days: string[]) => {
         setSelected(days);
