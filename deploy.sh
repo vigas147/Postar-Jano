@@ -2,6 +2,4 @@
 
 git pull
 # docker-compose pull
-docker-compose build --parallel
-docker-compose down
-docker-compose up -d
+docker-compose build --parallel && docker-compose down && docker-compose up -d
