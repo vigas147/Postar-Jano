@@ -61,6 +61,39 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         this.state.event = props.event;
     }
 
+    protected setValueHandler = (type: ActionType, value: any) => {
+        const state = {...this.state};
+        switch (type) {
+            case ActionType.SET_CHILD_NAME:
+                state.registraion.child.name = value;
+                break;
+            case ActionType.SET_CHILD_SURNAME:
+                state.registraion.child.surname = value;
+                break;
+            case ActionType.SET_CHILD_GENDER:
+                state.registraion.child.gender = value;
+                break;
+            case ActionType.SET_CHILD_BIRTH:
+                state.registraion.child.dateOfBirth = value;
+                break;
+            case ActionType.SET_CHILD_CITY:
+                state.registraion.child.city = value;
+                break;
+            case ActionType.SET_CHILD_YEAR:
+                state.registraion.child.finishedSchoolYear = value;
+                break;
+            case ActionType.SET_CHILD_ATTEND:
+                state.registraion.child.attendedPreiousEvents = value;
+                break;
+            case ActionType.SET_DAYS:
+                state.registraion.days = value;
+                break;
+            default:
+                break;
+    }
+        this.setState({...state})
+    }
+
     render(): React.ReactNode {
         return (
             <div className="grid-container">
