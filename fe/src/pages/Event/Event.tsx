@@ -43,7 +43,8 @@ const mockEvent: Event = {
         girls_max: 50,
         girls_now: 10
     },
-    days: [{
+    days: [
+    {
         id: 0,
         capacity: {
             now: 20,
@@ -53,8 +54,21 @@ const mockEvent: Event = {
             girls_max: 50,
             girls_now: 10
         },
-        description: "11.07."
-    }]
+        description: "11.07. Pondelok"
+    },
+    {
+        id: 1,
+        capacity: {
+            now: 55,
+            total: 100,
+            boys_max: 50,
+            boys_now: 10,
+            girls_max: 50,
+            girls_now: 10
+        },
+        description: "12.07. Utorok"
+    }
+]
 }
 
 class EventComponent extends React.Component<Props, State> {
