@@ -31,7 +31,7 @@ func NewClient(logger *zap.Logger) (*Client, error) {
 	}
 
 	key := os.Getenv(mailgunKey)
-	if domain == "" {
+	if key == "" {
 		return nil, errors.New("Mailgun key is not defined.")
 	}
 
@@ -58,13 +58,12 @@ func (c *Client) InfoMail(ctx context.Context) error {
 		return errors.WithStack(err)
 	}
 
-	c.send(ctx, "leto2020@sbb.sk", "Info o tabore", b.String(), "Lukas Macko <llukas3@gmail.com>")
-
-	return nil
+	return c.send(ctx, "leto2020@sbb.sk", "Info o tabore", b.String(), "Lukas Macko <llukas3@gmail.com>")
 }
 
 func (c *Client) send(ctx context.Context, sender string, subject string, body string, recipient string) error {
-	msg := c.mailgun.NewMessage(sender, subject, body, recipient)
+	msg := c.mailgun.NewMessage(sender, subject, "", recipient)
+	msg.SetHtml(body)
 
 	resp, id, err := c.mailgun.Send(ctx, msg)
 	if err != nil {
@@ -72,5 +71,4 @@ func (c *Client) send(ctx context.Context, sender string, subject string, body s
 	}
 	c.logger.Info("Message sent", zap.String("id", id), zap.String("resp", resp))
 	return nil
-
 }

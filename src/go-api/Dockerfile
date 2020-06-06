@@ -12,5 +12,6 @@ RUN make build
 
 FROM scratch
 WORKDIR /app
+COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 COPY --from=builder /src/registrations_api /app/bin/registrations_api
 CMD ["/app/bin/registrations_api"]

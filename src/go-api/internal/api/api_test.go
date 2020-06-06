@@ -11,6 +11,8 @@ import (
 	"net/http/httptest"
 	"os"
 
+	"github.com/MarekVigas/Postar-Jano/internal/mailer"
+
 	"github.com/MarekVigas/Postar-Jano/internal/api"
 	"github.com/MarekVigas/Postar-Jano/internal/db"
 	"github.com/MarekVigas/Postar-Jano/internal/repository"
@@ -27,8 +29,9 @@ type CommonSuite struct {
 	suite.Suite
 	logger *zap.Logger
 
-	api *api.API
-	db  *sql.DB
+	api    *api.API
+	db     *sql.DB
+	mailer *mailer.Client
 }
 
 func (s *CommonSuite) SetupSuite() {
@@ -43,6 +46,8 @@ func (s *CommonSuite) SetupSuite() {
 
 	s.db, err = db.Connect()
 	s.Require().NoError(err)
+
+	s.mailer, err = mailer.NewClient(s.logger)
 
 	// Create db schema.
 	s.db.Exec(`drop schema public cascade;
@@ -65,6 +70,7 @@ func (s *CommonSuite) SetupTest() {
 	s.api = api.New(
 		s.logger,
 		s.db,
+		s.mailer,
 	)
 	s.NoError(repository.Reset(ctx, s.db))
 }
