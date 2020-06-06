@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
+import Rollbar from "rollbar";
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
@@ -24,17 +25,36 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route path="/home" component={Home} exact={true} />
-        <Route exact path="/event" render={() => <Redirect to="/home" />} />
-        <Route path="/event/:id" component={Event} exact={true} />
-        <Route exact path="/" render={() => <Redirect to="/home" />} />
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+interface Props {}
 
-export default App;
+interface State {}
+
+class AppComponent extends PureComponent<Props, State> {
+    protected rollbar: Rollbar;
+
+    constructor(props: Props) {
+        super(props);
+        this.rollbar = new Rollbar({
+            accessToken: '6f9a8edc3c4e4c828d763fa498d0952d',
+            captureUncaught: true,
+            captureUnhandledRejections: true,
+            enabled: (process.env.NODE_ENV === 'production'),
+        });
+    }
+    render() {
+        return (
+        <IonApp>
+            <IonReactRouter>
+            <IonRouterOutlet>
+                <Route path="/home" component={Home} exact={true} />
+                <Route exact path="/event" render={() => <Redirect to="/home" />} />
+                <Route path="/event/:id" component={Event} exact={true} />
+                <Route exact path="/" render={() => <Redirect to="/home" />} />
+            </IonRouterOutlet>
+            </IonReactRouter>
+        </IonApp>
+        )
+    }
+}
+
+export default AppComponent;
