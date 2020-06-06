@@ -2,9 +2,26 @@ package templates
 
 import "text/template"
 
-var Info = template.Must(template.New("").Parse(infoMail))
+type ConfirmationReq struct {
+	Recipient    string
+	EventName    string
+	Name         string
+	Surname      string
+	Sex          string
+	Address      string
+	School       string
+	Birthday     string
+	Pills        string
+	Restrictions string
+	Text         string
+	PhotoURL     string
+	Sum          int
+	Owner        string
+}
 
-const infoMail = `<!doctype html>
+var Confirmation = template.Must(template.New("").Parse(confirmationMail))
+
+const confirmationMail = `<!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
     <head>
         <!-- NAME: FOLLOW UP -->
@@ -19,7 +36,7 @@ const infoMail = `<!doctype html>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Infomail na {{ .eventName }}</title>
+        <title>Prijatie prihlášky na {{ .EventName }}</title>
         
     <style type="text/css">
 		p{
@@ -563,7 +580,7 @@ const infoMail = `<!doctype html>
                         
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
                         
-                            <h2 class="null" style="text-align: left;"><span style="font-size:24px">Informácie</span></h2>
+                            <h2 class="null" style="text-align: left;"><span style="font-size:24px">Vaše údaje</span></h2>
 
                         </td>
                     </tr>
@@ -596,11 +613,13 @@ const infoMail = `<!doctype html>
                         
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
                         
-                                <p>Vážení rodičia!<br /><br />
-                                    Posielame Vám všetky potrebné informácie a dokumenty k saleziánskemu pobytovému táboru, do ktorého ste prihlásili Vaše dieťa. <br />
-                                    Ospravedlňujeme sa za veľa administratívnych požiadavok, no aj od nás štát vyžaduje tieto papiere, preto Vás prosíme, aby ste si všetko dobre prečítali, potrebné dokumenty (všetko v prílohe mailu) vypísali a pospísali a doniesli to všetko k autobusu v deň odchodu detí do tábora.
-                                    <br /><br />
-                                    Za porozumenie ďakujeme.</p>
+                            <p><strong>Meno: </strong>{{ .Name }} {{ .Surname }}<br>
+<strong>Pohlavie: </strong>{{ .Sex }}<br>
+<strong>Adresa:</strong> {{ .Address }} <br>
+<strong>Dátum narodenia: </strong>{{ .Birthday }} <br>
+<strong>Škola:</strong> {{ .School }}<br>
+<strong>Lieky:</strong> {{ .Pills}}<br>
+<strong>Zdravotné obmedzenia: </strong>{{ .Restriction }}<br>
 
                         </td>
                     </tr>
@@ -651,7 +670,7 @@ const infoMail = `<!doctype html>
                         
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
                         
-                            <h1 style="text-align: left;"><span style="font-size:24px">Príspevok na rekreáciu</span></h1>
+                            <h1 style="text-align: left;"><span style="font-size:24px">Pokyny k platbe</span></h1>
 
                         </td>
                     </tr>
@@ -684,16 +703,9 @@ const infoMail = `<!doctype html>
                         
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
                         
-                            <p>
-                                Potvrdenie o účasti vášho dieťaťa na tábore pre účely žiadosti o príspevok na rekreáciu vám bude zaslané mailom po <strong>skončení</strong> tábora.<br />
-                                Prosím skontrolujte si vyplnené údaje, pretože potvrdenie bude <strong>automaticky</strong> vygenerované s nasledujúcimi údajmi.<br><br>
-                                <strong>Meno: </strong>{{ .name }} {{ .surname }}<br>
-                                <strong>Adresa:</strong> {{ .street}} {{ .town}}<br>
-                                <strong>Dátum narodenia: </strong>{{ .birthaday }}<br>
-                                <strong>Telefónne číslo: </strong>{{ .phone }}<br> 
-                                Telefónne číslo je potrebné v prípade nutnosti kontaktovania rodiča počas tábora.
-                            </p>
-
+                            <p>Za prihlášku na <b>{{ .EventName}}</b> je možné zaplatiť iba osobe zodpovednej za akciu. Platba cez internet alebo prevodom na účet nie je možná. Ďakujeme za pochopenie.
+                                Prosíme vás, aby ste uhradili sumu <strong>{{ .Sum }}€ </strong>iba osobne hlavnému organizátorovi za SDB a FMA - {{ .Owner }}.
+                                </p>
                         </td>
                     </tr>
                 </tbody></table>
@@ -776,7 +788,7 @@ const infoMail = `<!doctype html>
                         
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
                         
-                            <p>{{ .text }}</p>
+                            <p>{{ .Text}}</p>
 
                         </td>
                     </tr>
@@ -801,7 +813,7 @@ const infoMail = `<!doctype html>
                             <td class="mcnImageContent" valign="top" style="padding-right: 9px; padding-left: 9px; padding-top: 0; padding-bottom: 0; text-align:center;">
                                 
                                     
-                                        <img align="center" alt="" src="{{.photoURL}}" width="400" style="max-width:400px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
+                                        <img align="center" alt="" src="{{ .PhotoURL}}" width="400" style="max-width:400px; padding-bottom: 0; display: inline !important; vertical-align: bottom;" class="mcnImage">
                                     
                                 
                             </td>
@@ -965,7 +977,7 @@ const infoMail = `<!doctype html>
                         
                             <em>Tento email vám poslal automaticky náš robot Poštár Jano.<br>
 Prosím neodpovedajte na tento email.&nbsp;<br>
-Copyright © 2019 Saleziáni Banská Bystrica, Všetky práva vyhradené.</em>
+Copyright © 2020 Saleziáni Banská Bystrica, Všetky práva vyhradené.</em>
                         </td>
                     </tr>
                 </tbody></table>

@@ -2,12 +2,15 @@
 
 CREATE SEQUENCE owner_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
 
+
 CREATE TABLE "public"."owners" (
                                    "id" integer DEFAULT nextval('owner_id_seq') NOT NULL,
                                    "name" text NOT NULL,
                                    "surname" text NOT NULL,
                                    "username" text NOT NULL,
                                    "pass" text NOT NULL,
+                                   "email" text NOT NULL,
+                                   "phone" text NOT NULL,
                                    CONSTRAINT "owner_id" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
@@ -18,6 +21,12 @@ CREATE TABLE "public"."events" (
                                    "id" integer DEFAULT nextval('events_id_seq') NOT NULL,
                                    "name" text NOT NULL,
                                    "owner_id" integer NOT NULL,
+                                   "description" text NOT NULL,
+                                   "date" text NOT NULL,
+                                   "place" text NOT NULL,
+                                   "min_age" integer NOT NULL,
+                                   "max_age" integer NOT NULL,
+                                   "info" text NOT NULL,
                                    CONSTRAINT "events_id" PRIMARY KEY ("id"),
                                    CONSTRAINT "events_owner_id_fkey" FOREIGN KEY (owner_id) REFERENCES owners(id) ON UPDATE CASCADE ON DELETE RESTRICT NOT DEFERRABLE
 ) WITH (oids = false);

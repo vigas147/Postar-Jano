@@ -2,11 +2,24 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+
+	"github.com/MarekVigas/Postar-Jano/internal/model"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
+
+type PostgresRepo struct {
+	db *sqlx.DB
+}
+
+func NewPostgresRepo(db *sql.DB) *PostgresRepo {
+	return &PostgresRepo{
+		db: sqlx.NewDb(db, "postgres"),
+	}
+}
 
 func getAllTables() []string {
 	return []string{
@@ -25,4 +38,44 @@ func Reset(ctx context.Context, db sqlx.ExecerContext) error {
 		}
 	}
 	return nil
+}
+
+func (repo *PostgresRepo) Ping(ctx context.Context) error {
+	if err := repo.db.PingContext(ctx); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error) {
+	var events []model.Event
+	if err := sqlx.SelectContext(ctx, repo.db, &events, `
+		SELECT 
+			ev.id,
+			ev.name,
+			o.name AS owner_name
+		FROM events ev
+		LEFT JOIN owners o ON o.id = ev.owner_id
+	`); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return events, nil
+}
+
+func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, error) {
+	var event model.Event
+	if err := sqlx.GetContext(ctx, repo.db, &event, `
+		SELECT 
+			ev.id,
+			ev.name,
+			o.name AS owner_name
+		FROM events ev
+		LEFT JOIN owners o ON o.id = ev.owner_id
+		WHERE ev.id = $1
+	`, id); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &event, nil
 }
