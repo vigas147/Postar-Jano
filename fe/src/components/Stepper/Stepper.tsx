@@ -6,6 +6,7 @@ import { Registration, Event, ActionType } from '../../types/types';
 import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
+import ParentInfo from '../ParentInfo/ParentInfo';
 
 interface StepperProps {
     event: Event
@@ -90,6 +91,18 @@ class Stepper extends React.Component<StepperProps, StepperState> {
             case ActionType.SET_DAYS:
                 state.registraion.days = value;
                 break;
+            case ActionType.SET_PARNET_NAME:
+                state.registraion.parent.name = value;
+                break;
+            case ActionType.SET_PARENT_SURNAME:
+                state.registraion.parent.surname = value;
+                break;
+            case ActionType.SET_PARENT_PHONE:
+                state.registraion.parent.phone = value;
+                break;
+            case ActionType.SET_PARENT_EMAIL:
+                state.registraion.parent.email = value;
+                break;
             default:
                 break;
         }
@@ -124,6 +137,18 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                             {
                                 this.state.page == 2 && this.state.event.days.length > 1 && <DaySelector
                                     event={this.state.event}
+                                    registration={this.state.registraion}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page == 2 && this.state.event.days.length == 1 && <ParentInfo
+                                    registration={this.state.registraion}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page == 3 && this.state.event.days.length > 1 && <ParentInfo
                                     registration={this.state.registraion}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />

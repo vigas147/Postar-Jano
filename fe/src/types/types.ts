@@ -94,4 +94,8 @@ export enum ActionType {
     SET_CHILD_YEAR,
     SET_CHILD_ATTEND,
     SET_DAYS,
+    SET_PARNET_NAME,
+    SET_PARENT_SURNAME,
+    SET_PARENT_PHONE,
+    SET_PARENT_EMAIL,
 }
