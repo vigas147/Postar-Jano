@@ -111,7 +111,7 @@ export enum ActionType {
 
 export interface RegistrationRespone {
     success: boolean,
-    registredIDs?: number[],
+    registeredIDs?: number[],
     token: string
 }
 

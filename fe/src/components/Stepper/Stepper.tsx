@@ -189,9 +189,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     responseMsg: "Prihláška bola úspešne spracovaná",
                     responseStatus: responseStatus.success
                 })
-            } else if (res.data.registredIDs) {
-                if (res.data.registredIDs.length != this.state.registraion.days.length) {
-                    const notRegistred = this.state.registraion.days.filter(d => !res.data.registredIDs?.includes(d))
+            } else if (res.data.registeredIDs) {
+                if (res.data.registeredIDs.length != this.state.registraion.days.length) {
+                    const notRegistred = this.state.registraion.days.filter(d => !res.data.registeredIDs?.includes(d))
                     let msg = 'Nepodarilo sa prihlásiť na tieto termíny: '
                     for (const dayId of notRegistred) {
                         const day = this.props.event.days.filter(d => d.id == dayId)[0];
