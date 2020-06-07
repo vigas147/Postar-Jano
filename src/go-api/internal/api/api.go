@@ -95,7 +95,12 @@ func (api *API) Register(c echo.Context) error {
 		return err
 	}
 
+	api.logger.Debug("Request received", zap.Reflect("raw", req))
 	// TODO: Validate input
+	if len(req.DayIDs) == 0 {
+		return c.JSON(http.StatusUnprocessableEntity, "No days provided.")
+	}
+
 	eventID, err := api.getID(c.Param("id"))
 	if err != nil {
 		return err
