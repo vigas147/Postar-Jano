@@ -21,7 +21,7 @@ func (s *EventsSuite) TestListEvents_OK() {
 		s.Equal([]interface{}{
 			map[string]interface{}{
 				"id":         float64(event.ID),
-				"name":       event.Name,
+				"title":      event.Title,
 				"owner_name": "John",
 			},
 		}, body)
@@ -42,7 +42,7 @@ func (s *EventsSuite) TestFindEvent_OK() {
 	s.AssertServerResponseObject(req, rec, http.StatusOK, func(body echo.Map) {
 		s.Equal(echo.Map{
 			"id":         float64(event.ID),
-			"name":       event.Name,
+			"title":      event.Title,
 			"owner_name": "John",
 		}, body)
 	})

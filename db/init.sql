@@ -11,6 +11,8 @@ CREATE TABLE "public"."owners" (
                                    "pass" text NOT NULL,
                                    "email" text NOT NULL,
                                    "phone" text NOT NULL,
+                                   "photo" text NOT NULL,
+                                   "gender" text NOT NULL,
                                    CONSTRAINT "owner_id" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
@@ -19,14 +21,16 @@ CREATE SEQUENCE events_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1
 
 CREATE TABLE "public"."events" (
                                    "id" integer DEFAULT nextval('events_id_seq') NOT NULL,
-                                   "name" text NOT NULL,
+                                   "title" text NOT NULL,
                                    "owner_id" integer NOT NULL,
                                    "description" text NOT NULL,
-                                   "date" text NOT NULL,
-                                   "place" text NOT NULL,
+                                   "date_from" text NOT NULL,
+                                   "location" text NOT NULL,
                                    "min_age" integer NOT NULL,
                                    "max_age" integer NOT NULL,
-                                   "info" text NOT NULL,
+                                   "info" text,
+                                   "photo" text NOT NULL,
+                                   "date_to" text NOT NULL,
                                    CONSTRAINT "events_id" PRIMARY KEY ("id"),
                                    CONSTRAINT "events_owner_id_fkey" FOREIGN KEY (owner_id) REFERENCES owners(id) ON UPDATE CASCADE ON DELETE RESTRICT NOT DEFERRABLE
 ) WITH (oids = false);
@@ -58,7 +62,17 @@ CREATE TABLE "public"."registrations" (
                                           "token" text NOT NULL,
                                           "gender" text NOT NULL,
                                           "amount" integer NOT NULL,
-                                          "payed" integer NULL,
+                                          "payed" integer,
+                                          "date_of_birth" date NOT NULL,
+                                          "finished_school" text,
+                                          "attended_previous" boolean NOT NULL,
+                                          "city" text NOT NULL,
+                                          "pills" text,
+                                          "notes" text NOT NULL,
+                                          "parent_name" text NOT NULL,
+                                          "parent_surname" text NOT NULL,
+                                          "email" text NOT NULL,
+                                          "phone" text NOT NULL,
                                           CONSTRAINT "registrations_id" PRIMARY KEY ("id")
 ) WITH (oids = false);
 

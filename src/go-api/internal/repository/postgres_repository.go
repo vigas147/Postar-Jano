@@ -56,7 +56,7 @@ func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error)
 	if err := sqlx.SelectContext(ctx, repo.db, &events, `
 		SELECT 
 			ev.id,
-			ev.name,
+			ev.title,
 			o.name AS owner_name
 		FROM events ev
 		LEFT JOIN owners o ON o.id = ev.owner_id
@@ -69,16 +69,36 @@ func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error)
 
 func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, error) {
 	var event model.Event
-	if err := sqlx.GetContext(ctx, repo.db, &event, `
-		SELECT 
-			ev.id,
-			ev.name,
-			o.name AS owner_name
-		FROM events ev
-		LEFT JOIN owners o ON o.id = ev.owner_id
-		WHERE ev.id = $1
-	`, id); err != nil {
-		return nil, errors.WithStack(err)
+	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		if err := sqlx.GetContext(ctx, tx, &event, `
+			SELECT 
+				ev.id,
+				ev.title,
+				o.name AS owner_name
+			FROM events ev
+			LEFT JOIN owners o ON o.id = ev.owner_id
+			WHERE ev.id = $1
+		`, id); err != nil {
+			return errors.WithStack(err)
+		}
+
+		if err := sqlx.SelectContext(ctx, tx, &event.Days, `
+			SELECT 
+				id,
+				capacity,
+				limit_boys,
+				limit_girls,
+				description,
+				price
+			FROM days
+			WHERE event_id = $1
+		`, id); err != nil {
+			return errors.WithStack(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return &event, nil

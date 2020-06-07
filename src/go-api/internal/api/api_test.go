@@ -143,49 +143,78 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 			id,
 			name,
 			surname,
+			gender,
 			username,
 			pass,
 			email,
-			phone
+			phone,
+			photo
 		) VALUES (
 			1,
 		 	'John',
 		 	'Doe',
+		 	'M',
 		 	'jdoe',
 		 	'pass123',
 		 	'email@example.com',
-		 	'132456'
+		 	'132456',
+		 	'photo'
 		)`)
 	s.Require().NoError(err)
 
 	event := model.Event{
 		ID:        1,
-		Name:      "Camp 42",
+		Title:     "Camp 42",
 		OwnerName: "John",
 	}
 
 	_, err = s.db.Exec(`
 		INSERT INTO events (
 			id,
-			name,
+			title,
 			owner_id,
 			description,
-			date,
-			place,
+			date_from,
+			date_to,
+			location,
 			min_age,
 			max_age,
-			info
+			info,
+			photo
 		) VALUES (
 			$1,
 		 	$2,
 		 	1,
 		 	'Lorem ipsum',
-		 	'15-16june 2020',
+		 	'15 june 2020',
+		 	'20 june 2020',
 		 	'somewhere',
 		 	10,
 		 	15,
-		 	'xyz ...'
-		)`, event.ID, event.Name)
+		 	'xyz ...',
+		 	'photo'
+		)`, event.ID, event.Title)
+	s.Require().NoError(err)
+
+	_, err = s.db.Exec(`
+		INSERT INTO days (
+			id,
+			capacity,
+			limit_boys,
+			limit_girls,
+			description,
+			price,
+			event_id
+		) VALUES (
+			5,
+			10,
+			5,
+			5,
+			'desc',
+			12,
+			$1
+		)
+		`, event.ID)
 	s.Require().NoError(err)
 
 	return &event
