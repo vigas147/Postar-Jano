@@ -182,11 +182,11 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 	return &reg, nil
 }
 
-func (repo *PostgresRepo) GetStat(ctx context.Context, dayID int) (*model.Stat, error) {
-	var stat model.Stat
+func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Stat, error) {
+	var stats []model.Stat
 
 	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
-		if err := sqlx.GetContext(ctx, tx, &stat, `
+		if err := sqlx.SelectContext(ctx, tx, &stats, `
 				SELECT 
 					id AS day_id,
 					event_id,
@@ -194,38 +194,40 @@ func (repo *PostgresRepo) GetStat(ctx context.Context, dayID int) (*model.Stat, 
 					limit_boys,
 					limit_girls
 				FROM days 
-				WHERE id = $1
-		`, dayID); err != nil {
+				WHERE event_id = $1
+		`, eventID); err != nil {
 			return errors.WithStack(err)
 		}
 
-		if err := sqlx.GetContext(ctx, tx, &stat.BoysCount, `
+		for i := range stats {
+			if err := sqlx.GetContext(ctx, tx, &stats[i].BoysCount, `
 				SELECT
 					COUNT(*)
 				FROM registrations r
 				LEFT JOIN signups s ON s.registration_id = r.id
 				LEFT JOIN days d ON s.day_id = d.id
-				WHERE r.gender = 'male' AND d.id = $1
-		`, dayID); err != nil {
-			return errors.WithStack(err)
-		}
+				WHERE r.gender = 'male' AND d.event_id = $1
+		`, eventID); err != nil {
+				return errors.WithStack(err)
+			}
 
-		if err := sqlx.GetContext(ctx, tx, &stat.GirlsCount, `
+			if err := sqlx.GetContext(ctx, tx, &stats[i].GirlsCount, `
 				SELECT
 					COUNT(*)
 				FROM registrations r
 				LEFT JOIN signups s ON s.registration_id = r.id
 				LEFT JOIN days d ON s.day_id = d.id
-				WHERE r.gender = 'female' AND d.id = $1
-		`, dayID); err != nil {
-			return errors.WithStack(err)
+				WHERE r.gender = 'female' AND d.event_id = $1
+		`, eventID); err != nil {
+				return errors.WithStack(err)
+			}
 		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &stat, nil
+	return stats, nil
 }
 
 func (repo *PostgresRepo) WithTxx(ctx context.Context, f func(context.Context, *sqlx.Tx) error) error {

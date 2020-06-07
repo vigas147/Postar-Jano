@@ -12,6 +12,7 @@ type Event struct {
 	Info        *string `json:"info" db:"info"`
 	Photo       string  `json:"photo" db:"photo"`
 	Time        *string `json:"time" db:"time"`
+	Price       *string `json:"price" db:"price"`
 	EventOwner  `json:"owner"`
 	Days        []Day `json:"days"`
 }

@@ -142,7 +142,7 @@ func (api *API) EventByID(c echo.Context) error {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return echo.ErrNotFound
 		}
-		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int("id", id))
+		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int("event_id", id))
 		return err
 	}
 	return c.JSON(http.StatusOK, event)
