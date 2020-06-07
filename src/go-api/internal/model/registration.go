@@ -29,7 +29,10 @@ type Registration struct {
 }
 
 type RegResult struct {
-	Token         string `json:"token"`
-	Success       bool   `json:"success"`
-	RegisteredIDs []int  `json:"registered_ids"`
+	Token          string `json:"token"`
+	Success        bool   `json:"success"`
+	RegisteredIDs  []int  `json:"registered_ids"`
+	RegisteredDesc []string
+	Event          *Event
+	Reg            Registration
 }
