@@ -2,7 +2,7 @@ import React from 'react';
 import { arrowForwardOutline, arrowBackOutline } from 'ionicons/icons'
 import IntroInfo from "../IntroInfo/IntroInfo";
 import "./Stepper.scss"
-import { Registration, Event, ActionType } from '../../types/types';
+import { Registration, Event, ActionType, Stat } from '../../types/types';
 import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol, IonToast } from '@ionic/react';
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
@@ -13,12 +13,14 @@ import axios from 'axios';
 import OtherInfo from '../OtherInfo/OtherInfo';
 
 interface StepperProps {
-    event: Event
+    event: Event,
+    stats: Stat[]
 }
 
 interface StepperState {
     registraion: Registration;
     event: Event | null,
+    stats: Stat[] | null,
     page: number,
     pageCount: number,
     valid: boolean
@@ -55,6 +57,7 @@ const defaultState: StepperState = {
         },
         notes: ""
     },
+    stats: null,
     event: null,
     page: 0,
     pageCount: 4,
@@ -71,6 +74,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         }
         this.state = defaultState;
         this.state.event = props.event;
+        this.state.stats = props.stats;
     }
 
     protected setValueHandler = (type: ActionType, value: any) => {
@@ -153,7 +157,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                         <IonCol size="2"></IonCol>
                         <IonCol>
                             {
-                                this.state.page == 0 && <IntroInfo event={this.state.event} />
+                                this.state.page == 0 && this.state.stats && <IntroInfo event={this.state.event} stats={this.state.stats} />
                             }
                             {
                                 this.state.page == 1 && <ChildInfo 
@@ -168,7 +172,8 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                 />
                             }
                             {
-                                this.state.page == 3 && this.state.event.days.length > 1 && <DaySelector
+                                this.state.page == 3 && this.state.event.days.length > 1 && this.state.stats && <DaySelector
+                                    stats={this.state.stats}
                                     event={this.state.event}
                                     registration={this.state.registraion}
                                     setValue={(t,v) => this.setValueHandler(t, v)}

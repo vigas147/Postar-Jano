@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import './DaySelector.scss';
-import { Event, Registration, ActionType, Day } from '../../types/types';
+import { Event, Registration, ActionType, Day, Stat } from '../../types/types';
 import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonRadioGroup, IonRadio, IonIcon, IonSelect, IonSelectOption, IonList, IonItemDivider, IonCheckbox, IonProgressBar } from '@ionic/react';
 
 interface ChildInfoProps {
     event: Event,
-    registration: Registration
+    registration: Registration,
+    stats: Stat[],
     setValue: (action: ActionType, value: any) => void,
 }
 
 const DaySelector: React.FC<ChildInfoProps> = (props) => {
     const { days } = props.event;
+    const { stats } = props;
     const [selected, setSelected] = useState<string[]>([...props.registration.days.map(d => `${d}`)]);
 
     const handleSetSelected = (days: string[]) => {
@@ -50,12 +52,13 @@ const DaySelector: React.FC<ChildInfoProps> = (props) => {
                                 <IonCol>
                                     <IonItem lines="none">
                                         <IonLabel>
-                                            {day.description}  Kapacita: {(parseFloat(`${day.capacity.now/day.capacity.total}`)*100).toFixed(0)} %
+                                            {day.description}  Kapacita: {(parseFloat(`${(stats[i].boys_count+stats[i].girls_count)/stats[i].capacity}`)*100).toFixed(0)} %
                                         </IonLabel>
                                         <IonCheckbox
                                             slot="start" 
                                             value={`${day.id}`} 
-                                            checked={selected.includes(`${day.id}`)} 
+                                            checked={selected.includes(`${day.id}`)}
+                                            disabled={(stats[i].boys_count+stats[i].girls_count)/stats[i].capacity == 1}
                                             onIonChange={e => {
                                                 if (e.detail.checked) {
                                                     handleSetSelected([...selected, `${day.id}`])
@@ -69,7 +72,7 @@ const DaySelector: React.FC<ChildInfoProps> = (props) => {
                             </IonRow>
                             <IonRow>
                                 <IonCol>
-                                    <IonProgressBar value={day.capacity.now/day.capacity.total} color={capacitytoColor(day.capacity.now/day.capacity.total)}/>
+                                    <IonProgressBar value={(stats[i].boys_count+stats[i].girls_count)/stats[i].capacity} color={capacitytoColor((stats[i].boys_count+stats[i].girls_count)/stats[i].capacity)}/>
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
