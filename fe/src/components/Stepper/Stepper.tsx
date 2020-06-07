@@ -3,11 +3,13 @@ import { arrowForwardOutline, arrowBackOutline } from 'ionicons/icons'
 import IntroInfo from "../IntroInfo/IntroInfo";
 import "./Stepper.scss"
 import { Registration, Event, ActionType } from '../../types/types';
-import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
+import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol, IonToast } from '@ionic/react';
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
 import ParentInfo from '../ParentInfo/ParentInfo';
 import MedicineHealth from '../MedicineHalth/MedicineHealt';
+import { toastController } from '@ionic/core'
+import axios from 'axios';
 
 interface StepperProps {
     event: Event
@@ -17,7 +19,8 @@ interface StepperState {
     registraion: Registration;
     event: Event | null,
     page: number,
-    pageCount: number
+    pageCount: number,
+    valid: boolean
 }
 
 const defaultState: StepperState = {
@@ -53,7 +56,8 @@ const defaultState: StepperState = {
     },
     event: null,
     page: 0,
-    pageCount: 5
+    pageCount: 4,
+    valid: false
 }
 
 class Stepper extends React.Component<StepperProps, StepperState> {
@@ -61,6 +65,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
 
     constructor(props: StepperProps) {
         super(props);
+        if (this.props.event.days.length > 1) {
+            defaultState.pageCount += 1
+        }
         this.state = defaultState;
         this.state.event = props.event;
     }
@@ -195,14 +202,48 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     </IonCol>
                     <IonCol size="3">
                         <div className="next">
-                            <IonButton expand="full" shape="round" onClick={() => {
-                                if (this.state.page < this.state.pageCount) {
-                                    this.setState({...this.state, page: this.state.page + 1})
-                                }
-                            }}>
-                                Ďalej
-                                <IonIcon icon={arrowForwardOutline}/>
-                            </IonButton>
+                            {
+                                this.state.page < this.state.pageCount &&
+                                <IonButton expand="full" shape="round" onClick={() => {
+                                    if (this.state.page < this.state.pageCount) {
+                                        this.setState({...this.state, page: this.state.page + 1})
+                                    }
+                                }}>
+                                    Ďalej
+                                    <IonIcon icon={arrowForwardOutline}/>
+                                </IonButton>
+                            }
+                            {
+                                this.state.page == this.state.pageCount &&
+                                <IonButton 
+                                    expand="full" 
+                                    shape="round"
+                                    color="success"
+                                    disabled={!this.state.valid}
+                                    onClick={async () => {
+                                        const toast = await toastController.create({
+                                            duration: 4000,
+                                            message: "Prihláška bola odoslaná na spracovanie",
+                                            color: "success",
+                                            position: "bottom"
+                                        })
+                                        toast.present()
+                                        
+                                        axios.post(`${process.env.REACT_APP_API_HOST}/registrations/${this.state.event?.id}`, this.state.registraion)
+                                        .then(res => {
+                                            this.setState({
+                                                ...this.state,
+                                                event: res.data.event
+                                            })
+                                        })
+                                        .catch(err => {
+                                            console.log(err)
+                                        })
+                                    }}
+                                >
+                                    Odoslať
+                                </IonButton>
+                            }
                         </div>
                     </IonCol>
                     <IonCol></IonCol>

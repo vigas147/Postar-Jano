@@ -81,8 +81,15 @@ class EventComponent extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/stats`)
+        axios.get(`${process.env.REACT_APP_API_HOST}/event/${this.props.match.params.id}`)
         .then(res => {
+            this.setState({
+                ...this.state,
+                event: res.data.event
+            })
+        })
+        .catch(err => {
+            // TODO: Remove after testing
             this.setState({
                 ...this.state,
                 event: mockEvent
@@ -110,7 +117,6 @@ class EventComponent extends React.Component<Props, State> {
                     {
                         this.state.event == null &&
                         <IonLoading
-                            cssClass='my-custom-class'
                             isOpen={true}
                             message={'Načítavam akciu...'}
                         />
