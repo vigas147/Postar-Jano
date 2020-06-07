@@ -167,9 +167,10 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         })
         sendToast.present()
 
-        const registration = this.state.registraion;
+        const registration = {...this.state.registraion};
 
         if (this.state.event && this.state.event.days.length == 1) {
+            registration.days = []
             registration.days.push(this.state.event.days[0].id)
         }
         
