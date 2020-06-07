@@ -170,13 +170,13 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				if (stat.GirlsCount + stat.BoysCount) >= stat.Capacity {
 					break
 				}
-				if req.Gender == "male" && stat.LimitBoys != nil {
+				if req.Child.Gender == "male" && stat.LimitBoys != nil {
 					if stat.BoysCount > *stat.LimitBoys {
 						break
 					}
 				}
 
-				if req.Gender == "female" && stat.LimitGirls != nil {
+				if req.Child.Gender == "female" && stat.LimitGirls != nil {
 					if stat.BoysCount > *stat.LimitGirls {
 						break
 					}
@@ -212,6 +212,8 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				parent_surname,
 				email,
 				phone,
+				attended_activities,
+				problems,
 				created_at,
 				updated_at
 			) VALUES (
@@ -230,13 +232,15 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				$13,
 				$14,
 				$15,
+				$16,
+				$17,
 				NOW(),
 				NOW()
 			) RETURNING *
-		`, req.Name, req.Surname, req.Gender, amount, token.String(),
-			req.DateOfBirth, req.FinishedSchool, req.AttendedPrevious, req.City,
-			req.Pills, req.Notes, req.ParentName, req.ParentSurname, req.Email,
-			req.Phone)
+		`, req.Child.Name, req.Child.Surname, req.Child.Gender, amount, token.String(),
+			req.Child.DateOfBirth, req.Child.FinishedSchool, req.Child.AttendedPrevious, req.Child.City,
+			req.Medicine.Pills, req.Notes, req.Parent.Name, req.Parent.Surname, req.Parent.Email,
+			req.Parent.Phone, req.Membership.AttendedActivities, req.Health.Problems)
 		if err != nil {
 			return errors.Wrap(err, "failed to create a registration")
 		}

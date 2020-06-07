@@ -3,18 +3,34 @@ package resources
 import "time"
 
 type RegisterReq struct {
-	Name             string    `json:"name"`
-	Surname          string    `json:"surname"`
-	Gender           string    `json:"gender"`
-	DateOfBirth      time.Time `json:"date_of_birth"`
-	FinishedSchool   string    `json:"finished_school"`
-	AttendedPrevious bool      `json:"attended_previous"`
-	City             string    `json:"city"`
-	Pills            string    `json:"pills"`
-	Notes            string    `json:"notes"`
-	ParentName       string    `json:"parent_name"`
-	ParentSurname    string    `json:"parent_surname"`
-	Email            string    `json:"email"`
-	Phone            string    `json:"phone"`
-	DayIDs           []int     `json:"day_ids"`
+	Child struct {
+		Name             string    `json:"name"`
+		Surname          string    `json:"surname"`
+		Gender           string    `json:"gender"`
+		DateOfBirth      time.Time `json:"dateOfBirth"`
+		FinishedSchool   string    `json:"finishedSchoolYear"`
+		AttendedPrevious bool      `json:"attendedPreviousEvents"`
+		City             string    `json:"city"`
+	} `json:"child"`
+
+	Medicine struct {
+		Pills string `json:"drugs"`
+	} `json:"medicine"`
+
+	Health struct {
+		Problems string `json:"problems"`
+	} `json:"health"`
+
+	Parent struct {
+		Name    string `json:"name"`
+		Surname string `json:"surname"`
+		Email   string `json:"email"`
+		Phone   string `json:"phone"`
+	} `json:"parent"`
+
+	Membership struct {
+		AttendedActivities string `json:"attendedActivities"`
+	} `json:"memberShip"`
+	Notes  string `json:"notes"`
+	DayIDs []int  `json:"days"`
 }

@@ -115,6 +115,9 @@ func (api *API) Register(c echo.Context) error {
 	}
 	_, err = api.repo.FindEvent(ctx, eventID)
 	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
 		api.logger.Error("Failed to find event", zap.Error(err))
 		return err
 	}

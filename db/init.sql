@@ -70,14 +70,15 @@ CREATE TABLE "public"."registrations" (
                                           "attended_previous" boolean NOT NULL,
                                           "city" text NOT NULL,
                                           "pills" text,
-                                          "notes" text NOT NULL,
+                                          "notes" text,
                                           "parent_name" text NOT NULL,
                                           "parent_surname" text NOT NULL,
                                           "email" text NOT NULL,
                                           "phone" text NOT NULL,
+                                          "attended_activities" text,
+                                          "problems" text,
                                           CONSTRAINT "registrations_id" PRIMARY KEY ("id")
 ) WITH (oids = false);
-
 
 CREATE SEQUENCE signups_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
 
