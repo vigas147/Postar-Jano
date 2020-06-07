@@ -176,8 +176,8 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
-                                value={stat.boys_count+stat.girls_count/stat.capacity} 
-                                color={capacitytoColor(stat.boys_count+stat.girls_count/stat.capacity)}/>
+                                value={(stat.boys_count+stat.girls_count)/stat.capacity} 
+                                color={capacitytoColor((stat.boys_count+stat.girls_count)/stat.capacity)}/>
                         </IonCol>
                 </IonItem>
                 ))
