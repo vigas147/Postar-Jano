@@ -3,30 +3,33 @@ export interface Event {
     title: string;
     description: string;
     photo: string;
-    dateFrom: string;
-    dateTo: string;
+    date_from: string;
+    date_to: string;
     location: string;
-    ageMin: number;
-    ageMax: number;
+    min_age: number;
+    max_age: number;
     price: number;
-    capacity: Capacity;
     owner: Owner;
-    moreInfo: string;
-    days: Day[]
+    info: string;
+    days: Day[],
+    time: string
+    stats: Stat[] | null
 }
 
-interface Capacity {
-    now: number;
-    total: number;
-    boys_now: number;
-    boys_max: number;
-    girls_now: number;
-    girls_max: number;
+export interface Stat {
+    event_id: number,
+    day_id: number,
+    capacity: number,
+    limit_boys: number | null,
+    limit_girls: number | null,
+    boys_count: number,
+    girls_count: number,
 }
-
 export interface Day {
     id: number;
-    capacity: Capacity;
+    capacity: number;
+    limit_boys: number | null,
+    limit_girls: number | null,
     description: string;
 }
 
@@ -104,4 +107,10 @@ export enum ActionType {
     SET_DRUGS,
     SET_ATTENDED_ACTIVITIES,
     SET_NOTES
+}
+
+interface RegistrationRespone {
+    success: boolean,
+    days?: number[],
+    token: string
 }
