@@ -19,6 +19,8 @@ type PostgresRepo struct {
 	db *sqlx.DB
 }
 
+var ErrOverLimit = errors.New("Limit exceeded")
+
 func NewPostgresRepo(db *sql.DB) *PostgresRepo {
 	return &PostgresRepo{
 		db: sqlx.NewDb(db, "postgres"),
@@ -53,15 +55,36 @@ func (repo *PostgresRepo) Ping(ctx context.Context) error {
 
 func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error) {
 	var events []model.Event
-	if err := sqlx.SelectContext(ctx, repo.db, &events, `
-		SELECT 
-			ev.id,
-			ev.title,
-			o.name AS owner_name
-		FROM events ev
-		LEFT JOIN owners o ON o.id = ev.owner_id
-	`); err != nil {
-		return nil, errors.WithStack(err)
+	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		if err := sqlx.SelectContext(ctx, tx, &events, `
+			SELECT 
+				ev.id,
+				ev.title,
+				ev.description,
+				ev.date_from,
+				ev.date_to,
+				ev.location,
+				ev.min_age,
+				ev.max_age,
+				ev.info,
+				ev.photo,
+				ev.time,
+				o.name AS owner_name,
+				o.surname AS owner_surname,
+				o.email AS owner_email,
+				o.phone AS owner_phone,
+				o.photo AS owner_photo,
+				o.gender AS owner_gender
+			FROM events ev
+			LEFT JOIN owners o ON o.id = ev.owner_id
+		`); err != nil {
+			return errors.WithStack(err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return events, nil
@@ -74,7 +97,22 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 			SELECT 
 				ev.id,
 				ev.title,
-				o.name AS owner_name
+				ev.description,
+				ev.date_from,
+				ev.date_to,
+				ev.location,
+				ev.min_age,
+				ev.max_age,
+				ev.info,
+				ev.photo,
+				ev.time,
+				ev.price,
+				o.name AS owner_name,
+				o.surname AS owner_surname,
+				o.email AS owner_email,
+				o.phone AS owner_phone,
+				o.photo AS owner_photo,
+				o.gender AS owner_gender
 			FROM events ev
 			LEFT JOIN owners o ON o.id = ev.owner_id
 			WHERE ev.id = $1
@@ -92,6 +130,7 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 				price
 			FROM days
 			WHERE event_id = $1
+			ORDER BY id
 		`, id); err != nil {
 			return errors.WithStack(err)
 		}
@@ -104,22 +143,75 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 	return &event, nil
 }
 
-func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterReq) (*model.Registration, error) {
+func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterReq, eventID int) (*model.RegResult, bool, error) {
 	token, err := uuid.NewUUID()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, false, errors.WithStack(err)
 	}
 
+	res := model.RegResult{
+		Token: token.String(),
+	}
 	var reg model.Registration
 	if err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
-		// Insert into registrations/
-		err := repo.db.GetContext(ctx, &reg, `
+
+		// List stats.
+		stats, err := repo.getStatInternal(ctx, tx, eventID)
+		if err != nil {
+			return err
+		}
+
+		// Validate limits
+		for i := range req.DayIDs {
+			for _, stat := range stats {
+				if stat.DayID != req.DayIDs[i] {
+					continue
+				}
+				if (stat.GirlsCount + stat.BoysCount) >= stat.Capacity {
+					break
+				}
+				if req.Gender == "male" && stat.LimitBoys != nil {
+					if stat.BoysCount > *stat.LimitBoys {
+						break
+					}
+				}
+
+				if req.Gender == "female" && stat.LimitGirls != nil {
+					if stat.BoysCount > *stat.LimitGirls {
+						break
+					}
+				}
+				res.RegisteredIDs = append(res.RegisteredIDs, stat.DayID)
+			}
+		}
+
+		if len(req.DayIDs) != len(res.RegisteredIDs) {
+			res.Success = false
+			return ErrOverLimit
+		}
+		res.Success = true
+
+		// Compute price.
+		var amount int
+
+		// Insert into registrations.
+		err = repo.db.GetContext(ctx, &reg, `
 			INSERT INTO registrations(
 				name,
 				surname,
 				gender,
 				amount,
 				token,
+				date_of_birth,
+				finished_school,
+				attended_previous,
+				city,
+				pills,
+				notes,
+				parent_name,
+				parent_surname,
+				email,
+				phone,
 				created_at,
 				updated_at
 			) VALUES (
@@ -128,30 +220,64 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				$3,
 				$4,
 				$5,
+				$6,
+				$7,
+				$8,
+				$9,
+				$10,
+				$11,
+				$12,
+				$13,
+				$14,
+				$15,
 				NOW(),
 				NOW()
 			) RETURNING *
-		`, req.Name, req.Surname, req.Gender, 0, token.String())
+		`, req.Name, req.Surname, req.Gender, amount, token.String(),
+			req.DateOfBirth, req.FinishedSchool, req.AttendedPrevious, req.City,
+			req.Pills, req.Notes, req.ParentName, req.ParentSurname, req.Email,
+			req.Phone)
 		if err != nil {
 			return errors.Wrap(err, "failed to create a registration")
 		}
 
-		// Insert into signups
+		// Insert into signups.
+		for _, dayID := range req.DayIDs {
+			_, err := tx.ExecContext(ctx, `
+			INSERT INTO signups(
+				day_id,
+				registration_id,
+				state,
+				created_at,
+				updated_at
+			) VALUES (
+				$1,
+				$2,
+				$3,
+				NOW(),
+				NOW()
+			) RETURNING *
+		`, dayID, reg.ID, "init")
+			if err != nil {
+				return errors.Wrap(err, "failed to create a signup")
+			}
+		}
 
-		// Check signups state
 		return nil
 	}); err != nil {
-		return nil, err
+		if errors.Cause(err) == ErrOverLimit {
+			return &res, false, nil
+		}
+		return nil, false, err
 	}
 
-	return &reg, nil
+	return &res, true, nil
 }
 
-func (repo *PostgresRepo) GetStat(ctx context.Context, dayID int) (*model.Stat, error) {
-	var stat model.Stat
+func (repo *PostgresRepo) getStatInternal(ctx context.Context, db sqlx.QueryerContext, eventID int) ([]model.Stat, error) {
+	var stats []model.Stat
 
-	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
-		if err := sqlx.GetContext(ctx, tx, &stat, `
+	if err := sqlx.SelectContext(ctx, db, &stats, `
 				SELECT 
 					id AS day_id,
 					event_id,
@@ -159,38 +285,82 @@ func (repo *PostgresRepo) GetStat(ctx context.Context, dayID int) (*model.Stat, 
 					limit_boys,
 					limit_girls
 				FROM days 
-				WHERE id = $1
-		`, dayID); err != nil {
-			return errors.WithStack(err)
-		}
+				WHERE event_id = $1
+		`, eventID); err != nil {
+		return nil, errors.WithStack(err)
+	}
 
-		if err := sqlx.GetContext(ctx, tx, &stat.BoysCount, `
+	for i := range stats {
+		if err := sqlx.GetContext(ctx, db, &stats[i].BoysCount, `
 				SELECT
 					COUNT(*)
 				FROM registrations r
 				LEFT JOIN signups s ON s.registration_id = r.id
 				LEFT JOIN days d ON s.day_id = d.id
-				WHERE r.gender = 'male' AND d.id = $1
-		`, dayID); err != nil {
-			return errors.WithStack(err)
+				WHERE r.gender = 'male' AND d.event_id = $1
+		`, eventID); err != nil {
+			return nil, errors.WithStack(err)
 		}
 
-		if err := sqlx.GetContext(ctx, tx, &stat.GirlsCount, `
+		if err := sqlx.GetContext(ctx, db, &stats[i].GirlsCount, `
 				SELECT
 					COUNT(*)
 				FROM registrations r
 				LEFT JOIN signups s ON s.registration_id = r.id
 				LEFT JOIN days d ON s.day_id = d.id
-				WHERE r.gender = 'female' AND d.id = $1
-		`, dayID); err != nil {
+				WHERE r.gender = 'female' AND d.event_id = $1
+		`, eventID); err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+	return stats, nil
+}
+
+func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Stat, error) {
+	var stats []model.Stat
+
+	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		if err := sqlx.SelectContext(ctx, tx, &stats, `
+				SELECT 
+					id AS day_id,
+					event_id,
+					capacity,
+					limit_boys,
+					limit_girls
+				FROM days 
+				WHERE event_id = $1
+				ORDER BY id
+		`, eventID); err != nil {
 			return errors.WithStack(err)
+		}
+
+		for i := range stats {
+			if err := sqlx.GetContext(ctx, tx, &stats[i].BoysCount, `
+				SELECT
+					COUNT(r.id)
+				FROM registrations r
+				LEFT JOIN signups s ON s.registration_id = r.id
+				WHERE r.gender = 'male' AND s.day_id = $1
+		`, stats[i].DayID); err != nil {
+				return errors.WithStack(err)
+			}
+
+			if err := sqlx.GetContext(ctx, tx, &stats[i].GirlsCount, `
+				SELECT
+					COUNT(r.id)
+				FROM registrations r
+				LEFT JOIN signups s ON s.registration_id = r.id
+				WHERE r.gender = 'female' AND s.day_id = $1
+		`, stats[i].DayID); err != nil {
+				return errors.WithStack(err)
+			}
 		}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &stat, nil
+	return stats, nil
 }
 
 func (repo *PostgresRepo) WithTxx(ctx context.Context, f func(context.Context, *sqlx.Tx) error) error {

@@ -163,9 +163,9 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 	s.Require().NoError(err)
 
 	event := model.Event{
-		ID:        1,
-		Title:     "Camp 42",
-		OwnerName: "John",
+		ID:         1,
+		Title:      "Camp 42",
+		EventOwner: model.EventOwner{OwnerName: "John"},
 	}
 
 	_, err = s.db.Exec(`

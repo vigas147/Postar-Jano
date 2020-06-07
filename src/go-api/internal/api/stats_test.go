@@ -44,6 +44,16 @@ func (s *StatsSuite) TestGetStat_OK() {
 		gender,
 		amount,
 		payed,
+		finished_school,
+		attended_previous,
+		city,
+		pills,
+		notes,
+		parent_name,
+		parent_surname,
+		email,
+		phone,
+		date_of_birth,
 		created_at,
 		updated_at
 	) VALUES (
@@ -54,6 +64,16 @@ func (s *StatsSuite) TestGetStat_OK() {
 		'female',
 		10,
 		0,
+		'zs',
+		true,
+		'bb',
+		'pills',
+		'notest',
+		'parentN',
+		'parentS',
+		'email',
+		'phone',
+		NOW(),
 		NOW(),
 		NOW()
 	)`)
@@ -74,9 +94,9 @@ func (s *StatsSuite) TestGetStat_OK() {
 	)`)
 	s.Require().NoError(err)
 
-	u := fmt.Sprintf("/api/stats/%d", 12)
+	u := fmt.Sprintf("/api/stats/%d", event.ID)
 	req, rec := s.NewRequest(http.MethodGet, u, nil)
-	s.AssertServerResponseObject(req, rec, http.StatusOK, func(body echo.Map) {
+	s.AssertServerResponseArray(req, rec, http.StatusOK, func(body []interface{}) {
 		s.Equal(echo.Map{
 			"boys_count":  float64(0),
 			"capacity":    float64(10),

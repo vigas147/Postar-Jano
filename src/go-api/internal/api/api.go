@@ -28,14 +28,16 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	e := echo.New()
 	a := &API{Echo: e, repo: repository.NewPostgresRepo(db), logger: logger, mailer: mailer}
 
-	api := e.Group("/api", middleware.Recover(), middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Skipper: func(c echo.Context) bool {
-			if c.Request().URL.Path == "/api/stats" {
-				return true
-			}
-			return false
-		},
-	}))
+	api := e.Group("/api",
+		middleware.Recover(),
+		middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Skipper: func(c echo.Context) bool {
+				if c.Request().URL.Path == "/api/stats" {
+					return true
+				}
+				return false
+			},
+		}))
 	api.GET("/status", a.Status)
 
 	api.POST("/registrations/:id", a.Register)
@@ -94,19 +96,35 @@ func (api *API) Register(c echo.Context) error {
 	}
 
 	// TODO: Validate input
+	eventID, err := api.getID(c.Param("id"))
+	if err != nil {
+		return err
+	}
 
-	reg, err := api.repo.Register(ctx, &req)
+	reg, ok, err := api.repo.Register(ctx, &req, eventID)
 	if err != nil {
 		api.logger.Error("Failed to create a registration", zap.Error(err))
+		return err
+	}
+
+	if !ok {
+		return c.JSON(http.StatusOK, echo.Map{
+			"success":       reg.Success,
+			"registeredIDs": reg.RegisteredIDs,
+		})
+	}
+	_, err = api.repo.FindEvent(ctx, eventID)
+	if err != nil {
+		api.logger.Error("Failed to find event", zap.Error(err))
 		return err
 	}
 
 	// Send confirmation mail
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"name":    reg.Name,
-		"surname": reg.Surname,
-		"token":   reg.Token,
+		"success":       reg.Success,
+		"registeredIDs": reg.RegisteredIDs,
+		"token":         reg.Token,
 	})
 }
 
@@ -142,7 +160,7 @@ func (api *API) EventByID(c echo.Context) error {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return echo.ErrNotFound
 		}
-		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int("id", id))
+		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int("event_id", id))
 		return err
 	}
 	return c.JSON(http.StatusOK, event)
