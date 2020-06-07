@@ -37,7 +37,7 @@ const ParentInfo: React.FC<ParentInfoProps> = (props) => {
             </IonRow>
             <IonRow>
                 <IonCol>
-                    <h4>Priezvisko</h4>
+                    <h4>Email</h4>
                     <IonItem>
                         <IonLabel position="floating"></IonLabel>
                         <IonInput value={parent.email} onIonChange={e => props.setValue(ActionType.SET_PARENT_EMAIL, e.detail.value)} placeholder="jozk.mrkvica@gmail.com" type="email" required={true}></IonInput>
