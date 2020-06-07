@@ -53,15 +53,36 @@ func (repo *PostgresRepo) Ping(ctx context.Context) error {
 
 func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error) {
 	var events []model.Event
-	if err := sqlx.SelectContext(ctx, repo.db, &events, `
-		SELECT 
-			ev.id,
-			ev.title,
-			o.name AS owner_name
-		FROM events ev
-		LEFT JOIN owners o ON o.id = ev.owner_id
-	`); err != nil {
-		return nil, errors.WithStack(err)
+	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		if err := sqlx.SelectContext(ctx, tx, &events, `
+			SELECT 
+				ev.id,
+				ev.title,
+				ev.description,
+				ev.date_from,
+				ev.date_to,
+				ev.location,
+				ev.min_age,
+				ev.max_age,
+				ev.info,
+				ev.photo,
+				ev.time,
+				o.name AS owner_name,
+				o.surname AS owner_surname,
+				o.email AS owner_email,
+				o.phone AS owner_phone,
+				o.photo AS owner_photo,
+				o.gender AS owner_gender
+			FROM events ev
+			LEFT JOIN owners o ON o.id = ev.owner_id
+		`); err != nil {
+			return errors.WithStack(err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	return events, nil
@@ -74,7 +95,21 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 			SELECT 
 				ev.id,
 				ev.title,
-				o.name AS owner_name
+				ev.description,
+				ev.date_from,
+				ev.date_to,
+				ev.location,
+				ev.min_age,
+				ev.max_age,
+				ev.info,
+				ev.photo,
+				ev.time,
+				o.name AS owner_name,
+				o.surname AS owner_surname,
+				o.email AS owner_email,
+				o.phone AS owner_phone,
+				o.photo AS owner_photo,
+				o.gender AS owner_gender
 			FROM events ev
 			LEFT JOIN owners o ON o.id = ev.owner_id
 			WHERE ev.id = $1

@@ -31,6 +31,7 @@ CREATE TABLE "public"."events" (
                                    "info" text,
                                    "photo" text NOT NULL,
                                    "date_to" text NOT NULL,
+                                   "time" text,
                                    CONSTRAINT "events_id" PRIMARY KEY ("id"),
                                    CONSTRAINT "events_owner_id_fkey" FOREIGN KEY (owner_id) REFERENCES owners(id) ON UPDATE CASCADE ON DELETE RESTRICT NOT DEFERRABLE
 ) WITH (oids = false);
