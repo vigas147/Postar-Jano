@@ -10,6 +10,7 @@ import ParentInfo from '../ParentInfo/ParentInfo';
 import MedicineHealth from '../MedicineHalth/MedicineHealt';
 import { toastController } from '@ionic/core'
 import axios from 'axios';
+import OtherInfo from '../OtherInfo/OtherInfo';
 
 interface StepperProps {
     event: Event
@@ -123,6 +124,12 @@ class Stepper extends React.Component<StepperProps, StepperState> {
             case ActionType.SET_PROBLEMS:
                 state.registraion.health.problems = value;
                 break;
+            case ActionType.SET_ATTENDED_ACTIVITIES:
+                state.registraion.memberShip.attendedActivities = value;
+                break;
+            case ActionType.SET_NOTES:
+                state.registraion.notes = value;
+                break;
             default:
                 break;
         }
@@ -175,6 +182,18 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                             }
                             {
                                 this.state.page == 4 && this.state.event.days.length > 1 && <ParentInfo
+                                    registration={this.state.registraion}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page == 4 && this.state.event.days.length == 1 && <OtherInfo
+                                    registration={this.state.registraion}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page == 5 && this.state.event.days.length > 1 && <OtherInfo
                                     registration={this.state.registraion}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />

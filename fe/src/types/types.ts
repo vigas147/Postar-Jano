@@ -46,7 +46,7 @@ export interface Registration {
     health: Health;
     parent: Parent;
     memberShip: MemberShip; 
-    notes: string;
+    notes: string; // long string
 }
 
 interface MemberShip {
@@ -101,5 +101,7 @@ export enum ActionType {
     SET_MEDICINE,
     SET_HEALTH,
     SET_PROBLEMS,
-    SET_DRUGS
+    SET_DRUGS,
+    SET_ATTENDED_ACTIVITIES,
+    SET_NOTES
 }
