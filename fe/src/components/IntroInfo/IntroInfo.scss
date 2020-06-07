@@ -1,19 +1,25 @@
 .bigIcon {
-    font-size: 1.2em;
-    padding: 0.3em;
+    font-size: 2em;
 }
 
-.value {
-    padding-left: 0.5em;
-}
-
-ion-item {
-    // div.item-inner {
-    //     border: none;
-    // }
+.infIcon {
+    padding-right: 0.5em;
 }
 
 ion-avatar { 
     width: 7vw;  
     height: 7vw;  
+}
+
+ion-progress-bar {
+    margin-top: 0.5em;
+}
+
+.eventPhoto {
+    max-height: 20vh;
+}
+
+h5 {
+    margin: 0 !important;
+    padding: 0.3em;
 }

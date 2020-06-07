@@ -1,78 +1,203 @@
 import React from 'react';
 import './IntroInfo.scss';
-import { Event } from '../../types/types';
-import { calendarOutline, locateOutline, personOutline, logoEuro, peopleOutline, manOutline, womanOutline } from 'ionicons/icons';
-import { IonIcon, IonItem, IonAvatar, IonLabel } from '@ionic/react';
+import { Event, Stat } from '../../types/types';
+import { calendarOutline, locateOutline, personOutline, logoEuro, peopleOutline, manOutline, womanOutline, timeOutline, informationCircleOutline } from 'ionicons/icons';
+import { IonIcon, IonItem, IonAvatar, IonLabel, IonCol, IonGrid, IonRow, IonProgressBar } from '@ionic/react';
 
 interface IntroInfoProps {
-    event: Event
+    event: Event,
+    stats: Stat[]
 }
 
 const IntroInfo: React.FC<IntroInfoProps> = (props) => {
-    const { event } = props;
+    const { event, stats } = props;
+
+    const capacitytoColor = (capacity: number): string => {
+        let color = "primary";
+
+        if (capacity >= 0.5) {
+            if (capacity < 0.75) {
+                color = "warning" 
+            } else if (capacity >= 0.75) {
+                color = "danger"
+            }
+        }
+        return color
+    }
+
     return (
-        <div>
-            <h1>{event.title}</h1>
-            <p>
-                {event.description}
-            </p>
-            <div>
-                <h5>Dátum:</h5>
-                <IonIcon icon={calendarOutline} class="bigIcon" />
-                <span className="value">                    
-                    {event.dateFrom} - {event.dateTo}
-                </span>
-                <h5>Miesto:</h5>
-                <IonIcon icon={locateOutline} class="bigIcon"/>
-                <span className="value">
-                    {event.location}
-                </span>
-                <h5>Vek:</h5>
-                <IonIcon icon={personOutline} class="bigIcon"/>
-                <span className="value">
-                    {event.ageMin} - {event.ageMax} rokov
-                </span>
-                <h5>Cena:</h5>
-                <IonIcon icon={logoEuro} class="bigIcon"/>
-                <span className="value">
-                    {event.price} €
-                </span>
-                <h5>Kapacita:</h5>
-                {
-                    event.capacity.boys_max == 0 && 
-                    <React.Fragment>
-                        <IonIcon icon={peopleOutline} class="bigIcon"/>
-                        <span className="value">
-                            {event.capacity.total}
+        <IonGrid>
+            <IonRow>
+                <IonCol>
+                    <h1>{event.title}</h1>
+                </IonCol>
+            </IonRow>
+            {
+                event.photo && 
+                <IonRow>
+                    <IonCol></IonCol>
+                    <IonCol>
+                        <img className="eventPhoto" src={event.photo} alt=""/>
+                    </IonCol>
+                    <IonCol></IonCol>
+                </IonRow>
+            }
+            {
+                event.description.length > 0 && 
+                <IonRow>
+                    <IonCol>
+                        {event.description}
+                    </IonCol>
+                </IonRow>
+            }
+            <IonItem>
+                    <IonCol slot="start" size="0.9" className="infIcon" >
+                        <IonIcon icon={calendarOutline} class="bigIcon" />
+                    </IonCol>
+                    <IonCol size="4">
+                        <h5>Dátum:</h5>
+                    </IonCol>
+                    <IonCol>
+                        <span className="value">                    
+                            {event.date_from} - {event.date_to}
                         </span>
-                    </React.Fragment>
-                }
-                {
-                    event.capacity.boys_max > 0 && 
-                    <React.Fragment>
-                        <IonIcon icon={manOutline} class="bigIcon"/>
+                    </IonCol>
+            </IonItem>
+            <IonItem>
+                <IonCol slot="start" size="0.9" className="infIcon" >
+                    <IonIcon icon={locateOutline} class="bigIcon" />
+                </IonCol>
+                <IonCol size="4">
+                    <h5>Miesto:</h5>
+                </IonCol>
+                <IonCol>
+                    <span className="value">
+                        {event.location}
+                    </span>
+                </IonCol>
+            </IonItem>
+            {
+                event.time && 
+                <IonItem>
+                    <IonCol slot="start" size="0.9" className="infIcon" >
+                        <IonIcon icon={timeOutline} class="bigIcon" />
+                    </IonCol>
+                    <IonCol size="4">
+                        <h5>Čas:</h5>
+                    </IonCol>
+                    <IonCol>
                         <span className="value">
-                            {event.capacity.boys_max} chlapcov
+                            {event.time}
                         </span>
-                        <IonIcon icon={womanOutline} class="bigIcon"/>
-                        <span className="value">
-                            {event.capacity.girls_max} dievčat
-                        </span>
-                    </React.Fragment>
-                }
-                <h5>Ďalšie informácie:</h5>
-                <span className="value">
-                    {event.moreInfo}
-                </span>
-                <h5>Za akciu zodpovedá:</h5>
+                    </IonCol>
+                </IonItem>
+            }
+            <IonItem>
+                <IonCol slot="start" size="0.9" className="infIcon" >
+                    <IonIcon icon={personOutline} class="bigIcon" />
+                </IonCol>
+                <IonCol size="4">
+                    <h5>Vek:</h5>
+                </IonCol>
+                <IonCol>
+                    <span className="value">
+                        {event.min_age} - {event.max_age} rokov
+                    </span>
+                </IonCol>
+            </IonItem>
+            <IonItem>
+                <IonCol slot="start" size="0.9" className="infIcon" >
+                    <IonIcon icon={logoEuro} class="bigIcon" />
+                </IonCol>
+                <IonCol size="4">
+                    <h5>Cena:</h5>
+                </IonCol>
+                <IonCol>
+                    <span className="value">
+                        {event.price}
+                    </span>
+                </IonCol>
+            </IonItem>
+            <IonItem>
+                <IonCol slot="start" size="0.9" className="infIcon" >
+                    <IonIcon icon={informationCircleOutline} class="bigIcon" />
+                </IonCol>
+                <IonCol size="4">
+                    <h5>Ďalšie informácie:</h5>
+                </IonCol>
+                <IonCol>
+                    <span className="value">
+                        {event.info}
+                    </span>
+                </IonCol>
+            </IonItem>
+            <IonRow>
+                <h5>Kapacita: </h5>
+            </IonRow>
+            {
+                stats[0].limit_boys != null && stats.map((stat, index) => (
+                    <IonItem>
+                        <IonCol slot="start" size="3">
+                            {event.days[index].description}
+                        </IonCol>
+                        <IonCol size="1">
+                            <IonIcon icon={manOutline} className="bigIcon" />
+                        </IonCol>
+                        <IonCol size="1">
+                            {(stat.boys_count/stat.limit_boys!)*100}%
+                        </IonCol>
+                        <IonCol>
+                            <IonProgressBar 
+                                value={stat.boys_count/stat.limit_boys!} 
+                                color={capacitytoColor(stat.boys_count+stat.girls_count/stat.capacity)}/>
+                        </IonCol>
+                        <IonCol size="1">
+                            <IonIcon icon={womanOutline} className="bigIcon" />
+                        </IonCol>
+                        <IonCol size="1">
+                            {(stat.girls_count/stat.limit_girls!)*100}%
+                        </IonCol>
+                        <IonCol>
+                            <IonProgressBar 
+                                value={stat.girls_count/stat.limit_girls!} 
+                                color={capacitytoColor(stat.boys_count+stat.girls_count/stat.capacity)}/>
+                        </IonCol>
+                    </IonItem>
+                ))
+            }
+            {
+                stats[0].limit_boys == null && stats.map((stat, index) => (
+                    <IonItem key={index}>
+                        <IonCol slot="start" size="3">
+                            {event.days[index].description}
+                        </IonCol>
+                        <IonCol size="1">
+                            {((stat.boys_count+stat.girls_count)/stat.capacity)*100}%
+                        </IonCol>
+                        <IonCol>
+                            <IonProgressBar 
+                                value={stat.boys_count+stat.girls_count/stat.capacity} 
+                                color={capacitytoColor(stat.boys_count+stat.girls_count/stat.capacity)}/>
+                        </IonCol>
+                </IonItem>
+                ))
+            }
+            <IonRow>
+                <IonCol>
+                    <h5>Za akciu zodpovedá:</h5>
+                </IonCol>
+            </IonRow>
+            <IonRow>
+                <IonCol>
                 <IonItem>
                     <IonAvatar slot="start">
                         <img src={event.owner.photo} />
                     </IonAvatar>
                     <IonLabel>{event.owner.name} {event.owner.surname} <br/>{event.owner.email} <br/> {event.owner.phone}</IonLabel>
                 </IonItem>
-            </div>
-        </div>
+                </IonCol>
+            </IonRow>
+        </IonGrid>
     );
 };
 
