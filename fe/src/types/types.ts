@@ -109,8 +109,14 @@ export enum ActionType {
     SET_NOTES
 }
 
-interface RegistrationRespone {
+export interface RegistrationRespone {
     success: boolean,
     days?: number[],
     token: string
+}
+
+
+export enum responseStatus {
+    success =  "success",
+    fail = "fail"
 }

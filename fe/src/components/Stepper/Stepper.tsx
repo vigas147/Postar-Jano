@@ -2,15 +2,16 @@ import React from 'react';
 import { arrowForwardOutline, arrowBackOutline } from 'ionicons/icons'
 import IntroInfo from "../IntroInfo/IntroInfo";
 import "./Stepper.scss"
-import { Registration, Event, ActionType, Stat } from '../../types/types';
+import { Registration, Event, ActionType, Stat, RegistrationRespone, responseStatus } from '../../types/types';
 import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol, IonToast } from '@ionic/react';
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
 import ParentInfo from '../ParentInfo/ParentInfo';
 import MedicineHealth from '../MedicineHalth/MedicineHealt';
 import { toastController } from '@ionic/core'
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import OtherInfo from '../OtherInfo/OtherInfo';
+import Results from '../Result/Results';
 
 interface StepperProps {
     event: Event,
@@ -23,7 +24,10 @@ interface StepperState {
     stats: Stat[] | null,
     page: number,
     pageCount: number,
-    valid: boolean
+    valid: boolean,
+    canGoBack: boolean,
+    responseMsg: string | null,
+    responseStatus: responseStatus | null
 }
 
 const defaultState: StepperState = {
@@ -60,14 +64,15 @@ const defaultState: StepperState = {
     stats: null,
     event: null,
     page: 0,
-    pageCount: 4,
-    valid: true
+    pageCount: 5,
+    valid: true,
+    canGoBack: true,
+    responseMsg: null,
+    responseStatus: null
 }
 
 class Stepper extends React.Component<StepperProps, StepperState> {
     state: StepperState;
-
-
     
     constructor(props: StepperProps) {
         super(props);
@@ -148,20 +153,73 @@ class Stepper extends React.Component<StepperProps, StepperState> {
 
 
     protected handleSubmit = async () => {
+        this.setState({
+            ...this.state,
+            page: this.state.page +1,
+            responseMsg: null,
+            responseStatus: null
+        })
         const sendToast = await toastController.create({
             duration: 2000,
             message: "Prihláška bola odoslaná na spracovanie",
-            color: "success",
+            color: "secondary",
             position: "bottom"
         })
         sendToast.present()
-        debugger
+
+        const registration = this.state.registraion;
+
+        if (this.state.event && this.state.event.days.length == 1) {
+            registration.days.push(this.state.event.days[0].id)
+        }
         
-        axios.post(`${process.env.REACT_APP_API_HOST}/registrations/${this.state.event?.id}`, this.state.registraion)
-        .then(res  => {
-            console.log(res)
+        axios.post(`${process.env.REACT_APP_API_HOST}/registrations/${this.state.event?.id}`, registration)
+        .then(async(res: AxiosResponse<RegistrationRespone>)  => {
+            if(res.data.success){
+                const processToast = await toastController.create({
+                    duration: 2000,
+                    message: "Prihláška bola úspešne spracovaná",
+                    color: "success",
+                    position: "bottom"
+                })
+                processToast.present()
+                this.setState({
+                    ...this.state,
+                    canGoBack: false,
+                    responseMsg: "Prihláška bola úspešne spracovaná",
+                    responseStatus: responseStatus.success
+                })
+            } else if (res.data.days) {
+                if (res.data.days.length != this.state.registraion.days.length) {
+                    const notRegistred = this.state.registraion.days.filter(d => !res.data.days?.includes(d))
+                    let msg = 'Nepodarilo sa prihlásiť na tieto termíny: '
+                    for (const dayId of notRegistred) {
+                        const day = this.props.event.days.filter(d => d.id == dayId)[0];
+                        msg += `${day.description} `
+                    }
+                    this.setState({
+                        ...this.state,
+                        canGoBack: true,
+                        responseMsg: msg,
+                        responseStatus: responseStatus.fail
+                    })
+                }
+            }
         })
-        .catch(err => {
+        .catch(async err => {
+            const errorToast = await toastController.create({
+                duration: 2000,
+                message: err,
+                color: "danger",
+                position: "bottom"
+            })
+            errorToast.present()
+            this.setState({
+                ...this.state,
+                canGoBack: true,
+                responseMsg: "Došlo k chybe pri odosielaní prihlášky",
+                responseStatus: responseStatus.fail
+            })
             console.log(err)
         })
     }
@@ -173,7 +231,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                 <IonRow>
                     <IonCol size="2"></IonCol>
                     <IonCol>
-                        <IonProgressBar value={this.state.page/this.state.pageCount}></IonProgressBar>
+                        <IonProgressBar value={this.state.page/(this.state.pageCount-1)}></IonProgressBar>
                     </IonCol>
                     <IonCol size="2"></IonCol>
                 </IonRow>
@@ -229,6 +287,20 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
+                            {
+                                this.state.page == 5 && this.state.event.days.length == 1 && <Results
+                                    registration={this.state.registraion}
+                                    responseMsg={this.state.responseMsg}
+                                    responseStatus={this.state.responseStatus}
+                                />
+                            }
+                            {
+                                this.state.page == 6 && this.state.event.days.length > 1 && <Results
+                                    registration={this.state.registraion}
+                                    responseMsg={this.state.responseMsg}
+                                    responseStatus={this.state.responseStatus}
+                                />
+                            }
                         </IonCol>
                         <IonCol size="2"></IonCol>
                     </IonRow>
@@ -238,7 +310,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     <IonCol size="3">
                         <div className="previous">
                             {
-                                this.state.page > 0 && 
+                                this.state.page > 0 && this.state.canGoBack && 
                                 <IonButton expand="full" shape="round" onClick={() => {
                                     if (this.state.page > 0) {
                                         this.setState({...this.state, page: this.state.page - 1})
@@ -253,7 +325,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     <IonCol size="3">
                         <div className="next">
                             {
-                                this.state.page < this.state.pageCount &&
+                                this.state.page < this.state.pageCount -1 &&
                                 <IonButton expand="full" shape="round" onClick={() => {
                                     if (this.state.page < this.state.pageCount) {
                                         this.setState({...this.state, page: this.state.page + 1})
@@ -264,7 +336,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                 </IonButton>
                             }
                             {
-                                this.state.page == this.state.pageCount &&
+                                this.state.page == this.state.pageCount -1 &&
                                 <IonButton 
                                     expand="full" 
                                     shape="round"
