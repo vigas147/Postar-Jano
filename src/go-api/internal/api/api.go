@@ -39,7 +39,6 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	api.GET("/status", a.Status)
 
 	api.POST("/registrations/:id", a.Register)
-	api.GET("/registrations/:token", a.FindRegistration)
 
 	api.GET("/stats", a.ListStats)
 	api.GET("/stats/:id", a.StatByID)
@@ -48,6 +47,8 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	api.GET("/events/:id", a.EventByID)
 
 	// TODO: will be delivered after Sunday :)
+	api.GET("/registrations/:token", a.FindRegistration)
+
 	api.POST("/api/sign/in", a.SignIn)
 	api.GET("/registrations", a.ListRegistrations)
 	api.PUT("/registrations/:id", a.UpdateRegistration)
@@ -63,13 +64,24 @@ func (api *API) Status(c echo.Context) error {
 }
 
 func (api *API) ListStats(c echo.Context) error {
-	// List Signups JOIN DAYS JOIN EVENT
-
-	return c.JSON(http.StatusOK, echo.Map{"value": 42})
+	return nil
 }
 
 func (api *API) StatByID(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+
+	id, err := api.getID(c.Param("id"))
+	if err != nil {
+		return err
+	}
+
+	stats, err := api.repo.GetStat(ctx, id)
+	if err != nil {
+		api.Logger.Error("failed to list stats", zap.Error(err))
+		return err
+	}
+
+	return c.JSON(http.StatusOK, stats)
 }
 
 func (api *API) Register(c echo.Context) error {
@@ -120,17 +132,17 @@ func (api *API) ListEvents(c echo.Context) error {
 func (api *API) EventByID(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	id, err := strconv.ParseInt(c.Param("id"), 10, 32)
+	id, err := api.getID(c.Param("id"))
 	if err != nil {
-		return echo.ErrBadRequest
+		return err
 	}
 
-	event, err := api.repo.FindEvent(ctx, int(id))
+	event, err := api.repo.FindEvent(ctx, id)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return echo.ErrNotFound
 		}
-		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int64("id", id))
+		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int("id", id))
 		return err
 	}
 	return c.JSON(http.StatusOK, event)
@@ -142,4 +154,12 @@ func (api *API) SignIn(c echo.Context) error {
 
 func (api *API) UpdateRegistration(c echo.Context) error {
 	return nil
+}
+
+func (api *API) getID(param string) (int, error) {
+	id, err := strconv.ParseInt(param, 10, 32)
+	if err != nil {
+		return 0, echo.ErrBadRequest
+	}
+	return int(id), nil
 }

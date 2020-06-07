@@ -97,6 +97,8 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 			INSERT INTO registrations(
 				name,
 				surname,
+				gender,
+				amount,
 				token,
 				created_at,
 				updated_at
@@ -104,10 +106,12 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				$1,
 				$2,
 				$3,
+				$4,
+				$5,
 				NOW(),
 				NOW()
 			) RETURNING *
-		`, req.Name, req.Surname, token.String())
+		`, req.Name, req.Surname, req.Gender, 0, token.String())
 		if err != nil {
 			return errors.Wrap(err, "failed to create a registration")
 		}
@@ -121,6 +125,52 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 	}
 
 	return &reg, nil
+}
+
+func (repo *PostgresRepo) GetStat(ctx context.Context, dayID int) (*model.Stat, error) {
+	var stat model.Stat
+
+	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		if err := sqlx.GetContext(ctx, tx, &stat, `
+				SELECT 
+					id AS day_id,
+					event_id,
+					capacity,
+					limit_boys,
+					limit_girls
+				FROM days 
+				WHERE id = $1
+		`, dayID); err != nil {
+			return errors.WithStack(err)
+		}
+
+		if err := sqlx.GetContext(ctx, tx, &stat.BoysCount, `
+				SELECT
+					COUNT(*)
+				FROM registrations r
+				LEFT JOIN signups s ON s.registration_id = r.id
+				LEFT JOIN days d ON s.day_id = d.id
+				WHERE r.gender = 'male' AND d.id = $1
+		`, dayID); err != nil {
+			return errors.WithStack(err)
+		}
+
+		if err := sqlx.GetContext(ctx, tx, &stat.GirlsCount, `
+				SELECT
+					COUNT(*)
+				FROM registrations r
+				LEFT JOIN signups s ON s.registration_id = r.id
+				LEFT JOIN days d ON s.day_id = d.id
+				WHERE r.gender = 'female' AND d.id = $1
+		`, dayID); err != nil {
+			return errors.WithStack(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &stat, nil
 }
 
 func (repo *PostgresRepo) WithTxx(ctx context.Context, f func(context.Context, *sqlx.Tx) error) error {

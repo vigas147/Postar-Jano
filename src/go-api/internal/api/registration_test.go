@@ -17,6 +17,7 @@ func (s *StatusSuite) TestRegister_OK() {
 	const (
 		name    = "dano"
 		surname = "zharmanca"
+		gender  = "male"
 	)
 	event := s.InsertEvent()
 
@@ -24,6 +25,7 @@ func (s *StatusSuite) TestRegister_OK() {
 	req, rec := s.NewRequest(http.MethodPost, u, echo.Map{
 		"name":    name,
 		"surname": surname,
+		"gender":  gender,
 	})
 	s.AssertServerResponseObject(req, rec, http.StatusOK, func(body echo.Map) {
 		s.NotEmpty(body["token"])
