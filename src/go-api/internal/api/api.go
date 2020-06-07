@@ -5,6 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MarekVigas/Postar-Jano/internal/resources"
+
+	"github.com/pkg/errors"
+
 	"github.com/MarekVigas/Postar-Jano/internal/mailer"
 	"github.com/MarekVigas/Postar-Jano/internal/repository"
 
@@ -69,17 +73,29 @@ func (api *API) StatByID(c echo.Context) error {
 }
 
 func (api *API) Register(c echo.Context) error {
-	// Validate input
+	ctx := c.Request().Context()
 
-	// Insert into registrations (+ generate UUID)
+	var req resources.RegisterReq
 
-	// Insert into signups
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
 
-	// Check signups state
+	// TODO: Validate input
+
+	reg, err := api.repo.Register(ctx, &req)
+	if err != nil {
+		api.logger.Error("Failed to create a registration", zap.Error(err))
+		return err
+	}
 
 	// Send confirmation mail
 
-	return nil
+	return c.JSON(http.StatusOK, echo.Map{
+		"name":    reg.Name,
+		"surname": reg.Surname,
+		"token":   reg.Token,
+	})
 }
 
 func (api *API) ListRegistrations(c echo.Context) error {
@@ -111,6 +127,9 @@ func (api *API) EventByID(c echo.Context) error {
 
 	event, err := api.repo.FindEvent(ctx, int(id))
 	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
 		api.Logger.Error("Failed to find event.", zap.Error(err), zap.Int64("id", id))
 		return err
 	}
