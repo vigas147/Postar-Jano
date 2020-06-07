@@ -204,6 +204,13 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                         responseStatus: responseStatus.fail
                     })
                 }
+            } else {
+                this.setState({
+                    ...this.state,
+                    canGoBack: true,
+                    responseMsg: "Došlo k neznámej chybe",
+                    responseStatus: responseStatus.fail
+                })
             }
         })
         .catch(async err => {
