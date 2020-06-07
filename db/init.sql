@@ -53,6 +53,7 @@ CREATE TABLE "public"."registrations" (
                                           "surname" text NOT NULL,
                                           "updated_at" timestamptz NOT NULL,
                                           "created_at" timestamptz NOT NULL,
+                                          "token" text NOT NULL,
                                           CONSTRAINT "registrations_id" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
