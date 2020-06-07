@@ -19,6 +19,8 @@ type PostgresRepo struct {
 	db *sqlx.DB
 }
 
+var ErrOverLimit = errors.New("Limit exceeded")
+
 func NewPostgresRepo(db *sql.DB) *PostgresRepo {
 	return &PostgresRepo{
 		db: sqlx.NewDb(db, "postgres"),
@@ -104,6 +106,7 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 				ev.info,
 				ev.photo,
 				ev.time,
+				ev.price,
 				o.name AS owner_name,
 				o.surname AS owner_surname,
 				o.email AS owner_email,
@@ -127,6 +130,7 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 				price
 			FROM days
 			WHERE event_id = $1
+			ORDER BY id
 		`, id); err != nil {
 			return errors.WithStack(err)
 		}
@@ -139,22 +143,75 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 	return &event, nil
 }
 
-func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterReq) (*model.Registration, error) {
+func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterReq, eventID int) (*model.RegResult, bool, error) {
 	token, err := uuid.NewUUID()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, false, errors.WithStack(err)
 	}
 
+	res := model.RegResult{
+		Token: token.String(),
+	}
 	var reg model.Registration
 	if err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
-		// Insert into registrations/
-		err := repo.db.GetContext(ctx, &reg, `
+
+		// List stats.
+		stats, err := repo.getStatInternal(ctx, tx, eventID)
+		if err != nil {
+			return err
+		}
+
+		// Validate limits
+		for i := range req.DayIDs {
+			for _, stat := range stats {
+				if stat.DayID != req.DayIDs[i] {
+					continue
+				}
+				if stat.Capacity > stat.GirlsCount+stat.BoysCount {
+					break
+				}
+				if req.Gender == "male" && stat.LimitBoys != nil {
+					if stat.BoysCount > *stat.LimitBoys {
+						break
+					}
+				}
+
+				if req.Gender == "female" && stat.LimitGirls != nil {
+					if stat.BoysCount > *stat.LimitGirls {
+						break
+					}
+				}
+				res.RegisteredIDs = append(res.RegisteredIDs, stat.DayID)
+			}
+		}
+
+		if len(req.DayIDs) != len(res.RegisteredIDs) {
+			res.Success = false
+			return ErrOverLimit
+		}
+		res.Success = true
+
+		// Compute price.
+		var amount int
+
+		// Insert into registrations.
+		err = repo.db.GetContext(ctx, &reg, `
 			INSERT INTO registrations(
 				name,
 				surname,
 				gender,
 				amount,
 				token,
+				date_of_birth,
+				finished_school,
+				attended_previous,
+				city,
+				pills,
+				notes,
+				parent_name,
+				parent_surname,
+				email,
+				phone,
 				created_at,
 				updated_at
 			) VALUES (
@@ -163,23 +220,100 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				$3,
 				$4,
 				$5,
+				$6,
+				$7,
+				$8,
+				$9,
+				$10,
+				$11,
+				$12,
+				$13,
+				$14,
+				$15,
 				NOW(),
 				NOW()
 			) RETURNING *
-		`, req.Name, req.Surname, req.Gender, 0, token.String())
+		`, req.Name, req.Surname, req.Gender, amount, token.String(),
+			req.DateOfBirth, req.FinishedSchool, req.AttendedPrevious, req.City,
+			req.Pills, req.Notes, req.ParentName, req.ParentSurname, req.Email,
+			req.Phone)
 		if err != nil {
 			return errors.Wrap(err, "failed to create a registration")
 		}
 
-		// Insert into signups
+		// Insert into signups.
+		for _, dayID := range req.DayIDs {
+			_, err := tx.ExecContext(ctx, `
+			INSERT INTO signups(
+				day_id,
+				registration_id,
+				state,
+				created_at,
+				updated_at
+			) VALUES (
+				$1,
+				$2,
+				$3,
+				NOW(),
+				NOW()
+			) RETURNING *
+		`, dayID, reg.ID, "init")
+			if err != nil {
+				return errors.Wrap(err, "failed to create a signup")
+			}
+		}
 
-		// Check signups state
 		return nil
 	}); err != nil {
-		return nil, err
+		if errors.Cause(err) == ErrOverLimit {
+			return &res, false, nil
+		}
+		return nil, false, err
 	}
 
-	return &reg, nil
+	return &res, true, nil
+}
+
+func (repo *PostgresRepo) getStatInternal(ctx context.Context, db sqlx.QueryerContext, eventID int) ([]model.Stat, error) {
+	var stats []model.Stat
+
+	if err := sqlx.SelectContext(ctx, db, &stats, `
+				SELECT 
+					id AS day_id,
+					event_id,
+					capacity,
+					limit_boys,
+					limit_girls
+				FROM days 
+				WHERE event_id = $1
+		`, eventID); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	for i := range stats {
+		if err := sqlx.GetContext(ctx, db, &stats[i].BoysCount, `
+				SELECT
+					COUNT(*)
+				FROM registrations r
+				LEFT JOIN signups s ON s.registration_id = r.id
+				LEFT JOIN days d ON s.day_id = d.id
+				WHERE r.gender = 'male' AND d.event_id = $1
+		`, eventID); err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		if err := sqlx.GetContext(ctx, db, &stats[i].GirlsCount, `
+				SELECT
+					COUNT(*)
+				FROM registrations r
+				LEFT JOIN signups s ON s.registration_id = r.id
+				LEFT JOIN days d ON s.day_id = d.id
+				WHERE r.gender = 'female' AND d.event_id = $1
+		`, eventID); err != nil {
+			return nil, errors.WithStack(err)
+		}
+	}
+	return stats, nil
 }
 
 func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Stat, error) {
@@ -195,6 +329,7 @@ func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Sta
 					limit_girls
 				FROM days 
 				WHERE event_id = $1
+				ORDER BY id
 		`, eventID); err != nil {
 			return errors.WithStack(err)
 		}

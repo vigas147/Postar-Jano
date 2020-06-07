@@ -26,6 +26,7 @@ func (s *StatusSuite) TestRegister_OK() {
 		"name":    name,
 		"surname": surname,
 		"gender":  gender,
+		"day_ids": []interface{}{1, 5, 10},
 	})
 	s.AssertServerResponseObject(req, rec, http.StatusOK, func(body echo.Map) {
 		s.NotEmpty(body["token"])
