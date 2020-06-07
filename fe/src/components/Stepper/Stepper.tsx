@@ -61,12 +61,14 @@ const defaultState: StepperState = {
     event: null,
     page: 0,
     pageCount: 4,
-    valid: false
+    valid: true
 }
 
 class Stepper extends React.Component<StepperProps, StepperState> {
     state: StepperState;
 
+
+    
     constructor(props: StepperProps) {
         super(props);
         if (this.props.event.days.length > 1) {
@@ -76,7 +78,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         this.state.event = props.event;
         this.state.stats = props.stats;
     }
-
+    
     protected setValueHandler = (type: ActionType, value: any) => {
         const state = {...this.state};
         switch (type) {
@@ -138,6 +140,30 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                 break;
         }
         this.setState({...state})
+    }
+
+    protected validate = () => {
+
+    }
+
+
+    protected handleSubmit = async () => {
+        const sendToast = await toastController.create({
+            duration: 2000,
+            message: "Prihláška bola odoslaná na spracovanie",
+            color: "success",
+            position: "bottom"
+        })
+        sendToast.present()
+        debugger
+        
+        axios.post(`${process.env.REACT_APP_API_HOST}/registrations/${this.state.event?.id}`, this.state.registraion)
+        .then(res  => {
+            console.log(res)
+        })
+        .catch(err => {
+            console.log(err)
+        })
     }
 
     render(): React.ReactNode {
@@ -244,26 +270,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                     shape="round"
                                     color="success"
                                     disabled={!this.state.valid}
-                                    onClick={async () => {
-                                        const toast = await toastController.create({
-                                            duration: 4000,
-                                            message: "Prihláška bola odoslaná na spracovanie",
-                                            color: "success",
-                                            position: "bottom"
-                                        })
-                                        toast.present()
-                                        
-                                        axios.post(`${process.env.REACT_APP_API_HOST}/registrations/${this.state.event?.id}`, this.state.registraion)
-                                        .then(res => {
-                                            this.setState({
-                                                ...this.state,
-                                                event: res.data.event
-                                            })
-                                        })
-                                        .catch(err => {
-                                            console.log(err)
-                                        })
-                                    }}
+                                    onClick={this.handleSubmit}
                                 >
                                     Odoslať
                                 </IonButton>

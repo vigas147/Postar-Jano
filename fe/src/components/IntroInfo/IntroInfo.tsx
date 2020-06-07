@@ -136,7 +136,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
             </IonRow>
             {
                 stats[0].limit_boys != null && stats.map((stat, index) => (
-                    <IonItem>
+                    <IonItem key={index}>
                         <IonCol slot="start" size="3">
                             {event.days[index].description}
                         </IonCol>
