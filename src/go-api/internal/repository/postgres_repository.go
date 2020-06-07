@@ -107,6 +107,7 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 				ev.photo,
 				ev.time,
 				ev.price,
+				ev.mail_info,
 				o.name AS owner_name,
 				o.surname AS owner_surname,
 				o.email AS owner_email,
@@ -149,10 +150,16 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 		return nil, false, errors.WithStack(err)
 	}
 
+	event, err := repo.FindEvent(ctx, eventID)
+	if err != nil {
+		return nil, false, err
+	}
+
 	res := model.RegResult{
 		Token: token.String(),
+		Event: event,
 	}
-	var reg model.Registration
+
 	if err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
 
 		// List stats.
@@ -193,9 +200,19 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 
 		// Compute price.
 		var amount int
+		for _, dID := range res.RegisteredIDs {
+			for _, d := range event.Days {
+				if dID != d.ID {
+					continue
+				}
+				amount += d.Price
+				res.RegisteredDesc = append(res.RegisteredDesc, d.Description)
+				break
+			}
+		}
 
 		// Insert into registrations.
-		err = repo.db.GetContext(ctx, &reg, `
+		err = repo.db.GetContext(ctx, &res.Reg, `
 			INSERT INTO registrations(
 				name,
 				surname,
@@ -261,7 +278,7 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				NOW(),
 				NOW()
 			) RETURNING *
-		`, dayID, reg.ID, "init")
+		`, dayID, res.Reg.ID, "init")
 			if err != nil {
 				return errors.Wrap(err, "failed to create a signup")
 			}

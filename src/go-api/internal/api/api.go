@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MarekVigas/Postar-Jano/internal/mailer/templates"
+
 	"github.com/MarekVigas/Postar-Jano/internal/resources"
 
 	"github.com/pkg/errors"
@@ -108,6 +110,9 @@ func (api *API) Register(c echo.Context) error {
 
 	reg, ok, err := api.repo.Register(ctx, &req, eventID)
 	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
 		api.logger.Error("Failed to create a registration", zap.Error(err))
 		return err
 	}
@@ -118,16 +123,41 @@ func (api *API) Register(c echo.Context) error {
 			"registeredIDs": reg.RegisteredIDs,
 		})
 	}
-	_, err = api.repo.FindEvent(ctx, eventID)
-	if err != nil {
-		if errors.Cause(err) == sql.ErrNoRows {
-			return echo.ErrNotFound
-		}
-		api.logger.Error("Failed to find event", zap.Error(err))
-		return err
+
+	pills := "-"
+	if reg.Reg.Pills != nil {
+		pills = *reg.Reg.Pills
 	}
 
-	// Send confirmation mail
+	restrictions := "-"
+	if reg.Reg.Problems != nil {
+		restrictions = *reg.Reg.Problems
+	}
+	var info string
+	if reg.Event.MailInfo != nil {
+		info = *reg.Event.MailInfo
+	}
+
+	// Send confirmation mail.
+	if err := api.mailer.ConfirmationMail(ctx, &templates.ConfirmationReq{
+		Mail:          reg.Reg.Email,
+		ParentName:    reg.Reg.ParentName,
+		ParentSurname: reg.Reg.ParentSurname,
+		EventName:     reg.Event.Title,
+		Name:          reg.Reg.Name,
+		Surname:       reg.Reg.Surname,
+		Pills:         pills,
+		Restrictions:  restrictions,
+		Text:          reg.Event.OwnerPhone + " " + reg.Event.OwnerEmail,
+		PhotoURL:      reg.Event.OwnerPhoto,
+		Sum:           reg.Reg.Amount,
+		Owner:         reg.Event.OwnerName + " " + reg.Event.OwnerSurname,
+		Days:          reg.RegisteredDesc,
+		Info:          info,
+	}); err != nil {
+		api.logger.Error("Failed to send a confirmation mail.", zap.Error(err))
+		return err
+	}
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"success":       reg.Success,

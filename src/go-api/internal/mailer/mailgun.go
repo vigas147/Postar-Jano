@@ -47,8 +47,8 @@ func (c *Client) ConfirmationMail(ctx context.Context, req *templates.Confirmati
 		return errors.WithStack(err)
 	}
 
-	return c.send(ctx, "robot@mailgun.sbb.sk", "Info o letnej akcii v Salezku", b.String(),
-		fmt.Sprintf("%s %s <%s>", req.Name, req.Surname, req.Recipient))
+	return c.send(ctx, "robot@mailgun.sbb.sk", fmt.Sprintf("Prijatie prihlášky na %s", req.EventName), b.String(),
+		fmt.Sprintf("%s %s <%s>", req.ParentName, req.ParentSurname, req.Mail))
 }
 
 func (c *Client) send(ctx context.Context, sender string, subject string, body string, recipient string) error {
