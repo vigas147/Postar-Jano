@@ -107,16 +107,19 @@ func (api *API) Register(c echo.Context) error {
 		return err
 	}
 
-	if ok {
-		_, err := api.repo.FindEvent(ctx, eventID)
-		if err != nil {
-			api.logger.Error("Failed to find event", zap.Error(err))
-			return err
-		}
-
-		// Send confirmation mail
-
+	if !ok {
+		return c.JSON(http.StatusOK, echo.Map{
+			"success":       reg.Success,
+			"registeredIDs": reg.RegisteredIDs,
+		})
 	}
+	_, err = api.repo.FindEvent(ctx, eventID)
+	if err != nil {
+		api.logger.Error("Failed to find event", zap.Error(err))
+		return err
+	}
+
+	// Send confirmation mail
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"success":       reg.Success,

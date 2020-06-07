@@ -167,7 +167,7 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 				if stat.DayID != req.DayIDs[i] {
 					continue
 				}
-				if stat.Capacity > stat.GirlsCount+stat.BoysCount {
+				if (stat.GirlsCount + stat.BoysCount) >= stat.Capacity {
 					break
 				}
 				if req.Gender == "male" && stat.LimitBoys != nil {
@@ -337,23 +337,21 @@ func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Sta
 		for i := range stats {
 			if err := sqlx.GetContext(ctx, tx, &stats[i].BoysCount, `
 				SELECT
-					COUNT(*)
+					COUNT(r.id)
 				FROM registrations r
 				LEFT JOIN signups s ON s.registration_id = r.id
-				LEFT JOIN days d ON s.day_id = d.id
-				WHERE r.gender = 'male' AND d.event_id = $1
-		`, eventID); err != nil {
+				WHERE r.gender = 'male' AND s.day_id = $1
+		`, stats[i].DayID); err != nil {
 				return errors.WithStack(err)
 			}
 
 			if err := sqlx.GetContext(ctx, tx, &stats[i].GirlsCount, `
 				SELECT
-					COUNT(*)
+					COUNT(r.id)
 				FROM registrations r
 				LEFT JOIN signups s ON s.registration_id = r.id
-				LEFT JOIN days d ON s.day_id = d.id
-				WHERE r.gender = 'female' AND d.event_id = $1
-		`, eventID); err != nil {
+				WHERE r.gender = 'female' AND s.day_id = $1
+		`, stats[i].DayID); err != nil {
 				return errors.WithStack(err)
 			}
 		}
