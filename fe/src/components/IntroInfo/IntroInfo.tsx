@@ -144,7 +144,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                             <IonIcon icon={manOutline} className="bigIcon" />
                         </IonCol>
                         <IonCol size="1">
-                            {(stat.boys_count/stat.limit_boys!)*100}%
+                            {parseFloat(`${((stat.boys_count/stat.limit_boys!))*100}`).toFixed(2)}%
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
@@ -155,7 +155,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                             <IonIcon icon={womanOutline} className="bigIcon" />
                         </IonCol>
                         <IonCol size="1">
-                            {(stat.girls_count/stat.limit_girls!)*100}%
+                            {parseFloat(`${(stat.girls_count/stat.limit_girls!)*100}`).toFixed(2)}%
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
@@ -172,7 +172,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                             {event.days[index].description}
                         </IonCol>
                         <IonCol size="1">
-                            {((stat.boys_count+stat.girls_count)/stat.capacity)*100}%
+                            {parseFloat(`${((stat.boys_count+stat.girls_count)/stat.capacity)*100}`).toFixed(2)}%
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
