@@ -78,7 +78,13 @@ const ChildInfo: React.FC<ChildInfoProps> = (props) => {
                 <IonCol>
                     <h4>Ukončený školský rok</h4>
                     <IonItem>
-                    <IonSelect value={child.finishedSchoolYear} placeholder="Vybrať" onIonChange={e => props.setValue(ActionType.SET_CHILD_YEAR, e.detail.value)}>
+                    <IonSelect 
+                        value={child.finishedSchoolYear} 
+                        placeholder="Vybrať" 
+                        onIonChange={e => props.setValue(ActionType.SET_CHILD_YEAR, e.detail.value)}
+                        okText="Vybrať"
+                        cancelText="Zrušiť"
+                    >
                         <IonSelectOption value="1zs">1. ZŠ</IonSelectOption>
                         <IonSelectOption value="2zs">2. ZŠ</IonSelectOption>
                         <IonSelectOption value="3zs">3. ZŠ</IonSelectOption>
