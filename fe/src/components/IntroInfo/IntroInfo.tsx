@@ -25,6 +25,10 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
         return color
     }
 
+    const calculatePercentage = (a: number, b: number): string => {
+        return `${parseFloat(`${(a/b)*100}`).toFixed(0)} %`
+    }
+
     return (
         <IonGrid>
             <IonRow>
@@ -144,7 +148,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                             <IonIcon icon={manOutline} className="bigIcon" />
                         </IonCol>
                         <IonCol size="1">
-                            {parseFloat(`${((stat.boys_count/stat.limit_boys!))*100}`).toFixed(2)}%
+                            {calculatePercentage(stat.boys_count, stat.limit_boys!)}
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
@@ -155,7 +159,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                             <IonIcon icon={womanOutline} className="bigIcon" />
                         </IonCol>
                         <IonCol size="1">
-                            {parseFloat(`${(stat.girls_count/stat.limit_girls!)*100}`).toFixed(2)}%
+                            {calculatePercentage(stat.girls_count, stat.limit_girls!)}
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
@@ -172,7 +176,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                             {event.days[index].description}
                         </IonCol>
                         <IonCol size="1">
-                            {parseFloat(`${((stat.boys_count+stat.girls_count)/stat.capacity)*100}`).toFixed(2)}%
+                            {calculatePercentage(stat.boys_count+stat.girls_count, stat.capacity)}
                         </IonCol>
                         <IonCol>
                             <IonProgressBar 
