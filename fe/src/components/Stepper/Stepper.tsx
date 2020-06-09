@@ -23,6 +23,7 @@ interface StepperState {
     event: Event | null,
     stats: Stat[] | null,
     page: number,
+    pageCount: number,
     valid: boolean,
     canGoBack: boolean,
     responseMsg: string | null,
@@ -63,6 +64,7 @@ const defaultState: StepperState = {
     stats: null,
     event: null,
     page: 0,
+    pageCount: 5,
     valid: true,
     canGoBack: true,
     responseMsg: null,
@@ -71,54 +73,15 @@ const defaultState: StepperState = {
 
 class Stepper extends React.Component<StepperProps, StepperState> {
     state: StepperState;
-    steps: JSX.Element[];
     
     constructor(props: StepperProps) {
         super(props);
+        if (this.props.event.days.length > 1) {
+            defaultState.pageCount += 1
+        }
         this.state = defaultState;
         this.state.event = props.event;
         this.state.stats = props.stats;
-        
-        const steps = [
-            <IntroInfo event={this.state.event} stats={this.state.stats} />,
-            <ChildInfo 
-                registration={this.state.registration}
-                setValue={(t,v) => this.setValueHandler(t, v)}
-            />,
-            <MedicineHealth
-                registration={this.state.registration}
-                setValue={(t,v) => this.setValueHandler(t, v)}
-            />,
-            <ParentInfo
-                registration={this.state.registration}
-                setValue={(t,v) => this.setValueHandler(t, v)}
-            />,
-            <OtherInfo
-                registration={this.state.registration}
-                setValue={(t,v) => this.setValueHandler(t, v)}
-            />,
-            <Results
-                registration={this.state.registration}
-                responseMsg={this.state.responseMsg}
-                responseStatus={this.state.responseStatus}
-            />
-        ]
-        
-        if (this.props.event.days.length > 1) {
-            // Day selector as 3rd step if event has multiple days
-            this.steps = [
-                ...steps.slice(0, 3),
-                <DaySelector
-                    stats={this.state.stats}
-                    event={this.state.event}
-                    registration={this.state.registration}
-                    setValue={(t,v) => this.setValueHandler(t, v)}
-                />,
-                ...steps.slice(3)
-            ]
-        } else {
-            this.steps = steps;
-        }
     }
     
     protected setValueHandler = (type: ActionType, value: any) => {
@@ -290,17 +253,75 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                 <IonRow>
                     <IonCol size="2"></IonCol>
                     <IonCol>
-                        <IonProgressBar value={this.state.page/(this.steps.length-2)}></IonProgressBar>
+                        <IonProgressBar value={this.state.page/(this.state.pageCount-1)}></IonProgressBar>
                     </IonCol>
                     <IonCol size="2"></IonCol>
                 </IonRow>
                 {
-                    this.state.event && this.state.stats && 
+                    this.state.event && 
                     <IonRow>
                         <IonCol size="2"></IonCol>
                         <IonCol>
                             {
-                                this.steps.filter((step, index) => index === this.state.page)[0]
+                                this.state.page === 0 && this.state.stats && <IntroInfo event={this.state.event} stats={this.state.stats} />
+                            }
+                            {
+                                this.state.page === 1 && <ChildInfo 
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 2 && <MedicineHealth
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 3 && this.state.event.days.length > 1 && this.state.stats && <DaySelector
+                                    stats={this.state.stats}
+                                    event={this.state.event}
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 3 && this.state.event.days.length === 1 && <ParentInfo
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 4 && this.state.event.days.length > 1 && <ParentInfo
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 4 && this.state.event.days.length === 1 && <OtherInfo
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 5 && this.state.event.days.length > 1 && <OtherInfo
+                                    registration={this.state.registration}
+                                    setValue={(t,v) => this.setValueHandler(t, v)}
+                                />
+                            }
+                            {
+                                this.state.page === 5 && this.state.event.days.length === 1 && <Results
+                                    registration={this.state.registration}
+                                    responseMsg={this.state.responseMsg}
+                                    responseStatus={this.state.responseStatus}
+                                />
+                            }
+                            {
+                                this.state.page === 6 && this.state.event.days.length > 1 && <Results
+                                    registration={this.state.registration}
+                                    responseMsg={this.state.responseMsg}
+                                    responseStatus={this.state.responseStatus}
+                                />
                             }
                         </IonCol>
                         <IonCol size="2"></IonCol>
@@ -326,9 +347,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     <IonCol size="3">
                         <div className="next">
                             {
-                                this.state.page < this.steps.length -2 && !this.eventFull() &&
+                                this.state.page < this.state.pageCount -1 && !this.eventFull() &&
                                 <IonButton expand="full" shape="round" onClick={() => {
-                                    if (this.state.page < this.steps.length) {
+                                    if (this.state.page < this.state.pageCount) {
                                         this.setState({...this.state, page: this.state.page + 1})
                                     }
                                 }}>
@@ -337,7 +358,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                 </IonButton>
                             }
                             {
-                                this.state.page === this.steps.length - 2 &&
+                                this.state.page === this.state.pageCount -1 &&
                                 <IonButton 
                                     expand="full" 
                                     shape="round"
