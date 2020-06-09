@@ -147,7 +147,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                         <IonCol size="1">
                             <IonIcon icon={manOutline} className="bigIcon" />
                         </IonCol>
-                        <IonCol size="1">
+                        <IonCol size="1" className="capacityPercentage">
                             {calculatePercentage(stat.boys_count, stat.limit_boys!)}
                         </IonCol>
                         <IonCol>
@@ -158,7 +158,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                         <IonCol size="1">
                             <IonIcon icon={womanOutline} className="bigIcon" />
                         </IonCol>
-                        <IonCol size="1">
+                        <IonCol size="1" className="capacityPercentage">
                             {calculatePercentage(stat.girls_count, stat.limit_girls!)}
                         </IonCol>
                         <IonCol>
@@ -175,7 +175,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                         <IonCol slot="start" size="3">
                             {event.days[index].description}
                         </IonCol>
-                        <IonCol size="1">
+                        <IonCol size="1" className="capacityPercentage">
                             {calculatePercentage(stat.boys_count+stat.girls_count, stat.capacity)}
                         </IonCol>
                         <IonCol>
