@@ -122,19 +122,22 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                     </span>
                 </IonCol>
             </IonItem>
-            <IonItem>
-                <IonCol slot="start" size="0.9" className="infIcon" >
-                    <IonIcon icon={informationCircleOutline} class="bigIcon" />
-                </IonCol>
-                <IonCol size="4">
-                    <h5>Ďalšie informácie:</h5>
-                </IonCol>
-                <IonCol>
-                    <span className="value">
-                        {event.info}
-                    </span>
-                </IonCol>
-            </IonItem>
+            {
+                event.info && 
+                <IonItem>
+                    <IonCol slot="start" size="0.9" className="infIcon" >
+                        <IonIcon icon={informationCircleOutline} class="bigIcon" />
+                    </IonCol>
+                    <IonCol size="4">
+                        <h5>Ďalšie informácie:</h5>
+                    </IonCol>
+                    <IonCol>
+                        <span className="value">
+                            {event.info}
+                        </span>
+                    </IonCol>
+                </IonItem>
+            }
             <IonRow>
                 <h5>Kapacita: </h5>
             </IonRow>
