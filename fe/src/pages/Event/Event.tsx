@@ -1,9 +1,9 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonLoading } from '@ionic/react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './Event.scss';
 import { RouteComponentProps } from 'react-router-dom';
 import Stepper from '../../components/Stepper/Stepper';
-import { Event, Gender, Stat } from '../../types/types';
+import { Event, Stat } from '../../types/types';
 import axios from 'axios';
 
 interface Props extends RouteComponentProps<{

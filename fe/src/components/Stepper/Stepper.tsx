@@ -3,7 +3,7 @@ import { arrowForwardOutline, arrowBackOutline } from 'ionicons/icons'
 import IntroInfo from "../IntroInfo/IntroInfo";
 import "./Stepper.scss"
 import { Registration, Event, ActionType, Stat, RegistrationRespone, responseStatus } from '../../types/types';
-import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol, IonToast } from '@ionic/react';
+import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
 import ParentInfo from '../ParentInfo/ParentInfo';
@@ -19,7 +19,7 @@ interface StepperProps {
 }
 
 interface StepperState {
-    registraion: Registration;
+    registration: Registration;
     event: Event | null,
     stats: Stat[] | null,
     page: number,
@@ -31,7 +31,7 @@ interface StepperState {
 }
 
 const defaultState: StepperState = {
-    registraion: {
+    registration: {
         child: {
             name: "",
             surname: "",
@@ -88,58 +88,58 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         const state = {...this.state};
         switch (type) {
             case ActionType.SET_CHILD_NAME:
-                state.registraion.child.name = value;
+                state.registration.child.name = value;
                 break;
             case ActionType.SET_CHILD_SURNAME:
-                state.registraion.child.surname = value;
+                state.registration.child.surname = value;
                 break;
             case ActionType.SET_CHILD_GENDER:
-                state.registraion.child.gender = value;
+                state.registration.child.gender = value;
                 break;
             case ActionType.SET_CHILD_BIRTH:
-                state.registraion.child.dateOfBirth = value;
+                state.registration.child.dateOfBirth = value;
                 break;
             case ActionType.SET_CHILD_CITY:
-                state.registraion.child.city = value;
+                state.registration.child.city = value;
                 break;
             case ActionType.SET_CHILD_YEAR:
-                state.registraion.child.finishedSchoolYear = value;
+                state.registration.child.finishedSchoolYear = value;
                 break;
             case ActionType.SET_CHILD_ATTEND:
-                state.registraion.child.attendedPreviousEvents = value;
+                state.registration.child.attendedPreviousEvents = value;
                 break;
             case ActionType.SET_DAYS:
-                state.registraion.days = value;
+                state.registration.days = value;
                 break;
             case ActionType.SET_PARNET_NAME:
-                state.registraion.parent.name = value;
+                state.registration.parent.name = value;
                 break;
             case ActionType.SET_PARENT_SURNAME:
-                state.registraion.parent.surname = value;
+                state.registration.parent.surname = value;
                 break;
             case ActionType.SET_PARENT_PHONE:
-                state.registraion.parent.phone = value;
+                state.registration.parent.phone = value;
                 break;
             case ActionType.SET_PARENT_EMAIL:
-                state.registraion.parent.email = value;
+                state.registration.parent.email = value;
                 break;
             case ActionType.SET_MEDICINE:
-                state.registraion.medicine.takes = value;
+                state.registration.medicine.takes = value;
                 break;
             case ActionType.SET_HEALTH:
-                state.registraion.health.hasProblmes = value;
+                state.registration.health.hasProblmes = value;
                 break;
             case ActionType.SET_DRUGS:
-                state.registraion.medicine.drugs = value;
+                state.registration.medicine.drugs = value;
                 break;
             case ActionType.SET_PROBLEMS:
-                state.registraion.health.problems = value;
+                state.registration.health.problems = value;
                 break;
             case ActionType.SET_ATTENDED_ACTIVITIES:
-                state.registraion.memberShip.attendedActivities = value;
+                state.registration.memberShip.attendedActivities = value;
                 break;
             case ActionType.SET_NOTES:
-                state.registraion.notes = value;
+                state.registration.notes = value;
                 break;
             default:
                 break;
@@ -167,9 +167,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         })
         sendToast.present()
 
-        const registration = {...this.state.registraion};
+        const registration = {...this.state.registration};
 
-        if (this.state.event && this.state.event.days.length == 1) {
+        if (this.state.event && this.state.event.days.length === 1) {
             registration.days = []
             registration.days.push(this.state.event.days[0].id)
         }
@@ -191,11 +191,11 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     responseStatus: responseStatus.success
                 })
             } else if (res.data.registeredIDs) {
-                if (res.data.registeredIDs.length != this.state.registraion.days.length) {
-                    const notRegistred = this.state.registraion.days.filter(d => !res.data.registeredIDs?.includes(d))
+                if (res.data.registeredIDs.length !== this.state.registration.days.length) {
+                    const notRegistred = this.state.registration.days.filter(d => !res.data.registeredIDs?.includes(d))
                     let msg = 'Nepodarilo sa prihlásiť na tieto termíny: '
                     for (const dayId of notRegistred) {
-                        const day = this.props.event.days.filter(d => d.id == dayId)[0];
+                        const day = this.props.event.days.filter(d => d.id === dayId)[0];
                         msg += `${day.description} `
                     }
                     this.setState({
@@ -249,62 +249,62 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                         <IonCol size="2"></IonCol>
                         <IonCol>
                             {
-                                this.state.page == 0 && this.state.stats && <IntroInfo event={this.state.event} stats={this.state.stats} />
+                                this.state.page === 0 && this.state.stats && <IntroInfo event={this.state.event} stats={this.state.stats} />
                             }
                             {
-                                this.state.page == 1 && <ChildInfo 
-                                    registration={this.state.registraion}
+                                this.state.page === 1 && <ChildInfo 
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 2 && <MedicineHealth
-                                    registration={this.state.registraion}
+                                this.state.page === 2 && <MedicineHealth
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 3 && this.state.event.days.length > 1 && this.state.stats && <DaySelector
+                                this.state.page === 3 && this.state.event.days.length > 1 && this.state.stats && <DaySelector
                                     stats={this.state.stats}
                                     event={this.state.event}
-                                    registration={this.state.registraion}
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 3 && this.state.event.days.length == 1 && <ParentInfo
-                                    registration={this.state.registraion}
+                                this.state.page === 3 && this.state.event.days.length === 1 && <ParentInfo
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 4 && this.state.event.days.length > 1 && <ParentInfo
-                                    registration={this.state.registraion}
+                                this.state.page === 4 && this.state.event.days.length > 1 && <ParentInfo
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 4 && this.state.event.days.length == 1 && <OtherInfo
-                                    registration={this.state.registraion}
+                                this.state.page === 4 && this.state.event.days.length === 1 && <OtherInfo
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 5 && this.state.event.days.length > 1 && <OtherInfo
-                                    registration={this.state.registraion}
+                                this.state.page === 5 && this.state.event.days.length > 1 && <OtherInfo
+                                    registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />
                             }
                             {
-                                this.state.page == 5 && this.state.event.days.length == 1 && <Results
-                                    registration={this.state.registraion}
+                                this.state.page === 5 && this.state.event.days.length === 1 && <Results
+                                    registration={this.state.registration}
                                     responseMsg={this.state.responseMsg}
                                     responseStatus={this.state.responseStatus}
                                 />
                             }
                             {
-                                this.state.page == 6 && this.state.event.days.length > 1 && <Results
-                                    registration={this.state.registraion}
+                                this.state.page === 6 && this.state.event.days.length > 1 && <Results
+                                    registration={this.state.registration}
                                     responseMsg={this.state.responseMsg}
                                     responseStatus={this.state.responseStatus}
                                 />
@@ -344,7 +344,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                                 </IonButton>
                             }
                             {
-                                this.state.page == this.state.pageCount -1 &&
+                                this.state.page === this.state.pageCount -1 &&
                                 <IonButton 
                                     expand="full" 
                                     shape="round"

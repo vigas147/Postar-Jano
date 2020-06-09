@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Event, Registration, ActionType, Day } from '../../types/types';
-import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonRadioGroup, IonRadio, IonIcon, IonSelect, IonSelectOption, IonList, IonItemDivider, IonCheckbox, IonProgressBar } from '@ionic/react';
+import React from 'react';
+import { Registration, ActionType } from '../../types/types';
+import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput } from '@ionic/react';
 
 interface ParentInfoProps {
     registration: Registration

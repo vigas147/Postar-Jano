@@ -1,7 +1,7 @@
 import React from 'react';
 import './IntroInfo.scss';
 import { Event, Stat } from '../../types/types';
-import { calendarOutline, locateOutline, personOutline, logoEuro, peopleOutline, manOutline, womanOutline, timeOutline, informationCircleOutline } from 'ionicons/icons';
+import { calendarOutline, locateOutline, personOutline, logoEuro, manOutline, womanOutline, timeOutline, informationCircleOutline } from 'ionicons/icons';
 import { IonIcon, IonItem, IonAvatar, IonLabel, IonCol, IonGrid, IonRow, IonProgressBar } from '@ionic/react';
 
 interface IntroInfoProps {
@@ -191,7 +191,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                 <IonCol>
                 <IonItem>
                     <IonAvatar slot="start">
-                        <img src={event.owner.photo} />
+                        <img src={event.owner.photo} alt={`${event.owner.name} ${event.owner.surname}`} />
                     </IonAvatar>
                     <IonLabel>{event.owner.name} {event.owner.surname} <br/>{event.owner.email} <br/> {event.owner.phone}</IonLabel>
                 </IonItem>

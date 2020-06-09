@@ -8,7 +8,6 @@ interface MedicineHealthProps {
 }
 
 const MedicineHealth: React.FC<MedicineHealthProps> = (props) => {
-    const { parent } = props.registration;
 
     return (
         <IonGrid>

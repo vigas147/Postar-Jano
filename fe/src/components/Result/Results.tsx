@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import "./Results.scss";
 import logo from "../logo.png"
-import { Event, Registration, ActionType, Day, responseStatus } from '../../types/types';
-import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonRadioGroup, IonRadio, IonIcon, IonSelect, IonSelectOption, IonList, IonItemDivider, IonCheckbox, IonProgressBar, IonButton } from '@ionic/react';
+import { Registration, responseStatus } from '../../types/types';
+import { IonGrid, IonRow, IonCol, IonButton } from '@ionic/react';
 
 interface ResultsProps {
     registration: Registration,
@@ -38,7 +38,7 @@ const Results: React.FC<ResultsProps> = (props) => {
                 </IonRow>
             }
             {
-                props.responseMsg != null && props.responseStatus == responseStatus.success && 
+                props.responseMsg != null && props.responseStatus === responseStatus.success && 
                 <IonRow>
                     <IonCol></IonCol>
                     <IonCol size="4">

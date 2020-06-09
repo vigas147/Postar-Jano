@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './DaySelector.scss';
 import { Event, Registration, ActionType, Day, Stat } from '../../types/types';
-import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonRadioGroup, IonRadio, IonIcon, IonSelect, IonSelectOption, IonList, IonItemDivider, IonCheckbox, IonProgressBar } from '@ionic/react';
+import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonCheckbox, IonProgressBar } from '@ionic/react';
 
 interface ChildInfoProps {
     event: Event,
@@ -58,7 +58,7 @@ const DaySelector: React.FC<ChildInfoProps> = (props) => {
                                             slot="start" 
                                             value={`${day.id}`} 
                                             checked={selected.includes(`${day.id}`)}
-                                            disabled={(stats[i].boys_count+stats[i].girls_count)/stats[i].capacity == 1}
+                                            disabled={(stats[i].boys_count+stats[i].girls_count)/stats[i].capacity === 1}
                                             onIonChange={e => {
                                                 if (e.detail.checked) {
                                                     handleSetSelected([...selected, `${day.id}`])
