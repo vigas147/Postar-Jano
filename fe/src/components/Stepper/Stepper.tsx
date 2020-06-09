@@ -188,6 +188,20 @@ class Stepper extends React.Component<StepperProps, StepperState> {
 
     }
 
+    protected eventFull = (): boolean => {
+        let total = 0;
+        let sum = 0;
+
+        if (this.state.stats) {
+            for (const stat of this.state.stats) {
+                sum += stat.boys_count + stat.girls_count;
+                total += stat.capacity;   
+            }
+            return (total === sum)
+        } else {
+            return true
+        }
+    }
 
     protected handleSubmit = async () => {
         this.setState({
@@ -312,7 +326,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     <IonCol size="3">
                         <div className="next">
                             {
-                                this.state.page < this.steps.length -2 &&
+                                this.state.page < this.steps.length -2 && !this.eventFull() &&
                                 <IonButton expand="full" shape="round" onClick={() => {
                                     if (this.state.page < this.steps.length) {
                                         this.setState({...this.state, page: this.state.page + 1})
