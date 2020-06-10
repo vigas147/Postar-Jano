@@ -267,6 +267,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                             }
                             {
                                 this.state.page === 1 && <ChildInfo 
+                                    event={this.props.event}
                                     registration={this.state.registration}
                                     setValue={(t,v) => this.setValueHandler(t, v)}
                                 />

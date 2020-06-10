@@ -1,12 +1,13 @@
 import React from 'react';
 import './ChildInfo.scss';
-import { Registration, Gender, ActionType } from '../../types/types';
+import { Registration, Gender, ActionType, Event } from '../../types/types';
 import DatePicker from 'react-date-picker';
 import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonRadioGroup, IonRadio, IonIcon, IonSelect, IonSelectOption } from '@ionic/react';
 import { calendarOutline } from 'ionicons/icons';
 
 interface ChildInfoProps {
-    registration: Registration
+    registration: Registration,
+    event: Event,
     setValue: (action: ActionType, value: any) => void,
 }
 
@@ -60,8 +61,8 @@ const ChildInfo: React.FC<ChildInfoProps> = (props) => {
                         onChange={(date) => props.setValue(ActionType.SET_CHILD_BIRTH, date)}
                         value={child.dateOfBirth}
                         calendarIcon={<IonIcon icon={calendarOutline}></IonIcon>}
-                        minDate={new Date(new Date().getFullYear() - 25, 0, 1)}
-                        maxDate={new Date(new Date().getFullYear() - 6, 0, 1)}
+                        minDate={new Date(new Date().getFullYear() - props.event.max_age, 8, 15)}
+                        maxDate={new Date(new Date().getFullYear() - props.event.min_age, 8, 15)}
                     />
                 </IonCol>
             </IonRow>
