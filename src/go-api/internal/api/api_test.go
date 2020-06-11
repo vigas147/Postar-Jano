@@ -11,13 +11,17 @@ import (
 	"net/http/httptest"
 	"os"
 
-	"github.com/MarekVigas/Postar-Jano/internal/model"
+	"github.com/MarekVigas/Postar-Jano/internal/auth"
 
-	"github.com/MarekVigas/Postar-Jano/internal/mailer"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/MarekVigas/Postar-Jano/internal/api"
 	"github.com/MarekVigas/Postar-Jano/internal/db"
+	"github.com/MarekVigas/Postar-Jano/internal/mailer/templates"
+	"github.com/MarekVigas/Postar-Jano/internal/model"
 	"github.com/MarekVigas/Postar-Jano/internal/repository"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
@@ -25,7 +29,10 @@ import (
 	"go.uber.org/zap"
 )
 
-const loggingEnabled = false
+const (
+	loggingEnabled = false
+	jwtSecret      = "top-secret"
+)
 
 type CommonSuite struct {
 	suite.Suite
@@ -33,7 +40,16 @@ type CommonSuite struct {
 
 	api    *api.API
 	db     *sql.DB
-	mailer *mailer.Client
+	dbx    *sqlx.DB
+	mailer *SenderMock
+}
+
+type SenderMock struct {
+	mock.Mock
+}
+
+func (m *SenderMock) ConfirmationMail(ctx context.Context, req *templates.ConfirmationReq) error {
+	return m.Called(ctx, req).Error(0)
 }
 
 func (s *CommonSuite) SetupSuite() {
@@ -48,8 +64,9 @@ func (s *CommonSuite) SetupSuite() {
 
 	s.db, err = db.Connect()
 	s.Require().NoError(err)
+	s.dbx = sqlx.NewDb(s.db, "postgres")
 
-	s.mailer, err = mailer.NewClient(s.logger)
+	s.mailer = &SenderMock{}
 
 	// Create db schema.
 	s.db.Exec(`drop schema public cascade;
@@ -69,10 +86,14 @@ func (s *CommonSuite) TearDownSuite() {
 
 func (s *CommonSuite) SetupTest() {
 	ctx := context.Background()
+
+	repo := repository.NewPostgresRepo(s.db)
 	s.api = api.New(
 		s.logger,
-		s.db,
+		repo,
+		auth.NewFromDB(repo),
 		s.mailer,
+		[]byte(jwtSecret),
 	)
 	s.NoError(repository.Reset(ctx, s.db))
 }

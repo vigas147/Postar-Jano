@@ -5,6 +5,9 @@ type Owner struct {
 	Name     string `db:"name"`
 	Surname  string `db:"surname"`
 	Email    string `db:"email"`
-	Login    string `db:"login"`
-	Password string `db:"password"`
+	Username string `db:"username"`
+	Pass     string `db:"pass"`
+	Phone    string `db:"phone"`
+	Photo    string `db:"photo"`
+	Gender   string `db:"gender"`
 }
