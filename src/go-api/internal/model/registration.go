@@ -1,7 +1,11 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type Registration struct {
@@ -28,6 +32,12 @@ type Registration struct {
 	CreatedAt          time.Time `json:"created_at" db:"created_at"`
 }
 
+type ExtendedRegistration struct {
+	Registration
+	DayNames DayNames `json:"days" db:"days"`
+	Title    string   `json:"title" db:"title"`
+}
+
 type RegResult struct {
 	Token          string `json:"token"`
 	Success        bool   `json:"success"`
@@ -35,4 +45,19 @@ type RegResult struct {
 	RegisteredDesc []string
 	Event          *Event
 	Reg            Registration
+}
+
+type DayNames []string
+
+func (d DayNames) Value() (driver.Value, error) {
+	return json.Marshal(d)
+}
+
+func (d *DayNames) Scan(src interface{}) error {
+	source, ok := src.([]byte)
+	if !ok {
+		return errors.New("source is not []byte")
+	}
+
+	return errors.WithStack(json.Unmarshal(source, &d))
 }

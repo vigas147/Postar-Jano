@@ -194,6 +194,9 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 
 		if len(req.DayIDs) != len(res.RegisteredIDs) {
 			res.Success = false
+			if len(res.RegisteredIDs) == 0 {
+				res.RegisteredIDs = []int{}
+			}
 			return ErrOverLimit
 		}
 		res.Success = true
@@ -380,6 +383,56 @@ func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Sta
 		return nil, err
 	}
 	return stats, nil
+}
+
+func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*model.Owner, error) {
+	var owner model.Owner
+	if err := sqlx.GetContext(ctx, repo.db, &owner, `SELECT * FROM owners WHERE username = $1`, username); err != nil {
+		return nil, errors.Wrap(err, "failed to find user")
+	}
+	return &owner, nil
+}
+
+func (repo *PostgresRepo) ListRegistrations(ctx context.Context) ([]model.ExtendedRegistration, error) {
+	var res []model.ExtendedRegistration
+	if err := sqlx.SelectContext(ctx, repo.db, &res, `
+		SELECT
+				r.id,
+				r.name,
+				r.surname,
+				e.title, 
+				json_agg( d.description ORDER BY d.id)  AS days,
+				r.gender,
+				r.date_of_birth,
+				r.finished_school,
+				r.attended_previous, 
+				r.city, 
+				r.pills,
+				r.notes,
+				r.parent_name, 
+				r.attended_activities,
+				r.problems, 
+				r.parent_surname,
+				r.email, 
+				r.phone,
+				r.amount,
+				r.payed,
+				r.created_at,
+				r.token,
+				r.updated_at
+		FROM registrations r
+		LEFT JOIN signups s ON r.id = s.registration_id
+		LEFT JOIN days d ON s.day_id = d.id
+		LEFT JOIN events e ON d.event_id = e.id
+		GROUP BY r.id, r.name, r.surname, e.title, r.gender, r.date_of_birth,
+		r.finished_school, r.attended_previous, r.city, r.pills, r.notes,
+		r.parent_name,  r.attended_activities, r.problems, r.parent_surname,
+		r.email,  r.phone , r.amount, r.payed, 				r.created_at,
+				r.updated_at`); err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return res, nil
+
 }
 
 func (repo *PostgresRepo) WithTxx(ctx context.Context, f func(context.Context, *sqlx.Tx) error) error {

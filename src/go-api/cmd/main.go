@@ -10,6 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/MarekVigas/Postar-Jano/internal/repository"
+
+	"github.com/MarekVigas/Postar-Jano/internal/auth"
+
 	"github.com/MarekVigas/Postar-Jano/internal/api"
 	"github.com/MarekVigas/Postar-Jano/internal/db"
 	"github.com/MarekVigas/Postar-Jano/internal/mailer"
@@ -134,7 +138,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	server := api.New(logger, postgres, mailer)
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET missing")
+	}
+
+	repo := repository.NewPostgresRepo(postgres)
+
+	server := api.New(logger, repo, auth.NewFromDB(repo), mailer, []byte(jwtSecret))
 
 	if err := Run(logger, runHTTP(logger, server)); err != nil {
 		logger.Fatal("Failed to run server.", zap.Error(err))

@@ -1,34 +1,69 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/MarekVigas/Postar-Jano/internal/auth"
 	"github.com/MarekVigas/Postar-Jano/internal/mailer/templates"
-
+	"github.com/MarekVigas/Postar-Jano/internal/model"
+	"github.com/MarekVigas/Postar-Jano/internal/repository"
 	"github.com/MarekVigas/Postar-Jano/internal/resources"
 
-	"github.com/pkg/errors"
-
-	"github.com/MarekVigas/Postar-Jano/internal/mailer"
-	"github.com/MarekVigas/Postar-Jano/internal/repository"
-
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
+
+const tokenLifetime = 3 * time.Hour
+
+type EmailSender interface {
+	ConfirmationMail(ctx context.Context, req *templates.ConfirmationReq) error
+}
+
+type Authenticator interface {
+	Authenticate(ctx context.Context, username string, pass string) (*model.Owner, error)
+}
 
 type API struct {
 	*echo.Echo
-	repo   *repository.PostgresRepo
-	logger *zap.Logger
-	mailer *mailer.Client
+	repo          *repository.PostgresRepo
+	logger        *zap.Logger
+	authenticator Authenticator
+	sender        EmailSender
+	jwtSecret     []byte
 }
 
-func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
+func New(
+	logger *zap.Logger,
+	repo *repository.PostgresRepo,
+	authenticator Authenticator,
+	sender EmailSender,
+	jwtSecret []byte,
+) *API {
 	e := echo.New()
-	a := &API{Echo: e, repo: repository.NewPostgresRepo(db), logger: logger, mailer: mailer}
+	a := &API{
+		Echo:          e,
+		repo:          repo,
+		logger:        logger,
+		authenticator: authenticator,
+		sender:        sender,
+		jwtSecret:     jwtSecret,
+	}
+
+	jwt := middleware.JWTWithConfig(middleware.JWTConfig{
+		Claims:     &auth.Claims{},
+		SigningKey: jwtSecret,
+		ErrorHandler: func(err error) error {
+			return echo.ErrUnauthorized
+		},
+	})
 
 	api := e.Group("/api",
 		middleware.Recover(),
@@ -53,8 +88,8 @@ func New(logger *zap.Logger, db *sql.DB, mailer *mailer.Client) *API {
 	// TODO: will be delivered after Sunday :)
 	api.GET("/registrations/:token", a.FindRegistration)
 
-	api.POST("/api/sign/in", a.SignIn)
-	api.GET("/registrations", a.ListRegistrations)
+	api.POST("/sign/in", a.SignIn)
+	api.GET("/registrations", a.ListRegistrations, jwt)
 	api.PUT("/registrations/:id", a.UpdateRegistration)
 
 	return a
@@ -139,7 +174,7 @@ func (api *API) Register(c echo.Context) error {
 	}
 
 	// Send confirmation mail.
-	if err := api.mailer.ConfirmationMail(ctx, &templates.ConfirmationReq{
+	if err := api.sender.ConfirmationMail(ctx, &templates.ConfirmationReq{
 		Mail:          reg.Reg.Email,
 		ParentName:    reg.Reg.ParentName,
 		ParentSurname: reg.Reg.ParentSurname,
@@ -167,7 +202,16 @@ func (api *API) Register(c echo.Context) error {
 }
 
 func (api *API) ListRegistrations(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+	regs, err := api.repo.ListRegistrations(ctx)
+	if err != nil {
+		api.logger.Error("Failed to list registrations", zap.Error(err))
+		return err
+	}
+	if len(regs) == 0 {
+		regs = []model.ExtendedRegistration{}
+	}
+	return c.JSON(http.StatusOK, regs)
 }
 
 func (api *API) FindRegistration(c echo.Context) error {
@@ -205,11 +249,57 @@ func (api *API) EventByID(c echo.Context) error {
 }
 
 func (api *API) SignIn(c echo.Context) error {
-	return nil
+	var req resources.SignIn
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	if errs := req.Validate(); errs != nil {
+		return c.JSON(http.StatusUnprocessableEntity, errs)
+	}
+
+	ctx := c.Request().Context()
+	owner, err := api.authenticator.Authenticate(ctx, req.Username, req.Password)
+	if err != nil {
+		switch errors.Cause(err) {
+		case sql.ErrNoRows:
+			return echo.ErrForbidden
+		case bcrypt.ErrMismatchedHashAndPassword:
+			return echo.ErrForbidden
+		default:
+			api.logger.Error("Error during authentication.", zap.Error(err), zap.String("username", req.Username))
+			return echo.ErrForbidden
+		}
+	}
+	token, err := api.generateToken(owner)
+	if err != nil {
+		api.logger.Error("Failed to generate token.", zap.Error(err))
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"token": token,
+	})
 }
 
 func (api *API) UpdateRegistration(c echo.Context) error {
 	return nil
+}
+
+func (api *API) generateToken(owner *model.Owner) (string, error) {
+	now := time.Now()
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, &auth.Claims{
+		StandardClaims: jwt.StandardClaims{
+			Audience:  "",
+			ExpiresAt: now.Add(tokenLifetime).Unix(),
+			Id:        owner.Email,
+			IssuedAt:  now.Unix(),
+			Issuer:    "",
+			NotBefore: 0,
+			Subject:   "",
+		},
+	})
+
+	return tok.SignedString(api.jwtSecret)
 }
 
 func (api *API) getID(param string) (int, error) {
