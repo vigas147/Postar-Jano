@@ -48,7 +48,7 @@ class AppComponent extends PureComponent<Props, State> {
             <IonRouterOutlet>
                 <Route path="/login" component={Login} exact={true} />
                 <Route path="/event/:id" component={Event} exact={true} />
-                <Route path="/" render={() => <Redirect to="/login" />} />
+                <Route render={() => <Redirect to="/login" />} />
             </IonRouterOutlet>
             </IonReactRouter>
         </IonApp>
