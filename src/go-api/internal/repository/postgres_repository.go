@@ -215,7 +215,7 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 		}
 
 		// Insert into registrations.
-		err = repo.db.GetContext(ctx, &res.Reg, `
+		err = tx.GetContext(ctx, &res.Reg, `
 			INSERT INTO registrations(
 				name,
 				surname,
@@ -429,6 +429,28 @@ func (repo *PostgresRepo) ListRegistrations(ctx context.Context) ([]model.Extend
 
 func (repo *PostgresRepo) ListEventRegistrations(ctx context.Context, eventID int) ([]model.ExtendedRegistration, error) {
 	return repo.listRegistrations(ctx, "e.event_id=$1", eventID)
+}
+
+func (repo *PostgresRepo) FindRegistrationByID(ctx context.Context, regID int) (*model.ExtendedRegistration, error) {
+	regs, err := repo.listRegistrations(ctx, "r.id = $1", regID)
+	if err != nil {
+		return nil, err
+	}
+	if len(regs) == 0 {
+		return nil, errors.WithStack(sql.ErrNoRows)
+	}
+	return &regs[0], nil
+}
+
+func (repo *PostgresRepo) FindRegistrationByToken(ctx context.Context, token string) (*model.ExtendedRegistration, error) {
+	regs, err := repo.listRegistrations(ctx, "r.token = $1", token)
+	if err != nil {
+		return nil, err
+	}
+	if len(regs) == 0 {
+		return nil, errors.WithStack(sql.ErrNoRows)
+	}
+	return &regs[0], nil
 }
 
 func (repo *PostgresRepo) WithTxx(ctx context.Context, f func(context.Context, *sqlx.Tx) error) error {

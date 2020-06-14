@@ -85,11 +85,12 @@ func New(
 	api.GET("/events", a.ListEvents)
 	api.GET("/events/:id", a.EventByID)
 
-	// TODO: will be delivered after Sunday :)
 	api.GET("/registrations/:token", a.FindRegistration)
 
 	api.POST("/sign/in", a.SignIn)
 	api.GET("/registrations", a.ListRegistrations, jwt)
+	api.GET("/registrations/:id", a.FindRegistrationByID, jwt)
+
 	api.PUT("/registrations/:id", a.UpdateRegistration, jwt)
 
 	return a
@@ -215,7 +216,33 @@ func (api *API) ListRegistrations(c echo.Context) error {
 }
 
 func (api *API) FindRegistration(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+	reg, err := api.repo.FindRegistrationByToken(ctx, c.Param("token"))
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
+		api.logger.Error("Failed to find registration.", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, reg)
+}
+
+func (api *API) FindRegistrationByID(c echo.Context) error {
+	ctx := c.Request().Context()
+	id, err := api.getIntParam(c, "id")
+	if err != nil {
+		return err
+	}
+	reg, err := api.repo.FindRegistrationByID(ctx, id)
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
+		api.logger.Error("Failed to find registration.", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, reg)
 }
 
 func (api *API) ListEvents(c echo.Context) error {
