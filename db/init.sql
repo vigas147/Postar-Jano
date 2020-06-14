@@ -78,6 +78,8 @@ CREATE TABLE "public"."registrations" (
                                           "phone" text NOT NULL,
                                           "attended_activities" text,
                                           "problems" text,
+                                          "admin_note" text DEFAULT '' NOT NULL,
+                                          "discount" integer,
                                           CONSTRAINT "registrations_id" PRIMARY KEY ("id")
 ) WITH (oids = false);
 

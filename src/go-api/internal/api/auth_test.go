@@ -5,16 +5,14 @@ import (
 	"testing"
 
 	"github.com/MarekVigas/Postar-Jano/internal/auth"
-	"github.com/dgrijalva/jwt-go"
-
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/MarekVigas/Postar-Jano/internal/model"
+
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/random"
-
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthSuite struct {
@@ -26,7 +24,9 @@ func (s *AuthSuite) TestSignIn_UnprocessableEntity_EmptyUsername() {
 		"password": "xyz",
 	})
 	s.AssertServerResponseObject(req, rec, http.StatusUnprocessableEntity, func(body echo.Map) {
-		s.Equal(echo.Map{"errors": []interface{}{"Field Username failed to validate required."}}, body)
+		s.Equal(echo.Map{"errors": map[string]interface{}{
+			"username": "required",
+		}}, body)
 	})
 }
 
@@ -35,7 +35,9 @@ func (s *AuthSuite) TestSignIn_UnprocessableEntity_EmptyPass() {
 		"username": "xyz",
 	})
 	s.AssertServerResponseObject(req, rec, http.StatusUnprocessableEntity, func(body echo.Map) {
-		s.Equal(echo.Map{"errors": []interface{}{"Field Password failed to validate required."}}, body)
+		s.Equal(echo.Map{"errors": map[string]interface{}{
+			"password": "required",
+		}}, body)
 	})
 }
 
@@ -117,10 +119,157 @@ func (s *AuthSuite) TestListRegistrations_Unauthorized() {
 	s.AssertServerResponseObject(req, rec, http.StatusUnauthorized, nil)
 }
 
-func (s *AuthSuite) TestListRegistrations_OK() {
+func (s *AuthSuite) TestListRegistrations_OK_Empty() {
 	req, rec := s.NewRequest(http.MethodGet, "/api/registrations", nil)
 	s.AuthorizeRequest(req, &auth.Claims{})
 	s.AssertServerResponseObject(req, rec, http.StatusOK, nil)
+}
+
+func (s *AuthSuite) TestPutRegistrations_Unauthorized() {
+	req, rec := s.NewRequest(http.MethodPut, "/api/registrations/1", nil)
+	s.AssertServerResponseObject(req, rec, http.StatusUnauthorized, nil)
+}
+
+func (s *AuthSuite) TestPutRegistrations_NotFound() {
+	req, rec := s.NewRequest(http.MethodPut, "/api/registrations/42", echo.Map{
+		"child": echo.Map{
+			"name":    "john",
+			"surname": "doe",
+		},
+		"parent": echo.Map{"email": "me@example.com"},
+	})
+	s.AuthorizeRequest(req, &auth.Claims{})
+	s.AssertServerResponseObject(req, rec, http.StatusNotFound, nil)
+}
+
+func (s *AuthSuite) TestPutRegistrations_UnprocessableEntity_MissingChildName() {
+	req, rec := s.NewRequest(http.MethodPut, "/api/registrations/42", echo.Map{
+		"child": echo.Map{
+			"surname": "doe",
+		},
+		"parent": echo.Map{"email": "me@example.com"},
+	})
+	s.AuthorizeRequest(req, &auth.Claims{})
+	s.AssertServerResponseObject(req, rec, http.StatusUnprocessableEntity, func(body echo.Map) {
+		s.Equal(echo.Map{
+			"errors": map[string]interface{}{
+				"updatereq.child.name": "required",
+			},
+		}, body)
+	})
+}
+
+func (s *AuthSuite) TestPutRegistrations_UnprocessableEntity_InvalidMail() {
+	req, rec := s.NewRequest(http.MethodPut, "/api/registrations/42", echo.Map{
+		"child": echo.Map{
+			"name":    "john",
+			"surname": "doe",
+		},
+		"parent": echo.Map{"email": "bla"},
+	})
+	s.AuthorizeRequest(req, &auth.Claims{})
+	s.AssertServerResponseObject(req, rec, http.StatusUnprocessableEntity, func(body echo.Map) {
+		s.Equal(echo.Map{
+			"errors": map[string]interface{}{
+				"updatereq.parent.email": "email",
+			},
+		}, body)
+	})
+}
+
+func (s *AuthSuite) TestPutRegistrations_OK() {
+	event := s.InsertEvent()
+
+	_, err := s.db.Exec(`INSERT INTO days (
+		id,
+		capacity,
+		limit_boys,
+		limit_girls,
+		description,
+		price,
+		event_id
+	) VALUES (
+		12,
+		10,
+		5,
+		5,
+		'bla',
+		42,
+		$1
+	)`, event.ID)
+	s.Require().NoError(err)
+
+	_, err = s.db.Exec(`INSERT INTO registrations(
+		id,
+		name,
+		surname,
+		token,
+		gender,
+		amount,
+		payed,
+		finished_school,
+		attended_previous,
+		city,
+		pills,
+		notes,
+		parent_name,
+		parent_surname,
+		email,
+		phone,
+		date_of_birth,
+		created_at,
+		updated_at
+	) VALUES (
+		15,
+		'sadf',
+		'sadf',
+		'sadf',
+		'female',
+		10,
+		0,
+		'zs',
+		true,
+		'bb',
+		'pills',
+		'notest',
+		'parentN',
+		'parentS',
+		'email',
+		'phone',
+		NOW(),
+		NOW(),
+		NOW()
+	)`)
+	s.Require().NoError(err)
+
+	_, err = s.db.Exec(`INSERT INTO signups(
+		day_id,
+		registration_id,
+		state,
+		created_at,
+		updated_at
+	) VALUES (
+		12,
+		15,
+		'sadf',
+		NOW(),
+		NOW()
+	)`)
+	s.Require().NoError(err)
+
+	req, rec := s.NewRequest(http.MethodPut, "/api/registrations/15", echo.Map{
+		"child": echo.Map{
+			"name":    "john",
+			"surname": "doe",
+		},
+		"parent":     echo.Map{"email": "me@example.com"},
+		"payed":      nil,
+		"discount":   nil,
+		"admin_note": nil,
+	})
+	s.AuthorizeRequest(req, &auth.Claims{})
+	s.AssertServerResponseObject(req, rec, http.StatusAccepted, nil)
+	//TODO: test db content
 }
 
 func (s *CommonSuite) AuthorizeRequest(req *http.Request, claims *auth.Claims) {

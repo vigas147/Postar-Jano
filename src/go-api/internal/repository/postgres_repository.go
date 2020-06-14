@@ -310,6 +310,7 @@ func (repo *PostgresRepo) getStatInternal(ctx context.Context, db sqlx.QueryerCo
 					limit_girls
 				FROM days 
 				WHERE event_id = $1
+				ORDER BY id
 		`, eventID); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -339,50 +340,7 @@ func (repo *PostgresRepo) getStatInternal(ctx context.Context, db sqlx.QueryerCo
 }
 
 func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Stat, error) {
-	var stats []model.Stat
-
-	err := repo.WithTxx(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
-		if err := sqlx.SelectContext(ctx, tx, &stats, `
-				SELECT 
-					id AS day_id,
-					event_id,
-					capacity,
-					limit_boys,
-					limit_girls
-				FROM days 
-				WHERE event_id = $1
-				ORDER BY id
-		`, eventID); err != nil {
-			return errors.WithStack(err)
-		}
-
-		for i := range stats {
-			if err := sqlx.GetContext(ctx, tx, &stats[i].BoysCount, `
-				SELECT
-					COUNT(r.id)
-				FROM registrations r
-				LEFT JOIN signups s ON s.registration_id = r.id
-				WHERE r.gender = 'male' AND s.day_id = $1
-		`, stats[i].DayID); err != nil {
-				return errors.WithStack(err)
-			}
-
-			if err := sqlx.GetContext(ctx, tx, &stats[i].GirlsCount, `
-				SELECT
-					COUNT(r.id)
-				FROM registrations r
-				LEFT JOIN signups s ON s.registration_id = r.id
-				WHERE r.gender = 'female' AND s.day_id = $1
-		`, stats[i].DayID); err != nil {
-				return errors.WithStack(err)
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return stats, nil
+	return repo.getStatInternal(ctx, repo.db, eventID)
 }
 
 func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*model.Owner, error) {
@@ -393,46 +351,84 @@ func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*mode
 	return &owner, nil
 }
 
-func (repo *PostgresRepo) ListRegistrations(ctx context.Context) ([]model.ExtendedRegistration, error) {
-	var res []model.ExtendedRegistration
-	if err := sqlx.SelectContext(ctx, repo.db, &res, `
+func (repo *PostgresRepo) UpdateRegistrations(ctx context.Context, reg *model.Registration) error {
+	stmt, err := repo.db.PrepareNamedContext(ctx, `
+		UPDATE registrations SET 
+			name = :name,
+			surname = :surname,
+			payed = :payed,
+			discount = :discount,
+			admin_note = :admin_note,
+			updated_at = NOW()
+		WHERE id = :id
+		RETURNING id
+	`)
+	if err != nil {
+		return errors.Wrap(err, "failed to prepare query")
+	}
+
+	var updated int
+	if err := stmt.GetContext(ctx, &updated, reg); err != nil {
+		return errors.Wrap(err, "failed to update a registration")
+	}
+	return nil
+}
+
+func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, args ...interface{}) ([]model.ExtendedRegistration, error) {
+	const queryTemplate = `
 		SELECT
-				r.id,
-				r.name,
-				r.surname,
-				e.title, 
-				json_agg( d.description ORDER BY d.id)  AS days,
-				r.gender,
-				r.date_of_birth,
-				r.finished_school,
-				r.attended_previous, 
-				r.city, 
-				r.pills,
-				r.notes,
-				r.parent_name, 
-				r.attended_activities,
-				r.problems, 
-				r.parent_surname,
-				r.email, 
-				r.phone,
-				r.amount,
-				r.payed,
-				r.created_at,
-				r.token,
-				r.updated_at
+		r.id,
+			r.name,
+			r.surname,
+			e.title,
+			json_agg( d.description ORDER BY d.id)  AS days,
+			r.gender,
+			r.date_of_birth,
+			r.finished_school,
+			r.attended_previous,
+			r.city,
+			r.pills,
+			r.notes,
+			r.parent_name,
+			r.attended_activities,
+			r.problems,
+			r.parent_surname,
+			r.email,
+			r.phone,
+			r.amount,
+			r.payed,
+			r.created_at,
+			r.token,
+			r.updated_at
 		FROM registrations r
 		LEFT JOIN signups s ON r.id = s.registration_id
 		LEFT JOIN days d ON s.day_id = d.id
 		LEFT JOIN events e ON d.event_id = e.id
+		%s
 		GROUP BY r.id, r.name, r.surname, e.title, r.gender, r.date_of_birth,
-		r.finished_school, r.attended_previous, r.city, r.pills, r.notes,
-		r.parent_name,  r.attended_activities, r.problems, r.parent_surname,
-		r.email,  r.phone , r.amount, r.payed, 				r.created_at,
-				r.updated_at`); err != nil {
+			r.finished_school, r.attended_previous, r.city, r.pills, r.notes,
+			r.parent_name,  r.attended_activities, r.problems, r.parent_surname,
+			r.email,  r.phone , r.amount, r.payed, r.created_at,
+			r.updated_at`
+
+	var condition string
+	if where != "" {
+		condition = fmt.Sprintf("WHERE %s", where)
+	}
+
+	var res []model.ExtendedRegistration
+	if err := sqlx.SelectContext(ctx, repo.db, &res, fmt.Sprintf(queryTemplate, condition), args...); err != nil {
 		return nil, errors.WithStack(err)
 	}
 	return res, nil
+}
 
+func (repo *PostgresRepo) ListRegistrations(ctx context.Context) ([]model.ExtendedRegistration, error) {
+	return repo.listRegistrations(ctx, "")
+}
+
+func (repo *PostgresRepo) ListEventRegistrations(ctx context.Context, eventID int) ([]model.ExtendedRegistration, error) {
+	return repo.listRegistrations(ctx, "e.event_id=$1", eventID)
 }
 
 func (repo *PostgresRepo) WithTxx(ctx context.Context, f func(context.Context, *sqlx.Tx) error) error {

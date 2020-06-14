@@ -27,6 +27,8 @@ type Registration struct {
 	Phone              string    `json:"phone" db:"phone"`
 	Amount             int       `json:"amount" db:"amount"`
 	Payed              *int      `json:"payed" db:"payed"`
+	Discount           *int      `json:"discount" db:"discount"`
+	AdminNote          string    `json:"admin_note" db:"admin_note"`
 	Token              string    `json:"token" db:"token"`
 	UpdatedAt          time.Time `json:"updated_at" db:"updated_at"`
 	CreatedAt          time.Time `json:"created_at" db:"created_at"`
