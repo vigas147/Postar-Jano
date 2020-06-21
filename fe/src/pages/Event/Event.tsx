@@ -4,7 +4,7 @@ import './Event.scss';
 import { RouteComponentProps } from 'react-router-dom';
 import Stepper from '../../components/Stepper/Stepper';
 import { IEvent, Stat } from '../../types/types';
-import axios from 'axios';
+import { ApiClientContext } from '../../services/apiContext';
 
 interface Props extends RouteComponentProps<{
     id: string;
@@ -17,6 +17,9 @@ interface State {
 }
 
 class EventComponent extends React.Component<Props, State> {
+    static contextType = ApiClientContext;
+    context!: React.ContextType<typeof ApiClientContext>;
+
     constructor(props: Props) {
         super(props);
         this.state = {
@@ -27,24 +30,26 @@ class EventComponent extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        axios.get(`${process.env.REACT_APP_API_HOST}/events/${this.props.match.params.id}`)
-        .then(res => {
-            const event: Event = res.data;
+        if (!this.context) {
+            return;
+        }
+
+        this.context.event.get(parseInt(this.props.match.params.id, 10))
+        .then(event => {
             this.setState({
                 ...this.state,
-                event, 
+                event,
             })
         })
         .catch(err => {
             throw err            
         })
 
-        axios.get(`${process.env.REACT_APP_API_HOST}/stats/${this.props.match.params.id}`)
-        .then(res => {
-            const stats: Stat[] = res.data;
+        this.context.event.stats(parseInt(this.props.match.params.id, 10))
+        .then(stats => {
             this.setState({
                 ...this.state,
-                stats, 
+                stats,
             })
         })
         .catch(err => {

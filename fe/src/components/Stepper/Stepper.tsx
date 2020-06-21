@@ -9,9 +9,9 @@ import DaySelector from '../DaySelector/DaySelector';
 import ParentInfo from '../ParentInfo/ParentInfo';
 import MedicineHealth from '../MedicineHalth/MedicineHealt';
 import { toastController } from '@ionic/core'
-import axios, { AxiosResponse } from 'axios';
 import OtherInfo from '../OtherInfo/OtherInfo';
 import Results from '../Result/Results';
+import { ApiClientContext } from '../../services/apiContext';
 
 interface StepperProps {
     event: IEvent,
@@ -72,6 +72,8 @@ const defaultState: StepperState = {
 }
 
 class Stepper extends React.Component<StepperProps, StepperState> {
+    static contextType = ApiClientContext;
+    context!: React.ContextType<typeof ApiClientContext>;
     state: StepperState;
     
     constructor(props: StepperProps) {
@@ -167,6 +169,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
     }
 
     protected handleSubmit = async () => {
+        if (!this.context || !this.state.event) {
+            return;
+        }
         this.setState({
             ...this.state,
             page: this.state.page +1,
@@ -188,9 +193,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
             registration.days.push(this.state.event.days[0].id)
         }
         
-        axios.post(`${process.env.REACT_APP_API_HOST}/registrations/${this.state.event?.id}`, registration)
-        .then(async(res: AxiosResponse<RegistrationRespone>)  => {
-            if(res.data.success){
+        this.context.event.register(this.state.event.id, registration)
+        .then(async(res)  => {
+            if(res.success){
                 const processToast = await toastController.create({
                     duration: 2000,
                     message: "Prihláška bola úspešne spracovaná",
@@ -204,9 +209,9 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     responseMsg: "Prihláška bola úspešne spracovaná",
                     responseStatus: responseStatus.success
                 })
-            } else if (res.data.registeredIDs) {
-                if (res.data.registeredIDs.length !== this.state.registration.days.length) {
-                    const notRegistred = this.state.registration.days.filter(d => !res.data.registeredIDs?.includes(d))
+            } else if (res.registeredIDs) {
+                if (res.registeredIDs.length !== this.state.registration.days.length) {
+                    const notRegistred = this.state.registration.days.filter(d => !res.registeredIDs?.includes(d))
                     let msg = 'Nepodarilo sa prihlásiť na tieto termíny: '
                     for (const dayId of notRegistred) {
                         const day = this.props.event.days.filter(d => d.id === dayId)[0];
