@@ -1,11 +1,11 @@
 import React from 'react';
 import './IntroInfo.scss';
-import { Event, Stat } from '../../types/types';
+import { IEvent, Stat } from '../../types/types';
 import { calendarOutline, locateOutline, personOutline, logoEuro, manOutline, womanOutline, timeOutline, informationCircleOutline } from 'ionicons/icons';
 import { IonIcon, IonItem, IonAvatar, IonLabel, IonCol, IonGrid, IonRow, IonProgressBar } from '@ionic/react';
 
 interface IntroInfoProps {
-    event: Event,
+    event: IEvent,
     stats: Stat[]
 }
 

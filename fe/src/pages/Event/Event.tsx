@@ -3,7 +3,7 @@ import React from 'react';
 import './Event.scss';
 import { RouteComponentProps } from 'react-router-dom';
 import Stepper from '../../components/Stepper/Stepper';
-import { Event, Stat } from '../../types/types';
+import { IEvent, Stat } from '../../types/types';
 import axios from 'axios';
 
 interface Props extends RouteComponentProps<{
@@ -11,7 +11,7 @@ interface Props extends RouteComponentProps<{
 }> { }
 
 interface State {
-    event: Event | null,
+    event: IEvent | null,
     stats: Stat[] | null,
     persons: any
 }

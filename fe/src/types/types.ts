@@ -1,4 +1,4 @@
-export interface Event {
+export interface IEvent {
     id: number;
     title: string;
     description: string;
@@ -9,7 +9,7 @@ export interface Event {
     min_age: number;
     max_age: number;
     price: number;
-    owner: Owner;
+    owner: IOwner;
     info: string;
     days: Day[],
     time: string
@@ -33,7 +33,7 @@ export interface Day {
     description: string;
 }
 
-interface Owner {
+export interface IOwner {
     name: string;
     surname: string;
     photo: string;

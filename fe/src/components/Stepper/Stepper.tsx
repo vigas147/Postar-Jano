@@ -2,7 +2,7 @@ import React from 'react';
 import { arrowForwardOutline, arrowBackOutline } from 'ionicons/icons'
 import IntroInfo from "../IntroInfo/IntroInfo";
 import "./Stepper.scss"
-import { Registration, Event, ActionType, Stat, RegistrationRespone, responseStatus } from '../../types/types';
+import { Registration, IEvent, ActionType, Stat, RegistrationRespone, responseStatus } from '../../types/types';
 import { IonIcon, IonProgressBar, IonButton, IonContent, IonGrid, IonRow, IonCol } from '@ionic/react';
 import ChildInfo from '../childInfo/ChildInfo';
 import DaySelector from '../DaySelector/DaySelector';
@@ -14,13 +14,13 @@ import OtherInfo from '../OtherInfo/OtherInfo';
 import Results from '../Result/Results';
 
 interface StepperProps {
-    event: Event,
+    event: IEvent,
     stats: Stat[]
 }
 
 interface StepperState {
     registration: Registration;
-    event: Event | null,
+    event: IEvent | null,
     stats: Stat[] | null,
     page: number,
     pageCount: number,

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import './DaySelector.scss';
-import { Event, Registration, ActionType, Day, Stat } from '../../types/types';
+import { IEvent, Registration, ActionType, Day, Stat } from '../../types/types';
 import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonCheckbox, IonProgressBar } from '@ionic/react';
 
 interface ChildInfoProps {
-    event: Event,
+    event: IEvent,
     registration: Registration,
     stats: Stat[],
     setValue: (action: ActionType, value: any) => void,

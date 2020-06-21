@@ -1,13 +1,13 @@
 import React from 'react';
 import './ChildInfo.scss';
-import { Registration, Gender, ActionType, Event } from '../../types/types';
+import { Registration, Gender, ActionType, IEvent } from '../../types/types';
 import DatePicker from 'react-date-picker';
 import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonRadioGroup, IonRadio, IonIcon, IonSelect, IonSelectOption } from '@ionic/react';
 import { calendarOutline } from 'ionicons/icons';
 
 interface ChildInfoProps {
     registration: Registration,
-    event: Event,
+    event: IEvent,
     setValue: (action: ActionType, value: any) => void,
 }
 
