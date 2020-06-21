@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/labstack/echo/v4"
-
 	"github.com/stretchr/testify/suite"
 )
 
@@ -97,14 +95,25 @@ func (s *StatsSuite) TestGetStat_OK() {
 	u := fmt.Sprintf("/api/stats/%d", event.ID)
 	req, rec := s.NewRequest(http.MethodGet, u, nil)
 	s.AssertServerResponseArray(req, rec, http.StatusOK, func(body []interface{}) {
-		s.Equal(echo.Map{
-			"boys_count":  float64(0),
-			"capacity":    float64(10),
-			"day_id":      float64(12),
-			"event_id":    float64(1),
-			"girls_count": float64(1),
-			"limit_boys":  float64(5),
-			"limit_girls": float64(5),
+		s.Equal([]interface{}{
+			map[string]interface{}{
+				"boys_count":  float64(0),
+				"capacity":    float64(10),
+				"day_id":      float64(5),
+				"event_id":    float64(1),
+				"girls_count": float64(0),
+				"limit_boys":  float64(5),
+				"limit_girls": float64(5),
+			},
+			map[string]interface{}{
+				"boys_count":  float64(0),
+				"capacity":    float64(10),
+				"day_id":      float64(12),
+				"event_id":    float64(1),
+				"girls_count": float64(1),
+				"limit_boys":  float64(5),
+				"limit_girls": float64(5),
+			},
 		}, body)
 	})
 }

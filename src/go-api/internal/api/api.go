@@ -85,12 +85,13 @@ func New(
 	api.GET("/events", a.ListEvents)
 	api.GET("/events/:id", a.EventByID)
 
-	// TODO: will be delivered after Sunday :)
 	api.GET("/registrations/:token", a.FindRegistration)
 
 	api.POST("/sign/in", a.SignIn)
 	api.GET("/registrations", a.ListRegistrations, jwt)
-	api.PUT("/registrations/:id", a.UpdateRegistration)
+	api.GET("/registrations/:id", a.FindRegistrationByID, jwt)
+
+	api.PUT("/registrations/:id", a.UpdateRegistration, jwt)
 
 	return a
 }
@@ -109,7 +110,7 @@ func (api *API) ListStats(c echo.Context) error {
 func (api *API) StatByID(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	id, err := api.getID(c.Param("id"))
+	id, err := api.getIntParam(c, "id")
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func (api *API) Register(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, "No days provided.")
 	}
 
-	eventID, err := api.getID(c.Param("id"))
+	eventID, err := api.getIntParam(c, "id")
 	if err != nil {
 		return err
 	}
@@ -215,7 +216,33 @@ func (api *API) ListRegistrations(c echo.Context) error {
 }
 
 func (api *API) FindRegistration(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+	reg, err := api.repo.FindRegistrationByToken(ctx, c.Param("token"))
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
+		api.logger.Error("Failed to find registration.", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, reg)
+}
+
+func (api *API) FindRegistrationByID(c echo.Context) error {
+	ctx := c.Request().Context()
+	id, err := api.getIntParam(c, "id")
+	if err != nil {
+		return err
+	}
+	reg, err := api.repo.FindRegistrationByID(ctx, id)
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
+		api.logger.Error("Failed to find registration.", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, reg)
 }
 
 func (api *API) ListEvents(c echo.Context) error {
@@ -232,7 +259,7 @@ func (api *API) ListEvents(c echo.Context) error {
 func (api *API) EventByID(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	id, err := api.getID(c.Param("id"))
+	id, err := api.getIntParam(c, "id")
 	if err != nil {
 		return err
 	}
@@ -282,7 +309,38 @@ func (api *API) SignIn(c echo.Context) error {
 }
 
 func (api *API) UpdateRegistration(c echo.Context) error {
-	return nil
+	var req resources.UpdateReq
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	id, err := api.getIntParam(c, "id")
+	if err != nil {
+		return err
+	}
+
+	if errs := req.Validate(); errs != nil {
+		return c.JSON(http.StatusUnprocessableEntity, errs)
+	}
+
+	ctx := c.Request().Context()
+	if err := api.repo.UpdateRegistrations(ctx, &model.Registration{
+		ID:        id,
+		Name:      req.Child.Name,
+		Surname:   req.Child.Surname,
+		Email:     req.Parent.Email,
+		Payed:     req.Payed,
+		Discount:  req.Discount,
+		AdminNote: req.AdminNote,
+	}); err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
+		api.logger.Error("Failed to update registration.", zap.Error(err))
+		return err
+	}
+
+	return c.JSON(http.StatusAccepted, nil)
 }
 
 func (api *API) generateToken(owner *model.Owner) (string, error) {
@@ -302,8 +360,8 @@ func (api *API) generateToken(owner *model.Owner) (string, error) {
 	return tok.SignedString(api.jwtSecret)
 }
 
-func (api *API) getID(param string) (int, error) {
-	id, err := strconv.ParseInt(param, 10, 32)
+func (api *API) getIntParam(c echo.Context, name string) (int, error) {
+	id, err := strconv.ParseInt(c.Param(name), 10, 32)
 	if err != nil {
 		return 0, echo.ErrBadRequest
 	}

@@ -1,7 +1,7 @@
 package resources
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -15,10 +15,10 @@ type SignIn struct {
 func (s *SignIn) Validate() interface{} {
 	v := validator.New()
 	if errs := v.Struct(s); errs != nil {
-		var msgs []string
+		msgs := echo.Map{}
 		if e, ok := errs.(validator.ValidationErrors); ok {
 			for _, err := range e {
-				msgs = append(msgs, fmt.Sprintf("Field %s failed to validate %s.", err.Field(), err.Tag()))
+				msgs[strings.ToLower(err.Field())] = err.Tag()
 			}
 		}
 		return echo.Map{"errors": msgs}
