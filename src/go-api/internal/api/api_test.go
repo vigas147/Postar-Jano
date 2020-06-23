@@ -201,7 +201,8 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 			min_age,
 			max_age,
 			info,
-			photo
+			photo,
+			active
 		) VALUES (
 			$1,
 		 	$2,
@@ -213,7 +214,8 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 		 	10,
 		 	15,
 		 	'xyz ...',
-		 	'photo'
+			'photo',
+			true
 		)`, event.ID, event.Title)
 	s.Require().NoError(err)
 

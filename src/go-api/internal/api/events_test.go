@@ -44,6 +44,7 @@ func (s *EventsSuite) TestFindEvent_OK() {
 			"id":         float64(event.ID),
 			"title":      event.Title,
 			"owner_name": "John",
+			"active":     true,
 		}, body)
 	})
 }

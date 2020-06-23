@@ -14,6 +14,7 @@ type Event struct {
 	Time        *string `json:"time" db:"time"`
 	Price       *string `json:"price" db:"price"`
 	MailInfo    *string `json:"mail_info" db:"mail_info"`
+	Active      bool    `json:"active" db:"active"`
 	EventOwner  `json:"owner"`
 	Days        []Day `json:"days"`
 }
