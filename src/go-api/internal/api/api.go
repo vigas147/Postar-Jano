@@ -87,6 +87,7 @@ func New(
 
 	api.GET("/registrations/:token", a.FindRegistration)
 
+	// Admin
 	api.POST("/sign/in", a.SignIn)
 	api.GET("/registrations", a.ListRegistrations, jwt)
 	api.GET("/registrations/:id", a.FindRegistrationByID, jwt)
@@ -104,7 +105,14 @@ func (api *API) Status(c echo.Context) error {
 }
 
 func (api *API) ListStats(c echo.Context) error {
-	return nil
+	ctx := c.Request().Context()
+
+	stats, err := api.repo.GetStats(ctx)
+	if err != nil {
+		api.Logger.Error("failed to list stats", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, stats)
 }
 
 func (api *API) StatByID(c echo.Context) error {

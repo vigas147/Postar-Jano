@@ -302,49 +302,59 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 	return &res, true, nil
 }
 
-func (repo *PostgresRepo) getStatInternal(ctx context.Context, db sqlx.QueryerContext, eventID int) ([]model.Stat, error) {
+func (repo *PostgresRepo) getStats(ctx context.Context, db sqlx.QueryerContext, where string, args ...interface{}) ([]model.Stat, error) {
 	var stats []model.Stat
-
-	if err := sqlx.SelectContext(ctx, db, &stats, `
+	if err := sqlx.SelectContext(ctx, db, &stats, fmt.Sprintf(`
+			WITH
+			boys AS (
 				SELECT 
-					id AS day_id,
-					event_id,
-					capacity,
-					limit_boys,
-					limit_girls
-				FROM days 
-				WHERE event_id = $1
-				ORDER BY id
-		`, eventID); err != nil {
+					COUNT(r.id) AS boys_count,
+					s.day_id
+				FROM registrations r 
+				LEFT JOIN signups s ON s.registration_id = r.id
+				WHERE r.gender='male'
+				GROUP BY s.day_id
+			),
+			girls AS (
+				SELECT 
+					COUNT(r.id) AS girls_count,
+					s.day_id
+				FROM registrations r 
+				LEFT JOIN signups s ON s.registration_id = r.id
+				WHERE r.gender='female'
+				GROUP BY s.day_id
+			)
+			SELECT 
+				d.id AS day_id,
+				e.id AS event_id,
+				d.capacity,
+				d.limit_boys,
+				d.limit_girls,
+				COALESCE(b.boys_count,0) AS boys_count,
+				COALESCE(g.girls_count,0) AS girls_count
+			FROM
+				days d 
+			LEFT JOIN events e ON e.id = d.event_id
+			LEFT JOIN boys b ON b.day_id = d.id
+			LEFT JOIN girls g ON g.day_id = d.id
+			%s
+			ORDER BY d.id
+		`, where), args...); err != nil {
 		return nil, errors.WithStack(err)
-	}
-
-	for i := range stats {
-		if err := sqlx.GetContext(ctx, db, &stats[i].BoysCount, `
-				SELECT
-					COUNT(r.id)
-				FROM registrations r
-				LEFT JOIN signups s ON s.registration_id = r.id
-				WHERE r.gender = 'male' AND s.day_id = $1
-		`, stats[i].DayID); err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		if err := sqlx.GetContext(ctx, db, &stats[i].GirlsCount, `
-				SELECT
-					COUNT(r.id)
-				FROM registrations r
-				LEFT JOIN signups s ON s.registration_id = r.id
-				WHERE r.gender = 'female' AND s.day_id = $1
-		`, stats[i].DayID); err != nil {
-			return nil, errors.WithStack(err)
-		}
 	}
 	return stats, nil
 }
 
+func (repo *PostgresRepo) getStatInternal(ctx context.Context, db sqlx.QueryerContext, eventID int) ([]model.Stat, error) {
+	return repo.getStats(ctx, db, "WHERE e.id = $1", eventID)
+}
+
 func (repo *PostgresRepo) GetStat(ctx context.Context, eventID int) ([]model.Stat, error) {
 	return repo.getStatInternal(ctx, repo.db, eventID)
+}
+
+func (repo *PostgresRepo) GetStats(ctx context.Context) ([]model.Stat, error) {
+	return repo.getStats(ctx, repo.db, "")
 }
 
 func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*model.Owner, error) {
