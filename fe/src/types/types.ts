@@ -13,7 +13,8 @@ export interface IEvent {
     info: string;
     days: Day[],
     time: string
-    stats: Stat[] | null
+    stats: Stat[] | null,
+    active: boolean
 }
 
 export interface Stat {

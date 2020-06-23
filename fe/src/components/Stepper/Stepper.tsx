@@ -353,7 +353,7 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                     <IonCol size="3">
                         <div className="next">
                             {
-                                this.state.page < this.state.pageCount -1 && !this.eventFull() &&
+                                this.state.page < this.state.pageCount -1 && !this.eventFull() && this.state.event?.active &&
                                 <IonButton expand="full" shape="round" onClick={() => {
                                     if (this.state.page < this.state.pageCount) {
                                         this.setState({...this.state, page: this.state.page + 1})
