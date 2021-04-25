@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "registrations",
+  "info": {
+    "name": "registration",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "days": {
+      "via": "registrations",
+      "collection": "day",
+      "dominant": true
+    },
+    "state": {
+      "type": "string"
+    },
+    "child": {
+      "model": "child",
+      "via": "registrations"
+    },
+    "payed": {
+      "type": "decimal",
+      "required": true
+    },
+    "note": {
+      "type": "text"
+    }
+  }
+}

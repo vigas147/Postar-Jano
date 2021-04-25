@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "days",
+  "info": {
+    "name": "day",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "capacity": {
+      "type": "integer",
+      "required": true
+    },
+    "limit_boys": {
+      "type": "integer"
+    },
+    "limit_girls": {
+      "type": "integer"
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "event": {
+      "private": true,
+      "model": "event",
+      "via": "days"
+    },
+    "registrations": {
+      "private": true,
+      "collection": "registration",
+      "via": "days"
+    }
+  }
+}

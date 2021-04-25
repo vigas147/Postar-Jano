@@ -1,0 +1,69 @@
+{
+  "kind": "collectionType",
+  "collectionName": "events",
+  "info": {
+    "name": "event"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "minLength": 5,
+      "maxLength": 45
+    },
+    "owner": {
+      "via": "events",
+      "model": "owner"
+    },
+    "description": {
+      "type": "richtext",
+      "required": true
+    },
+    "date_from": {
+      "type": "date",
+      "required": true
+    },
+    "date_to": {
+      "type": "date",
+      "required": true
+    },
+    "location": {
+      "type": "string",
+      "required": false
+    },
+    "min_age": {
+      "type": "integer",
+      "required": false
+    },
+    "max_age": {
+      "type": "integer"
+    },
+    "info": {
+      "type": "richtext"
+    },
+    "photo": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images"
+      ],
+      "plugin": "upload",
+      "required": true,
+      "pluginOptions": {}
+    },
+    "price": {
+      "type": "string",
+      "required": true
+    },
+    "days": {
+      "via": "event",
+      "collection": "day"
+    }
+  }
+}
