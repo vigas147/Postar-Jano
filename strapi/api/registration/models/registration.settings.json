@@ -13,8 +13,8 @@
   "pluginOptions": {},
   "attributes": {
     "days": {
-      "via": "registrations",
       "collection": "day",
+      "via": "registrations",
       "dominant": true
     },
     "state": {
@@ -26,7 +26,7 @@
     },
     "payed": {
       "type": "decimal",
-      "required": true
+      "required": false
     },
     "note": {
       "type": "text"
