@@ -75,7 +75,7 @@ func (s *CommonSuite) SetupSuite() {
 	s.Require().NoError(err)
 
 	// Create db schema.
-	_, err = rootDB.Exec(fmt.Sprintf(`DROP DATABASE %s;`, testingDB))
+	_, err = rootDB.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS %s;`, testingDB))
 	s.Require().NoError(err)
 	_, err = rootDB.Exec(fmt.Sprintf(`CREATE DATABASE %s;`, testingDB))
 	s.Require().NoError(err)

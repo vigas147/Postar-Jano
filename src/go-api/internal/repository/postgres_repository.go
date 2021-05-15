@@ -312,7 +312,7 @@ func (repo *PostgresRepo) getStats(ctx context.Context, db sqlx.QueryerContext, 
 					s.day_id
 				FROM registrations r 
 				LEFT JOIN signups s ON s.registration_id = r.id
-				WHERE r.gender='male'
+				WHERE r.gender='male' and r.deleted_at IS NULL and s.deleted_at IS NULL
 				GROUP BY s.day_id
 			),
 			girls AS (
@@ -321,7 +321,7 @@ func (repo *PostgresRepo) getStats(ctx context.Context, db sqlx.QueryerContext, 
 					s.day_id
 				FROM registrations r 
 				LEFT JOIN signups s ON s.registration_id = r.id
-				WHERE r.gender='female'
+				WHERE r.gender='female' and r.deleted_at IS NULL and s.deleted_at IS NULL
 				GROUP BY s.day_id
 			)
 			SELECT 
@@ -438,15 +438,15 @@ func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, a
 }
 
 func (repo *PostgresRepo) ListRegistrations(ctx context.Context) ([]model.ExtendedRegistration, error) {
-	return repo.listRegistrations(ctx, "")
+	return repo.listRegistrations(ctx, "r.deleted_at IS NULL AND s.deleted_at IS NULL")
 }
 
 func (repo *PostgresRepo) ListEventRegistrations(ctx context.Context, eventID int) ([]model.ExtendedRegistration, error) {
-	return repo.listRegistrations(ctx, "e.event_id=$1", eventID)
+	return repo.listRegistrations(ctx, "e.event_id=$1 AND deleted_at IS NULL", eventID)
 }
 
 func (repo *PostgresRepo) FindRegistrationByID(ctx context.Context, regID int) (*model.ExtendedRegistration, error) {
-	regs, err := repo.listRegistrations(ctx, "r.id = $1", regID)
+	regs, err := repo.listRegistrations(ctx, "r.id = $1 AND r.deleted_at IS NULL", regID)
 	if err != nil {
 		return nil, err
 	}
@@ -457,7 +457,7 @@ func (repo *PostgresRepo) FindRegistrationByID(ctx context.Context, regID int) (
 }
 
 func (repo *PostgresRepo) FindRegistrationByToken(ctx context.Context, token string) (*model.ExtendedRegistration, error) {
-	regs, err := repo.listRegistrations(ctx, "r.token = $1", token)
+	regs, err := repo.listRegistrations(ctx, "r.token = $1 IS NULL", token)
 	if err != nil {
 		return nil, err
 	}
