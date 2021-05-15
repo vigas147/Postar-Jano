@@ -64,7 +64,7 @@ func New(
 			return echo.ErrUnauthorized
 		},
 	})
-
+	e.Use(middleware.CORS())
 	api := e.Group("/api",
 		middleware.Recover(),
 		middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -74,7 +74,8 @@ func New(
 				}
 				return false
 			},
-		}))
+		}),
+	)
 	api.GET("/status", a.Status)
 
 	api.POST("/registrations/:id", a.Register)
@@ -359,8 +360,8 @@ func (api *API) generateToken(owner *model.Owner) (string, error) {
 			ExpiresAt: now.Add(tokenLifetime).Unix(),
 			Id:        owner.Email,
 			IssuedAt:  now.Unix(),
-			Issuer:    "",
-			NotBefore: 0,
+			Issuer:    "sbb.sk",
+			NotBefore: now.Unix(),
 			Subject:   "",
 		},
 	})

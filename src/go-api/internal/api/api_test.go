@@ -5,11 +5,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
+
+	"github.com/kelseyhightower/envconfig"
 
 	"github.com/MarekVigas/Postar-Jano/internal/auth"
 
@@ -32,6 +35,7 @@ import (
 const (
 	loggingEnabled = false
 	jwtSecret      = "top-secret"
+	testingDB      = "testing"
 )
 
 type CommonSuite struct {
@@ -62,24 +66,36 @@ func (s *CommonSuite) SetupSuite() {
 		s.logger = zap.NewNop()
 	}
 
-	s.db, err = db.Connect()
-	s.Require().NoError(err)
-	s.dbx = sqlx.NewDb(s.db, "postgres")
-
 	s.mailer = &SenderMock{}
 
+	var dbConfig db.Config
+	s.Require().NoError(envconfig.Process("", &dbConfig))
+
+	rootDB, err := dbConfig.Connect()
+	s.Require().NoError(err)
+
 	// Create db schema.
-	s.db.Exec(`drop schema public cascade;
-create schema public;`)
+	_, err = rootDB.Exec(fmt.Sprintf(`DROP DATABASE %s;`, testingDB))
+	s.Require().NoError(err)
+	_, err = rootDB.Exec(fmt.Sprintf(`CREATE DATABASE %s;`, testingDB))
+	s.Require().NoError(err)
 	schema, err := os.Open("../../../../db/init.sql")
 	s.Require().NoError(err)
 	dbData, err := ioutil.ReadAll(schema)
 	s.Require().NoError(err)
+
+	dbConfig.Database = testingDB
+	s.db, err = dbConfig.Connect()
+	s.Require().NoError(err)
+
+	s.dbx = sqlx.NewDb(s.db, "postgres")
+
 	_, err = s.db.Exec(string(dbData))
 	s.Require().NoError(err)
 }
 
 func (s *CommonSuite) TearDownSuite() {
+	s.db.Exec("DROP DATABASE " + testingDB)
 	_ = s.db.Close()
 	_ = s.logger.Sync()
 }
@@ -159,6 +175,7 @@ func (s *CommonSuite) AssertServerResponseArray(
 }
 
 func (s *CommonSuite) InsertEvent() *model.Event {
+	ctx := context.Background()
 	_, err := s.db.Exec(`
 		INSERT INTO owners (
 			id,
@@ -184,61 +201,39 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 	s.Require().NoError(err)
 
 	event := model.Event{
-		ID:         1,
-		Title:      "Camp 42",
-		EventOwner: model.EventOwner{OwnerName: "John"},
+		Title:       "Camp 42",
+		Description: "Lorem ipsum",
+		DateFrom:    "15 june 2020",
+		DateTo:      "20 june 2020",
+		Location:    "somewhere",
+		MinAge:      10,
+		MaxAge:      15,
+		Info:        s.stringRef("xyz.."),
+		Photo:       "photo",
+		Active:      true,
+		EventOwner:  model.EventOwner{OwnerID: 1, OwnerName: "John"},
 	}
+	s.Require().NoError((&event).Create(ctx, s.dbx))
 
-	_, err = s.db.Exec(`
-		INSERT INTO events (
-			id,
-			title,
-			owner_id,
-			description,
-			date_from,
-			date_to,
-			location,
-			min_age,
-			max_age,
-			info,
-			photo,
-			active
-		) VALUES (
-			$1,
-		 	$2,
-		 	1,
-		 	'Lorem ipsum',
-		 	'15 june 2020',
-		 	'20 june 2020',
-		 	'somewhere',
-		 	10,
-		 	15,
-		 	'xyz ...',
-			'photo',
-			true
-		)`, event.ID, event.Title)
-	s.Require().NoError(err)
+	day := model.Day{
+		Description: "Desc",
+		Capacity:    10,
+		LimitBoys:   s.intRef(5),
+		LimitGirls:  s.intRef(5),
+		Price:       12,
+		EventID:     event.ID,
+	}
+	s.Require().NoError((&day).Create(ctx, s.dbx))
 
-	_, err = s.db.Exec(`
-		INSERT INTO days (
-			id,
-			capacity,
-			limit_boys,
-			limit_girls,
-			description,
-			price,
-			event_id
-		) VALUES (
-			5,
-			10,
-			5,
-			5,
-			'desc',
-			12,
-			$1
-		)
-		`, event.ID)
-	s.Require().NoError(err)
+	event.Days = append(event.Days, day)
 
 	return &event
+}
+
+func (s *CommonSuite) stringRef(str string) *string {
+	return &str
+}
+
+func (s *CommonSuite) intRef(val int) *int {
+	return &val
 }

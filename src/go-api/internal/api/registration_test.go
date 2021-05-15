@@ -24,6 +24,8 @@ func (s *StatusSuite) TestRegister_OK() {
 	)
 	event := s.InsertEvent()
 
+	day := event.Days[0]
+
 	u := fmt.Sprintf("/api/registrations/%d", event.ID)
 	req, rec := s.NewRequest(http.MethodPost, u, echo.Map{
 		"child": echo.Map{
@@ -31,7 +33,7 @@ func (s *StatusSuite) TestRegister_OK() {
 			"surname": surname,
 			"gender":  gender,
 		},
-		"days": []interface{}{5},
+		"days": []interface{}{day.ID},
 	})
 	s.mailer.On("ConfirmationMail", mock.Anything, &templates.ConfirmationReq{
 		Mail:          "",
@@ -47,14 +49,14 @@ func (s *StatusSuite) TestRegister_OK() {
 		Sum:           12,
 		Owner:         "John Doe",
 		Text:          "132456 email@example.com",
-		Days:          []string{"desc"},
+		Days:          []string{day.Description},
 	}).Return(nil)
 
 	s.AssertServerResponseObject(req, rec, http.StatusOK, func(body echo.Map) {
 		s.NotEmpty(body["token"])
 		delete(body, "token")
 		s.Equal(echo.Map{
-			"registeredIDs": []interface{}{float64(5)},
+			"registeredIDs": []interface{}{float64(day.ID)},
 			"success":       true,
 		}, body)
 	})

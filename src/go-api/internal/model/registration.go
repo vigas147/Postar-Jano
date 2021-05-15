@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,7 +38,7 @@ type Registration struct {
 type ExtendedRegistration struct {
 	Registration
 	DayNames DayNames `json:"days" db:"days"`
-	Title    string   `json:"title" db:"title"`
+	Title    *string  `json:"title" db:"title"`
 }
 
 type RegResult struct {
@@ -49,13 +50,17 @@ type RegResult struct {
 	Reg            Registration
 }
 
-type DayNames []string
+type DayNames []struct {
+	ID          int    `json:"id"`
+	Description string `json:"description"`
+}
 
 func (d DayNames) Value() (driver.Value, error) {
 	return json.Marshal(d)
 }
 
 func (d *DayNames) Scan(src interface{}) error {
+	fmt.Println(string(src.([]byte)))
 	source, ok := src.([]byte)
 	if !ok {
 		return errors.New("source is not []byte")

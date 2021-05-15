@@ -4,13 +4,29 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
-	"os"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/pkg/errors"
 )
 
+type Config struct {
+	User     string `envconfig:"POSTGRES_USER" required:"true"`
+	Password string `envconfig:"POSTGRES_PASSWORD" required:"true"`
+	Host     string `envconfig:"POSTGRES_HOST" required:"true"`
+	Port     uint   `envconfig:"POSTGRES_PORT" required:"true"`
+	Database string `envconfig:"POSTGRES_DB" required:"true"`
+}
+
 func Connect() (*sql.DB, error) {
-	conn, err := connectionString()
+	var c Config
+	if err := envconfig.Process("", &c); err != nil {
+		return nil, errors.Wrap(err, "failed to load config")
+	}
+	return c.Connect()
+}
+
+func (c *Config) Connect() (*sql.DB, error) {
+	conn, err := c.ConnectionString()
 	if err != nil {
 		return nil, err
 	}
@@ -21,38 +37,19 @@ func Connect() (*sql.DB, error) {
 	return db, nil
 }
 
-func connectionString() (string, error) {
+func (c *Config) ConnectionString() (string, error) {
 	var b bytes.Buffer
-	add := func(envVar string, key string) error {
-		val := os.Getenv(envVar)
-		if val == "" {
-			return errors.New(fmt.Sprintf("Missing %s value", envVar))
-		}
+
+	add := func(key string, val interface{}) {
 		fmt.Fprintf(&b, "%s=%v ", key, val)
-		return nil
 	}
 
-	if err := add("POSTGRES_USER", "user"); err != nil {
-		return "", err
-	}
-
-	if err := add("POSTGRES_PASSWORD", "password"); err != nil {
-		return "", err
-	}
-
-	if err := add("POSTGRES_HOST", "host"); err != nil {
-		return "", err
-	}
-
-	if err := add("POSTGRES_PORT", "port"); err != nil {
-		return "", err
-	}
-
-	if err := add("POSTGRES_DB", "dbname"); err != nil {
-		return "", err
-	}
+	add("user", c.User)
+	add("password", c.Password)
+	add("host", c.Host)
+	add("port", c.Port)
+	add("dbname", c.Database)
 
 	fmt.Fprint(&b, "sslmode=disable")
-
 	return b.String(), nil
 }

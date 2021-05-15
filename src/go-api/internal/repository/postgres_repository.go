@@ -395,7 +395,7 @@ func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, a
 			r.name,
 			r.surname,
 			e.title,
-			json_agg( d.description ORDER BY d.id)  AS days,
+			json_agg(json_build_object('id', d.id, 'description', d.description) ORDER BY d.id)  AS days,
 			r.gender,
 			r.date_of_birth,
 			r.finished_school,

@@ -41,10 +41,16 @@ func (s *EventsSuite) TestFindEvent_OK() {
 	req, rec := s.NewRequest(http.MethodGet, "/api/events/1", nil)
 	s.AssertServerResponseObject(req, rec, http.StatusOK, func(body echo.Map) {
 		s.Equal(echo.Map{
-			"id":         float64(event.ID),
-			"title":      event.Title,
-			"owner_name": "John",
-			"active":     true,
+			"id":          float64(event.ID),
+			"title":       event.Title,
+			"description": event.Description,
+			"date_from":   event.DateFrom,
+			"date_to":     event.DateTo,
+			"location":    event.Location,
+			"min_age":     float64(event.MinAge),
+			"max_age":     float64(event.MaxAge),
+			"owner_name":  "John",
+			"active":      event.Active,
 		}, body)
 	})
 }
