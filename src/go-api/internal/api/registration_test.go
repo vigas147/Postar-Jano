@@ -16,7 +16,7 @@ type RegistrationSuite struct {
 	CommonSuite
 }
 
-func (s *StatusSuite) TestRegister_OK() {
+func (s *RegistrationSuite) TestRegister_OK() {
 	const (
 		name    = "dano"
 		surname = "zharmanca"
@@ -45,10 +45,10 @@ func (s *StatusSuite) TestRegister_OK() {
 		Pills:         "",
 		Restrictions:  "",
 		Info:          "",
-		PhotoURL:      "photo",
+		PhotoURL:      event.OwnerPhoto,
 		Sum:           12,
 		Owner:         "John Doe",
-		Text:          "132456 email@example.com",
+		Text:          event.OwnerPhone + " " + event.OwnerEmail,
 		Days:          []string{day.Description},
 	}).Return(nil)
 

@@ -176,28 +176,16 @@ func (s *CommonSuite) AssertServerResponseArray(
 
 func (s *CommonSuite) InsertEvent() *model.Event {
 	ctx := context.Background()
-	_, err := s.db.Exec(`
-		INSERT INTO owners (
-			id,
-			name,
-			surname,
-			gender,
-			username,
-			pass,
-			email,
-			phone,
-			photo
-		) VALUES (
-			1,
-		 	'John',
-		 	'Doe',
-		 	'M',
-		 	'jdoe',
-		 	'pass123',
-		 	'email@example.com',
-		 	'132456',
-		 	'photo'
-		)`)
+	owner, err := (&model.Owner{
+		Name:     "John",
+		Surname:  "Doe",
+		Email:    "john@doe.com",
+		Username: "john@doe.com",
+		Pass:     "bla bla",
+		Phone:    "123",
+		Photo:    "phot.jpg",
+		Gender:   "M",
+	}).Create(ctx, s.dbx)
 	s.Require().NoError(err)
 
 	event := model.Event{
@@ -211,7 +199,7 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 		Info:        s.stringRef("xyz.."),
 		Photo:       "photo",
 		Active:      true,
-		EventOwner:  model.EventOwner{OwnerID: 1, OwnerName: "John"},
+		EventOwner:  s.eventOwnerFromModel(owner),
 	}
 	s.Require().NoError((&event).Create(ctx, s.dbx))
 
@@ -236,4 +224,16 @@ func (s *CommonSuite) stringRef(str string) *string {
 
 func (s *CommonSuite) intRef(val int) *int {
 	return &val
+}
+
+func (s *CommonSuite) eventOwnerFromModel(owner *model.Owner) model.EventOwner {
+	return model.EventOwner{
+		OwnerID:      owner.ID,
+		OwnerName:    owner.Name,
+		OwnerSurname: owner.Surname,
+		OwnerEmail:   owner.Email,
+		OwnerPhone:   owner.Phone,
+		OwnerPhoto:   owner.Photo,
+		OwnerGender:  owner.Gender,
+	}
 }

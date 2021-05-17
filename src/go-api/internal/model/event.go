@@ -27,7 +27,7 @@ type Event struct {
 }
 
 type EventOwner struct {
-	OwnerID      int    `json:"owner_id" db:"owner_id"`
+	OwnerID      int    `json:"id" db:"owner_id"`
 	OwnerName    string `json:"name" db:"owner_name"`
 	OwnerSurname string `json:"surname" db:"owner_surname"`
 	OwnerEmail   string `json:"email" db:"owner_email"`

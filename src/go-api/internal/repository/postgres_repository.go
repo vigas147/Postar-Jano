@@ -72,6 +72,7 @@ func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error)
 				ev.price,
 				ev.mail_info,
 				ev.active,
+			    o.id AS owner_id,
 				o.name AS owner_name,
 				o.surname AS owner_surname,
 				o.email AS owner_email,
@@ -84,6 +85,22 @@ func (repo *PostgresRepo) ListEvents(ctx context.Context) ([]model.Event, error)
 			return errors.WithStack(err)
 		}
 
+		for i := range events {
+			if err := sqlx.SelectContext(ctx, tx, &events[i].Days, `
+			SELECT 
+				id,
+				capacity,
+				limit_boys,
+				limit_girls,
+				description,
+				price
+			FROM days
+			WHERE event_id = $1
+			ORDER BY id
+		`, events[i].ID); err != nil {
+				return errors.WithStack(err)
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -112,6 +129,7 @@ func (repo *PostgresRepo) FindEvent(ctx context.Context, id int) (*model.Event, 
 				ev.price,
 				ev.mail_info,
 				ev.active,
+			    o.id AS owner_id,
 				o.name AS owner_name,
 				o.surname AS owner_surname,
 				o.email AS owner_email,
