@@ -39,8 +39,9 @@ type Registration struct {
 
 type ExtendedRegistration struct {
 	Registration
-	DayNames DayNames `json:"days" db:"days"`
-	Title    *string  `json:"title" db:"title"`
+	DayNames DayNames `json:"days"     db:"days"`
+	EventID  string   `json:"eventID" db:"event_id"`
+	Title    *string  `json:"title"    db:"title"`
 }
 
 type RegResult struct {

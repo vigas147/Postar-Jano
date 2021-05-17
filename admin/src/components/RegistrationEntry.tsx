@@ -15,6 +15,7 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration}) => {
         title,
         days,
         notes,
+        eventID,
     } = registration
 
     const isShown = (name :string): boolean => {
@@ -28,7 +29,7 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration}) => {
             {isShown("id") && <td>{id}</td>}
             {isShown("name") && <td>{name}</td>}
             {isShown("surname") && <td>{surname}</td>}
-            {isShown("title") && <td>{title}</td>}
+            {isShown("title") && <td>{title} - {eventID}</td>}
             {isShown("days") &&
             <td>{days.map((d) => (
                     <span key={d.id}>

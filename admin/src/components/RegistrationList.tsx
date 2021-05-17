@@ -1,14 +1,12 @@
-import React, {SetStateAction, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import {IExtendedRegistration, loadRegistrations} from "../api/registrations";
 import RegistrationEntry from "./RegistrationEntry";
 import ViewFilter, {IViewFields} from "./ViewFilter";
+import {useParams} from 'react-router-dom'
+import {AppContext} from "../AppContext";
 
-interface Props {
-    token :string|null
-    setToken :React.Dispatch<SetStateAction<string|null>>
-}
-
-const RegistrationList:React.FC<Props> = ({token, setToken}) :JSX.Element => {
+const RegistrationList:React.FC = () :JSX.Element => {
+    const {token, setToken} = useContext(AppContext)
     const [filter, setFilter] = useState<string>("")
     const [registrations, setRegistrations] = useState<IExtendedRegistration[]>([])
     const [fields, setFields] = useState<IViewFields>({
@@ -19,6 +17,11 @@ const RegistrationList:React.FC<Props> = ({token, setToken}) :JSX.Element => {
         "days": { display: "Dni", show: true},
         "note": { display: "Poznamka", show: false},
     })
+
+    const {event} = useParams<{event:string}>()
+
+
+
 
     useEffect(
         () => {
@@ -31,6 +34,13 @@ const RegistrationList:React.FC<Props> = ({token, setToken}) :JSX.Element => {
     ,[token, setToken])
 
     const displayedRegistrations = ():IExtendedRegistration[] => {
+        const eventID = parseInt(event || "")
+
+        console.log("EVENT", eventID, event)
+        if (event) {
+           return registrations.filter(r => r.eventID == eventID)
+        }
+
         if (filter === "") {
             return registrations
         }

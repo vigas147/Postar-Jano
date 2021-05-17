@@ -5,6 +5,7 @@ export interface IExtendedRegistration {
     id :number;
     name :string;
     surname :string;
+    eventID :number;
     title: string;
     days: IDay[];
     notes: string;

@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	loggingEnabled = false
+	loggingEnabled = true
 	jwtSecret      = "top-secret"
 	testingDB      = "testing"
 )

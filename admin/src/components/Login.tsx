@@ -1,6 +1,5 @@
 import React, {SetStateAction, useState} from 'react';
 import {signInUser} from "../api/login";
-import useToken from "../hooks/useToken";
 
 interface Props {
     setToken :React.Dispatch<SetStateAction<string|null>>

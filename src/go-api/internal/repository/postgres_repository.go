@@ -409,9 +409,10 @@ func (repo *PostgresRepo) UpdateRegistrations(ctx context.Context, reg *model.Re
 func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, args ...interface{}) ([]model.ExtendedRegistration, error) {
 	const queryTemplate = `
 		SELECT
-		r.id,
+			r.id,
 			r.name,
 			r.surname,
+			e.id AS event_id,
 			e.title,
 			json_agg(json_build_object('id', d.id, 'description', d.description) ORDER BY d.id)  AS days,
 			r.gender,
@@ -437,7 +438,7 @@ func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, a
 		LEFT JOIN days d ON s.day_id = d.id
 		LEFT JOIN events e ON d.event_id = e.id
 		%s
-		GROUP BY r.id, r.name, r.surname, e.title, r.gender, r.date_of_birth,
+		GROUP BY r.id, r.name, r.surname, e.title, e.id, r.gender, r.date_of_birth,
 			r.finished_school, r.attended_previous, r.city, r.pills, r.notes,
 			r.parent_name,  r.attended_activities, r.problems, r.parent_surname,
 			r.email,  r.phone , r.amount, r.payed, r.created_at,
