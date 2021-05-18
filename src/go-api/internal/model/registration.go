@@ -3,7 +3,6 @@ package model
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/lib/pq"
@@ -63,7 +62,6 @@ func (d DayNames) Value() (driver.Value, error) {
 }
 
 func (d *DayNames) Scan(src interface{}) error {
-	fmt.Println(string(src.([]byte)))
 	source, ok := src.([]byte)
 	if !ok {
 		return errors.New("source is not []byte")

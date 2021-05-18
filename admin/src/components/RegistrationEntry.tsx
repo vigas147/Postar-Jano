@@ -29,7 +29,7 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration}) => {
             {isShown("id") && <td>{id}</td>}
             {isShown("name") && <td>{name}</td>}
             {isShown("surname") && <td>{surname}</td>}
-            {isShown("title") && <td>{title} - {eventID}</td>}
+            {isShown("title") && <td>{title}</td>}
             {isShown("days") &&
             <td>{days.map((d) => (
                     <span key={d.id}>

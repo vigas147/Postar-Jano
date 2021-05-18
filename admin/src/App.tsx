@@ -10,12 +10,9 @@ const App: React.FC = () => {
     const {token, setToken} = useContext(AppContext);
     // TODO: check token validity
 
-
     if(!token) {
         return <Login setToken={setToken}/>
     }
-
-
 
     return (
          <div className="wrapper">
