@@ -4,13 +4,13 @@ import "time"
 
 type RegisterReq struct {
 	Child struct {
-		Name             string    `json:"name"`
-		Surname          string    `json:"surname"`
-		Gender           string    `json:"gender"`
-		DateOfBirth      time.Time `json:"dateOfBirth"`
-		FinishedSchool   string    `json:"finishedSchoolYear"`
+		Name             string    `json:"name"    validate:"required"`
+		Surname          string    `json:"surname" validate:"required"`
+		Gender           string    `json:"gender"  validate:"eq=male|eq=female"`
+		DateOfBirth      time.Time `json:"dateOfBirth" validate:"required"`
+		FinishedSchool   string    `json:"finishedSchoolYear" validate:"required"`
 		AttendedPrevious bool      `json:"attendedPreviousEvents"`
-		City             string    `json:"city"`
+		City             string    `json:"city"      validate:"required"`
 	} `json:"child"`
 
 	Medicine struct {
@@ -22,15 +22,15 @@ type RegisterReq struct {
 	} `json:"health"`
 
 	Parent struct {
-		Name    string `json:"name"`
-		Surname string `json:"surname"`
-		Email   string `json:"email"`
-		Phone   string `json:"phone"`
+		Name    string `json:"name"    validate:"required"`
+		Surname string `json:"surname" validate:"required"`
+		Email   string `json:"email"   validate:"email,required"`
+		Phone   string `json:"phone"   validate:"required"`
 	} `json:"parent"`
 
 	Membership struct {
 		AttendedActivities string `json:"attendedActivities"`
 	} `json:"memberShip"`
 	Notes  string `json:"notes"`
-	DayIDs []int  `json:"days"`
+	DayIDs []int  `json:"days" validate:"required"`
 }

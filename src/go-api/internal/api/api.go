@@ -4,8 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"reflect"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/MarekVigas/Postar-Jano/internal/auth"
 	"github.com/MarekVigas/Postar-Jano/internal/mailer/templates"
@@ -143,9 +147,9 @@ func (api *API) Register(c echo.Context) error {
 	}
 
 	api.logger.Debug("Request received", zap.Reflect("raw", req))
-	// TODO: Validate input
-	if len(req.DayIDs) == 0 {
-		return c.JSON(http.StatusUnprocessableEntity, "No days provided.")
+
+	if errs := validateStruct(&req); errs != nil {
+		return c.JSON(http.StatusUnprocessableEntity, echo.Map{"errors": errs})
 	}
 
 	eventID, err := api.getIntParam(c, "id")
@@ -375,4 +379,50 @@ func (api *API) getIntParam(c echo.Context, name string) (int, error) {
 		return 0, echo.ErrBadRequest
 	}
 	return int(id), nil
+}
+
+func validateStruct(s interface{}) interface{} {
+	v := validator.New()
+	err := v.Struct(s)
+	if err == nil {
+		return nil
+	}
+	validationErrs, ok := err.(validator.ValidationErrors)
+	if !ok {
+		return err
+	}
+
+	t := reflect.TypeOf(s).Elem()
+	mustFieldName := func(fieldName string) string {
+		tokens := strings.Split(fieldName, ".")
+		var res []string
+		current := t
+		for _, token := range tokens[1:] {
+			field, ok := current.FieldByName(token)
+			if !ok {
+				panic("field not found:" + token)
+			}
+			jsonName := field.Tag.Get("json")
+			if jsonName == "" {
+				res = append(res, token)
+			}
+			res = append(res, jsonName)
+			current = field.Type
+		}
+
+		return strings.Join(res, ".")
+	}
+
+	errs := echo.Map{}
+	for _, fieldErr := range validationErrs {
+		var errName string
+		switch fieldErr.Tag() {
+		case "required":
+			errName = "missing"
+		default:
+			errName = "invalid"
+		}
+		errs[mustFieldName(fieldErr.Namespace())] = errName
+	}
+	return errs
 }
