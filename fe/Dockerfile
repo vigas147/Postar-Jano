@@ -8,13 +8,13 @@ ENV PATH /app/node_modules/.bin:$PATH
 # Block npm ads
 ENV OPEN_SOURCE_CONTRIBUTOR=true
 
-COPY ./fe/package*.json /app/
+COPY ./package*.json /app/
 
 # Better npm install https://docs.npmjs.com/cli/ci.html
 RUN npm ci
 
-COPY ./fe/ /app/
-COPY ./fe/.env /app/.env
+COPY ./ /app/
+COPY ./.env /app/.env
 
 RUN npm run build
 

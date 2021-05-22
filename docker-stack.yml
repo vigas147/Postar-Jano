@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  db:
+    image: 
+    volumes: 
+      - db-data:/var/lib/postgresql/data
+  api:
+    image:
+  form:
+    image:
+  admin:
+    image:
+  pgadmin:
+    image:
+  
+volumes: 
+  db-data:
+
+networks:
+  traefik-public:
+    external: true
