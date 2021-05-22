@@ -17,7 +17,6 @@ interface ISetting {
 
 const ViewFilter: React.FC<Props> = ({fields, setFields}) => {
     const handleChange = (name:string, checked :boolean) => {
-        console.log(name, checked)
         setFields(prevState => {
                 const updated = {...prevState}
                 updated[name] = {...prevState[name], show:checked}

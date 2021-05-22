@@ -42,6 +42,34 @@ func (s *RegistrationSuite) TestRegister_UnprocessableEntity() {
 	})
 }
 
+func (s *RegistrationSuite) TestRegister_NotFoundDay() {
+	//TODO
+}
+
+func (s *RegistrationSuite) TestRegister_NotFoundEvent() {
+	req, rec := s.NewRequest(http.MethodPost, "/api/registrations/42", echo.Map{
+		"child": echo.Map{
+			"name":               "meno",
+			"surname":            "priezvisko",
+			"gender":             "female",
+			"city":               "city",
+			"finishedSchoolYear": "school",
+			"dateOfBirth":        time.Now().Format(time.RFC3339),
+		},
+		"parent": echo.Map{
+			"name":    "pname",
+			"surname": "psurname",
+			"email":   "email@email.com",
+			"phone":   "phone",
+		},
+		"days": []interface{}{9, 500},
+	})
+
+	s.AssertServerResponseObject(req, rec, http.StatusNotFound, func(body echo.Map) {
+		s.Equal(body, echo.Map{"message": "Not Found"})
+	})
+}
+
 func (s *RegistrationSuite) TestRegister_OK() {
 	const (
 		name     = "dano"

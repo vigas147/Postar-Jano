@@ -5,10 +5,31 @@ export interface IExtendedRegistration {
     id :number;
     name :string;
     surname :string;
+    gender :string;
+    date_of_birth: string;
+    finished_school: string;
+    attended_previous: boolean;
+    attended_activities: string|null;
+
+    city :string;
+    pills :string|null;
+    problems :string|null;
+    notes: string;
+
+    parent_name :string;
+    parent_surname :string;
+    email :string;
+    phone :string;
+
+    amount :number;
+    payed :number|null;
+    discount :number|null
+
     eventID :number;
     title: string;
     days: IDay[];
-    notes: string;
+
+    admin_note :string;
 }
 
 export interface IDay {
