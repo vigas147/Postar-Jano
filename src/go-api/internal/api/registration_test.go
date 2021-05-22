@@ -6,8 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/MarekVigas/Postar-Jano/internal/auth"
 	"github.com/MarekVigas/Postar-Jano/internal/mailer/templates"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -132,6 +134,66 @@ func (s *RegistrationSuite) TestRegister_OK() {
 		}, body)
 	})
 	//TODO: assert DB content
+}
+
+func (s *RegistrationSuite) TestDelete_Unauthorized() {
+	req, rec := s.NewRequest(http.MethodDelete, "/api/registrations/42", nil)
+	s.AssertServerResponseObject(req, rec, http.StatusUnauthorized, nil)
+}
+
+func (s *RegistrationSuite) TestDelete_NotFound() {
+	req, rec := s.NewRequest(http.MethodDelete, "/api/registrations/42", nil)
+	s.AuthorizeRequest(req, &auth.Claims{StandardClaims: jwt.StandardClaims{Id: "admin@sbb.sk"}})
+	s.AssertServerResponseObject(req, rec, http.StatusNotFound, nil)
+}
+
+func (s *RegistrationSuite) TestDelete_OK() {
+	_, err := s.db.Exec(`INSERT INTO registrations(
+		id,
+		name,
+		surname,
+		token,
+		gender,
+		amount,
+		payed,
+		finished_school,
+		attended_previous,
+		city,
+		pills,
+		notes,
+		parent_name,
+		parent_surname,
+		email,
+		phone,
+		date_of_birth,
+		created_at,
+		updated_at
+	) VALUES (
+		15,
+		'sadf',
+		'sadf',
+		'sadf',
+		'female',
+		10,
+		0,
+		'zs',
+		true,
+		'bb',
+		'pills',
+		'notest',
+		'parentN',
+		'parentS',
+		'email',
+		'phone',
+		NOW(),
+		NOW(),
+		NOW()
+	)`)
+	s.Require().NoError(err)
+
+	req, rec := s.NewRequest(http.MethodDelete, "/api/registrations/15", nil)
+	s.AuthorizeRequest(req, &auth.Claims{StandardClaims: jwt.StandardClaims{Id: "admin@sbb.sk"}})
+	s.AssertServerResponseObject(req, rec, http.StatusOK, nil)
 }
 
 func TestRegistrationSuite(t *testing.T) {

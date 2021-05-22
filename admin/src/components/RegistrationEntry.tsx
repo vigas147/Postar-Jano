@@ -5,9 +5,10 @@ import {IViewFields} from "./ViewFilter";
 interface Props {
     registration : IExtendedRegistration;
     fields : IViewFields;
+    deleteRegByID :(id:number)=>void;
 }
 
-const RegistrationEntry :React.FC<Props> = ({fields, registration}) => {
+const RegistrationEntry :React.FC<Props> = ({fields, registration, deleteRegByID}) => {
     const {
         id,
         name,
@@ -86,7 +87,10 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration}) => {
             {isShown("buttons") && <td>
             <button>Upravit</button>
             <button onClick={(e) => {
-                if (window.confirm(`Naozaj chcete vymazat zaznam s ID ${id}?`)) console.log("Deleting ", id)
+                if (window.confirm(`Naozaj chcete vymazat zaznam s ID ${id}?`)) {
+                    console.log("Deleting ", id)
+                    deleteRegByID(id)
+                }
             }}>&times;</button>
             </td>}
         </tr>

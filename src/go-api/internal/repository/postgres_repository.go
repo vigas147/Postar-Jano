@@ -406,6 +406,21 @@ func (repo *PostgresRepo) UpdateRegistrations(ctx context.Context, reg *model.Re
 	return nil
 }
 
+func (repo *PostgresRepo) markRegistrationAsDeleted(ctx context.Context, id int) (*model.Registration, error) {
+	var deleted model.Registration
+	err := repo.db.GetContext(ctx, &deleted, `
+		UPDATE registrations SET 
+			deleted_at = NOW(),
+			updated_at = NOW()
+		WHERE id = $1
+		RETURNING *
+	`, id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to mark registration as deleted")
+	}
+	return &deleted, nil
+}
+
 func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, args ...interface{}) ([]model.ExtendedRegistration, error) {
 	const queryTemplate = `
 		SELECT
@@ -473,6 +488,10 @@ func (repo *PostgresRepo) FindRegistrationByID(ctx context.Context, regID int) (
 		return nil, errors.WithStack(sql.ErrNoRows)
 	}
 	return &regs[0], nil
+}
+
+func (repo *PostgresRepo) DeleteRegistrationByID(ctx context.Context, regID int) (*model.Registration, error) {
+	return repo.markRegistrationAsDeleted(ctx, regID)
 }
 
 func (repo *PostgresRepo) FindRegistrationByToken(ctx context.Context, token string) (*model.ExtendedRegistration, error) {

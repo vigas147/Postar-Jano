@@ -96,7 +96,7 @@ func New(
 	api.POST("/sign/in", a.SignIn)
 	api.GET("/registrations", a.ListRegistrations, jwt)
 	api.GET("/registrations/:id", a.FindRegistrationByID, jwt)
-
+	api.DELETE("/registrations/:id", a.DeleteRegistrationByID, jwt)
 	api.PUT("/registrations/:id", a.UpdateRegistration, jwt)
 
 	return a
@@ -253,6 +253,23 @@ func (api *API) FindRegistrationByID(c echo.Context) error {
 			return echo.ErrNotFound
 		}
 		api.logger.Error("Failed to find registration.", zap.Error(err))
+		return err
+	}
+	return c.JSON(http.StatusOK, reg)
+}
+
+func (api *API) DeleteRegistrationByID(c echo.Context) error {
+	ctx := c.Request().Context()
+	id, err := api.getIntParam(c, "id")
+	if err != nil {
+		return err
+	}
+	reg, err := api.repo.DeleteRegistrationByID(ctx, id)
+	if err != nil {
+		if errors.Cause(err) == sql.ErrNoRows {
+			return echo.ErrNotFound
+		}
+		api.logger.Error("Failed to delete registration.", zap.Error(err))
 		return err
 	}
 	return c.JSON(http.StatusOK, reg)

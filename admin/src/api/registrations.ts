@@ -58,3 +58,20 @@ export const loadRegistrations = (token:string|null, setToken :React.Dispatch<Re
              })
      })
 }
+
+export interface IRegistration {
+    id :number;
+}
+
+export const deleteRegistration = (token:string|null, id:number) :Promise<IRegistration> => {
+    return new Promise<IRegistration>((resolve, reject) => {
+        axios.delete<IRegistration>(
+            `http://localhost:5000/api/registrations/${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+        ).then((resp) => resolve(resp.data)).catch(err => reject(err))
+    })
+}
