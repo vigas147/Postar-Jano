@@ -30,50 +30,9 @@ func (s *StatsSuite) TestGetStat_OK() {
 	}
 	s.Require().NoError((&dayTwo).Create(ctx, s.dbx))
 
-	_, err := s.db.Exec(`INSERT INTO registrations(
-		id,
-		name,
-		surname,
-		token,
-		gender,
-		amount,
-		payed,
-		finished_school,
-		attended_previous,
-		city,
-		pills,
-		notes,
-		parent_name,
-		parent_surname,
-		email,
-		phone,
-		date_of_birth,
-		created_at,
-		updated_at
-	) VALUES (
-		15,
-		'sadf',
-		'sadf',
-		'sadf',
-		'female',
-		10,
-		0,
-		'zs',
-		true,
-		'bb',
-		'pills',
-		'notest',
-		'parentN',
-		'parentS',
-		'email',
-		'phone',
-		NOW(),
-		NOW(),
-		NOW()
-	)`)
-	s.Require().NoError(err)
+	reg := s.createRegistration()
 
-	_, err = s.db.Exec(`INSERT INTO signups(
+	_, err := s.db.Exec(`INSERT INTO signups(
 		day_id,
 		registration_id,
 		state,
@@ -81,11 +40,11 @@ func (s *StatsSuite) TestGetStat_OK() {
 		updated_at
 	) VALUES (
 		$1,
-		15,
+		$2,
 		'sadf',
 		NOW(),
 		NOW()
-	)`, dayTwo.ID)
+	)`, dayTwo.ID, reg.ID)
 	s.Require().NoError(err)
 
 	u := fmt.Sprintf("/api/stats/%d", event.ID)

@@ -237,55 +237,29 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 		}
 
 		// Insert into registrations.
-		err = tx.GetContext(ctx, &res.Reg, `
-			INSERT INTO registrations(
-				name,
-				surname,
-				gender,
-				amount,
-				token,
-				date_of_birth,
-				finished_school,
-				attended_previous,
-				city,
-				pills,
-				notes,
-				parent_name,
-				parent_surname,
-				email,
-				phone,
-				attended_activities,
-				problems,
-				created_at,
-				updated_at
-			) VALUES (
-				$1,
-				$2,
-				$3,
-				$4,
-				$5,
-				$6,
-				$7,
-				$8,
-				$9,
-				$10,
-				$11,
-				$12,
-				$13,
-				$14,
-				$15,
-				$16,
-				$17,
-				NOW(),
-				NOW()
-			) RETURNING *
-		`, req.Child.Name, req.Child.Surname, req.Child.Gender, amount, token.String(),
-			req.Child.DateOfBirth, req.Child.FinishedSchool, req.Child.AttendedPrevious, req.Child.City,
-			req.Medicine.Pills, req.Notes, req.Parent.Name, req.Parent.Surname, req.Parent.Email,
-			req.Parent.Phone, req.Membership.AttendedActivities, req.Health.Problems)
+		reg, err := (&model.Registration{
+			Name:               req.Child.Name,
+			Surname:            req.Child.Surname,
+			Gender:             req.Child.Gender,
+			DateOfBirth:        req.Child.DateOfBirth,
+			FinishedSchool:     req.Child.FinishedSchool,
+			AttendedPrevious:   req.Child.AttendedPrevious,
+			AttendedActivities: req.Membership.AttendedActivities,
+			City:               req.Child.City,
+			Pills:              req.Medicine.Pills,
+			Problems:           req.Health.Problems,
+			Notes:              req.Notes,
+			ParentName:         req.Parent.Name,
+			ParentSurname:      req.Parent.Surname,
+			Email:              req.Parent.Email,
+			Phone:              req.Parent.Phone,
+			Amount:             amount,
+			Token:              token.String(),
+		}).Create(ctx, tx)
 		if err != nil {
-			return errors.Wrap(err, "failed to create a registration")
+			return err
 		}
+		res.Reg = *reg
 
 		// Insert into signups.
 		for _, dayID := range req.DayIDs {

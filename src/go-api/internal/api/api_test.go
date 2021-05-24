@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -216,6 +217,34 @@ func (s *CommonSuite) InsertEvent() *model.Event {
 	event.Days = append(event.Days, day)
 
 	return &event
+}
+
+func (s *CommonSuite) createRegistration() *model.Registration {
+	reg, err := (&model.Registration{
+		Name:               "sdafa",
+		Surname:            "asdfasf",
+		Gender:             "female",
+		DateOfBirth:        time.Time{},
+		FinishedSchool:     "1ZS",
+		AttendedPrevious:   true,
+		AttendedActivities: nil,
+		City:               "fadsf",
+		Pills:              nil,
+		Problems:           nil,
+		Notes:              "",
+		ParentName:         "sadfa",
+		ParentSurname:      "asdfa",
+		Email:              "",
+		Phone:              "",
+		Amount:             0,
+		Payed:              nil,
+		Discount:           nil,
+		AdminNote:          "asdfas",
+		Token:              "asfasfd",
+	}).Create(context.Background(), s.dbx)
+	s.Require().NoError(err)
+
+	return reg
 }
 
 func (s *CommonSuite) stringRef(str string) *string {

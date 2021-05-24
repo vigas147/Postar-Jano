@@ -14,11 +14,11 @@ type RegisterReq struct {
 	} `json:"child"`
 
 	Medicine struct {
-		Pills string `json:"drugs"`
+		Pills *string `json:"drugs"`
 	} `json:"medicine"`
 
 	Health struct {
-		Problems string `json:"problems"`
+		Problems *string `json:"problems"`
 	} `json:"health"`
 
 	Parent struct {
@@ -29,7 +29,7 @@ type RegisterReq struct {
 	} `json:"parent"`
 
 	Membership struct {
-		AttendedActivities string `json:"attendedActivities"`
+		AttendedActivities *string `json:"attendedActivities"`
 	} `json:"memberShip"`
 	Notes  string `json:"notes"`
 	DayIDs []int  `json:"days" validate:"required"`

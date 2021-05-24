@@ -115,8 +115,8 @@ func (s *RegistrationSuite) TestRegister_OK() {
 		EventName:     event.Title,
 		Name:          name,
 		Surname:       surname,
-		Pills:         "",
-		Restrictions:  "",
+		Pills:         "-",
+		Restrictions:  "-",
 		Info:          "",
 		PhotoURL:      event.OwnerPhoto,
 		Sum:           day.Price,
@@ -148,50 +148,10 @@ func (s *RegistrationSuite) TestDelete_NotFound() {
 }
 
 func (s *RegistrationSuite) TestDelete_OK() {
-	_, err := s.db.Exec(`INSERT INTO registrations(
-		id,
-		name,
-		surname,
-		token,
-		gender,
-		amount,
-		payed,
-		finished_school,
-		attended_previous,
-		city,
-		pills,
-		notes,
-		parent_name,
-		parent_surname,
-		email,
-		phone,
-		date_of_birth,
-		created_at,
-		updated_at
-	) VALUES (
-		15,
-		'sadf',
-		'sadf',
-		'sadf',
-		'female',
-		10,
-		0,
-		'zs',
-		true,
-		'bb',
-		'pills',
-		'notest',
-		'parentN',
-		'parentS',
-		'email',
-		'phone',
-		NOW(),
-		NOW(),
-		NOW()
-	)`)
-	s.Require().NoError(err)
+	reg := s.createRegistration()
 
-	req, rec := s.NewRequest(http.MethodDelete, "/api/registrations/15", nil)
+	u := fmt.Sprintf("/api/registrations/%d", reg.ID)
+	req, rec := s.NewRequest(http.MethodDelete, u, nil)
 	s.AuthorizeRequest(req, &auth.Claims{StandardClaims: jwt.StandardClaims{Id: "admin@sbb.sk"}})
 	s.AssertServerResponseObject(req, rec, http.StatusOK, nil)
 }
