@@ -2,21 +2,55 @@ version: "3.8"
 
 services:
   db:
-    image: 
+    image: leto-db
+    networks:
+      - backend
     volumes: 
       - db-data:/var/lib/postgresql/data
   api:
-    image:
+    image: leto-api
+    networks:
+      - backend
+      - traefik-public
+    env_file: api.env
+    deploy:
+      labels:
+        - traefik.http.routers.leto-form.rule=Host(`leto.sbb.sk`) && Path(`/api`)
+        - traefik.http.services.leto-form.loadbalancer.server.port=5000
+        - traefik.enable=true
   form:
-    image:
+    image: leto-form
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - traefik.http.routers.leto-form.rule=Host(`leto.sbb.sk`)
+        - traefik.http.services.leto-form.loadbalancer.server.port=80
+        - traefik.enable=true
   admin:
-    image:
+    image: leto-admin
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - traefik.http.routers.leto-form.rule=Host(`leto.sbb.sk`) && Path(`/admin`)
+        - traefik.http.services.leto-form.loadbalancer.server.port=80
+        - traefik.enable=true
   pgadmin:
-    image:
+    image: dpage/pgadmin4
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    env_file: pgadmin.env
+    ports:
+     - "5050:80"
+    networks:
+      - backend
   
 volumes: 
   db-data:
+  pgadmin:
 
 networks:
+  backend:
   traefik-public:
     external: true
