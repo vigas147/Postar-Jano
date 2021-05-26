@@ -5,6 +5,7 @@ services:
     image: leto-db
     networks:
       - backend
+    env_file: db.env
     volumes: 
       - db-data:/var/lib/postgresql/data
   api:
