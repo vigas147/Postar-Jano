@@ -792,8 +792,9 @@ const confirmationMail = `<!doctype html>
 
                                                             <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                                                                <p>Poplatok za podujatie {{ .EventName }} v sume {{ .Sum}}eur je potrebné <strong>uhradiť osobne do 21. júna 2020 (nedeľa)</strong>. Účastnícke poplatky bude zbierať salezián <strong>Lukáš Závodník SDB</strong> (0915 342 200). Bude vám k dispozícii  v dňoch <strong>7.-21.6.2020</strong>. Nájdete ho v budove Salezka na prízemí; <strong>utorok - sobota v čase od 19:00 - 19:30, v nedeľu po dopoludňajších svätých omšiach</strong>.
-                                                                    Vopred vás upozorňujeme, že dieťa, ktoré má zaplatené členské Salezka na rok 2020, alebo mu ho aktualizujete pri platbe za tábor, dostane zľavu na každú letnú akciu, na ktorú ho prihlásite. Cena členského je 10€.
+                                                           <p><strong>Poplatok</strong> za podujatie {{ .EventName }} v sume {{ .Sum}}eur je potrebné <strong>uhradiť osobne do 20. júna 2021 (nedeľa)</strong>. Účastnícke poplatky bude zbierať salezián <strong>Lukáš Závodník SDB</strong> (0915 342 200). Bude vám k dispozícii  od 2.júna
+                                                                    v utorky a piatky po večernej sv.omši a v nedeľu po sv. omši o 10:30. Nájdete ho v budove Salezka na prízemí.
+                                                                    Vopred vás upozorňujeme, že <strong>dieťa, ktoré si zaplatí členské Salezka za rok 2021 dostane zľavu na každú letnú akciu, na ktorú ho prihlásite. Cena členského je 10€.</strong>
 <br/><br/>
                                                                     saleziáni a saleziánky
 
