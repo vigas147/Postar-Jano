@@ -16,8 +16,8 @@ services:
     env_file: api.env
     deploy:
       labels:
-        - traefik.http.routers.leto-form.rule=Host(`leto.sbb.sk`) && Path(`/api`)
-        - traefik.http.services.leto-form.loadbalancer.server.port=5000
+        - traefik.http.routers.leto-api.rule=Host(`leto.sbb.sk`) && Path(`/api`)
+        - traefik.http.services.leto-api.loadbalancer.server.port=5000
         - traefik.enable=true
   form:
     image: leto-form
@@ -34,8 +34,8 @@ services:
       - traefik-public
     deploy:
       labels:
-        - traefik.http.routers.leto-form.rule=Host(`leto.sbb.sk`) && Path(`/admin`)
-        - traefik.http.services.leto-form.loadbalancer.server.port=80
+        - traefik.http.routers.leto-admin.rule=Host(`leto.sbb.sk`) && Path(`/admin`)
+        - traefik.http.services.leto-admin.loadbalancer.server.port=80
         - traefik.enable=true
   pgadmin:
     image: dpage/pgadmin4
