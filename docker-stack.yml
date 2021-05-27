@@ -17,7 +17,9 @@ services:
     deploy:
       labels:
         - traefik.http.routers.leto-api.rule=Host(`leto.sbb.sk`) && Path(`/api`)
+        - traefik.http.routers.leto-api-https.tls.certresolver=le
         - traefik.http.services.leto-api.loadbalancer.server.port=5000
+        - traefik.http.middlewares.https-redirect
         - traefik.enable=true
   form:
     image: leto-form
@@ -26,7 +28,9 @@ services:
     deploy:
       labels:
         - traefik.http.routers.leto-form.rule=Host(`leto.sbb.sk`)
+        - traefik.http.routers.leto-form-https.tls.certresolver=le
         - traefik.http.services.leto-form.loadbalancer.server.port=80
+        - traefik.http.middlewares.https-redirect
         - traefik.enable=true
   admin:
     image: leto-admin
@@ -35,7 +39,9 @@ services:
     deploy:
       labels:
         - traefik.http.routers.leto-admin.rule=Host(`leto.sbb.sk`) && Path(`/admin`)
+        - traefik.http.routers.leto-form-admin.tls.certresolver=le
         - traefik.http.services.leto-admin.loadbalancer.server.port=80
+        - traefik.http.middlewares.https-redirect
         - traefik.enable=true
   pgadmin:
     image: dpage/pgadmin4
