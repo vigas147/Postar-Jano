@@ -40,7 +40,7 @@ export interface IDay {
 export const loadRegistrations = (token:string|null, setToken :React.Dispatch<React.SetStateAction<string|null>>) :Promise<IExtendedRegistration[]> => {
      return new Promise<IExtendedRegistration[]>((resolve, reject) => {
          axios.get<IExtendedRegistration[]>(
-             'http://localhost:5000/api/registrations',
+             'http://leto.sbb.sk/api/registrations',
              {
                  headers: {
                      Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ export interface IRegistration {
 export const deleteRegistration = (token:string|null, id:number) :Promise<IRegistration> => {
     return new Promise<IRegistration>((resolve, reject) => {
         axios.delete<IRegistration>(
-            `http://localhost:5000/api/registrations/${id}`,
+            `http://leto.sbb.sk/api/registrations/${id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
