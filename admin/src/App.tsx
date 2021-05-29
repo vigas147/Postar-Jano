@@ -18,7 +18,7 @@ const App: React.FC = () => {
          <div className="wrapper">
            <h1>Prihlasovanie Leto 2021</h1>
 
-           <BrowserRouter>
+           <BrowserRouter basename="/admin">
                <Link to="/events">
                    Akcie
                </Link>
