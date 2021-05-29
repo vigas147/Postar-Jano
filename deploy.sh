@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
 git pull
-docker-compose build --parallel && 
-docker-compose down && 
-docker-compose up -d
+./build.sh
+docker stack deploy --with-registry-auth --resolve-image=always -c ./docker-stack.yml leto
