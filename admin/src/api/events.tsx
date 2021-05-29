@@ -54,7 +54,7 @@ export interface IStat {
 export const getStats = (token:string|null) => {
     return new Promise<IStat[]>((resolve, reject) => {
         axios.get<IStat[]>(
-            'http://leto.sbb.sk/api/stats',
+            'https://leto.sbb.sk/api/stats',
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
