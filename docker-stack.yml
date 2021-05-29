@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   db:
-    image: leto-db
+    image: marekvigas/leto-db:latest
     networks:
       - backend
     env_file: db.env
     volumes: 
       - db-data:/var/lib/postgresql/data
   api:
-    image: leto-api
+    image: marekvigas/leto-api:latest
     networks:
       - backend
       - traefik-public
@@ -22,7 +22,7 @@ services:
         - traefik.http.middlewares.https-redirect
         - traefik.enable=true
   form:
-    image: leto-form
+    image: marekvigas/leto-form:latest
     networks:
       - traefik-public
     deploy:
@@ -33,7 +33,7 @@ services:
         - traefik.http.middlewares.https-redirect
         - traefik.enable=true
   admin:
-    image: leto-admin
+    image: marekvigas/leto-admin:latest
     networks:
       - traefik-public
     deploy:
