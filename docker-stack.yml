@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   db:
-    image: marekvigas/leto-db:latest
+    image: marekvigas/sbb-leto-db:latest
     networks:
       - backend
     env_file: db.env
     volumes: 
       - db-data:/var/lib/postgresql/data
   api:
-    image: marekvigas/leto-api:latest
+    image: marekvigas/sbb-leto-api:latest
     networks:
       - backend
       - traefik-public
@@ -22,7 +22,7 @@ services:
         - traefik.http.services.leto-api.loadbalancer.server.port=5000
         - traefik.enable=true
   form:
-    image: marekvigas/leto-form:latest
+    image: marekvigas/sbb-leto-form:latest
     networks:
       - traefik-public
     deploy:
@@ -33,7 +33,7 @@ services:
         - traefik.http.services.leto-form.loadbalancer.server.port=80
         - traefik.enable=true
   admin:
-    image: marekvigas/leto-admin:latest
+    image: marekvigas/sbb-leto-admin:latest
     networks:
       - traefik-public
     deploy:
