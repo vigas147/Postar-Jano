@@ -12,21 +12,21 @@ interface Props extends RouteComponentProps<{
 
 interface State {
     event: IEvent | null,
-    stats: Stat[] | null,
-    persons: any
+    stats: Stat[] | null
 }
 
 class EventComponent extends React.Component<Props, State> {
     static contextType = ApiClientContext;
     context!: React.ContextType<typeof ApiClientContext>;
+    timer: NodeJS.Timeout | null;
 
     constructor(props: Props) {
         super(props);
         this.state = {
             event: null,
-            persons: null,
             stats: null
         };
+        this.timer = null;
     }
 
     componentDidMount() {
@@ -44,6 +44,19 @@ class EventComponent extends React.Component<Props, State> {
         .catch(err => {
             throw err            
         })
+        this.getStats();
+        this.timer = setInterval(() => this.getStats(), 5000)
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer!);
+        this.timer = null;
+    }
+
+    protected getStats = () => {
+        if (!this.context) {
+            return;
+        }
 
         this.context.event.stats(parseInt(this.props.match.params.id, 10))
         .then(stats => {

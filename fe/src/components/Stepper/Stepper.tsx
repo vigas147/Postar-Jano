@@ -287,6 +287,14 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         })
     }
 
+    componentDidUpdate(prevProps: StepperProps) {
+        if(JSON.stringify(prevProps.stats) !== JSON.stringify(this.props.stats)) {
+            this.setState({
+                stats: this.props.stats
+            });
+        }
+    }
+
     render(): React.ReactNode {
         return (
             <IonContent>
