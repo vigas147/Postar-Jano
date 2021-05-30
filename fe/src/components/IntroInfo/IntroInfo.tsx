@@ -46,14 +46,6 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                     <IonCol></IonCol>
                 </IonRow>
             }
-            {
-                event.description.length > 0 && 
-                <IonRow>
-                    <IonCol>
-                        {event.description}
-                    </IonCol>
-                </IonRow>
-            }
             <IonItem>
                     <IonCol slot="start" size="0.9" className="infIcon" >
                         <IonIcon icon={calendarOutline} class="bigIcon" />
@@ -105,7 +97,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
                 </IonCol>
                 <IonCol>
                     <span className="value">
-                        {event.min_age} - {event.max_age} rokov
+                        {event.description}
                     </span>
                 </IonCol>
             </IonItem>
