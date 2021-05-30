@@ -8,8 +8,6 @@ ENV PATH /app/node_modules/.bin:$PATH
 # Block npm ads
 ENV OPEN_SOURCE_CONTRIBUTOR=true
 
-ENV PUBLIC_URL=https://leto.sbb.sk/admin
-
 COPY ./package*.json /app/
 
 # Better npm install https://docs.npmjs.com/cli/ci.html
