@@ -63,6 +63,13 @@ services:
      - "5050:80"
     networks:
       - backend
+   
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local:13-alpine
+    user: postgres:postgres
+    volumes:
+      - /mnt/backups/db:/backups
+    env_file: pgbackups.env
 
 volumes: 
   db-data:
