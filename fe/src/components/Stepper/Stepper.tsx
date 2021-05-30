@@ -165,6 +165,15 @@ class Stepper extends React.Component<StepperProps, StepperState> {
             if (this.state.registration.child.city.length <= 2){
                 problems.push("Vyplnte mesto/obec trvalého bydliska, nie skratku.");
             }
+            if (this.state.registration.child.finishedSchoolYear == null){
+                problems.push("Vyplnte mesto/obec trvalého bydliska, nie skratku.");
+            }
+            if (this.state.registration.child.attendedPreviousEvents == null){
+                problems.push("Vyplnte účasť na minuloročných akciách.");
+            }
+            if (this.state.registration.child.finishedSchoolYear == null){
+                problems.push("Vyplnte ukončený školský rok.");
+            }
         }
         
         if (problems.length > 0) {
