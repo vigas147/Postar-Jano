@@ -16,6 +16,6 @@ export default function useStorage<T>(key :string, init:T):[T, React.Dispatch<Re
             sessionStorage.removeItem(key)
         }
 
-    },[val])
+    },[key, val])
     return [val, setVal]
 }

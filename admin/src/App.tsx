@@ -5,6 +5,8 @@ import EventList from "./components/EventList";
 import RegistrationList from "./components/RegistrationList";
 import Login from "./components/Login";
 import {AppContext} from "./AppContext";
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const App: React.FC = () => {
     const {token, setToken} = useContext(AppContext);

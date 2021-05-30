@@ -5,6 +5,8 @@ import ViewFilter, {IViewFields} from "./ViewFilter";
 import {useParams} from 'react-router-dom'
 import {AppContext} from "../AppContext";
 import useStorage from "../hooks/useStorage";
+import {Modal, Button} from "react-bootstrap";
+import EditForm from "./EditForm";
 
 const RegistrationList:React.FC = () :JSX.Element => {
     const {token, setToken} = useContext(AppContext)
@@ -40,6 +42,8 @@ const RegistrationList:React.FC = () :JSX.Element => {
         "buttons": {display: "Upravy", show:true},
     })
     const [expandViewFilter, setExpandViewFilter] = useState(false)
+    const [showEdit, setShowEdit] = useState(false)
+    const [editedRegistration, setEditedRegistration] = useState<IExtendedRegistration|null>(null)
 
     const {event} = useParams<{event:string}>()
 
@@ -86,6 +90,27 @@ const RegistrationList:React.FC = () :JSX.Element => {
         )
     }
 
+    const handleUpdate = (updated :IExtendedRegistration) => {
+        setRegistrations((prevState) => {
+            return prevState.map((r) => {
+                if (r.id !== updated.id) return r
+                return {...r, ...updated}
+            })
+        })
+    }
+
+    const handleEdit = (mutator:(prev :IExtendedRegistration) => IExtendedRegistration) => {
+        setEditedRegistration((p :IExtendedRegistration|null) => {
+            if (p == null) return p
+            const copyVal :IExtendedRegistration = {...p}
+
+            const newVal = mutator(copyVal)
+            console.log(newVal)
+            return newVal
+        })
+    }
+
+
     return (
         <>
         <h2>Zoznam prihlasenych</h2>
@@ -94,7 +119,13 @@ const RegistrationList:React.FC = () :JSX.Element => {
                 placeholder='filter...'
                 onChange={event => setFilter(event.target.value)}
             />
-
+            {editedRegistration!= null && <EditForm
+                show={showEdit}
+                reg={{...editedRegistration}}
+                handleChange={handleEdit}
+                handleSubmit={handleUpdate}
+                handleClose={() => {setShowEdit(false)}}
+            />}
             {renderViewFilter()}
             <table>
                 <tbody>
@@ -108,6 +139,10 @@ const RegistrationList:React.FC = () :JSX.Element => {
                                 deleteRegistration(token, id).then(()=>{
                                     setRegistrations((prev => prev.filter(r => r.id !== id)))
                                 })
+                            }}
+                            editRegByID={() => {
+                                setEditedRegistration({...r})
+                                setShowEdit(true)
                             }}
                         />
                 )}

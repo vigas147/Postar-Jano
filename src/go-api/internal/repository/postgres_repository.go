@@ -19,7 +19,10 @@ type PostgresRepo struct {
 	db *sqlx.DB
 }
 
-var ErrOverLimit = errors.New("Limit exceeded")
+var (
+	ErrOverLimit = errors.New("Limit exceeded")
+	ErrNotActive = errors.New("Event not active")
+)
 
 func NewPostgresRepo(db *sql.DB) *PostgresRepo {
 	return &PostgresRepo{
@@ -175,6 +178,10 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 	event, err := repo.FindEvent(ctx, eventID)
 	if err != nil {
 		return nil, false, err
+	}
+
+	if !event.Active {
+		return nil, false, ErrNotActive
 	}
 
 	res := model.RegResult{
@@ -360,10 +367,7 @@ func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*mode
 func (repo *PostgresRepo) UpdateRegistrations(ctx context.Context, reg *model.Registration) error {
 	stmt, err := repo.db.PrepareNamedContext(ctx, `
 		UPDATE registrations SET 
-			name = :name,
-			surname = :surname,
 			payed = :payed,
-			discount = :discount,
 			admin_note = :admin_note,
 			updated_at = NOW()
 		WHERE id = :id

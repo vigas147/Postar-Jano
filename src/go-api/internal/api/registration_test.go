@@ -72,6 +72,53 @@ func (s *RegistrationSuite) TestRegister_NotFoundEvent() {
 	})
 }
 
+func (s *RegistrationSuite) TestRegister_NotActive() {
+	const (
+		name     = "dano"
+		surname  = "zharmanca"
+		pname    = "janko"
+		psurname = "hrasko"
+		gender   = "male"
+		city     = "BB"
+		phone    = "+421"
+		email    = "dano@mail.sk"
+		school   = "3.ZS"
+	)
+	event := s.InsertEvent()
+
+	_, err := s.dbx.Exec("UPDATE events SET active = false WHERE id = $1", event.ID)
+	s.Require().NoError(err)
+
+	day := event.Days[0]
+	birth := time.Now().Format(time.RFC3339)
+	u := fmt.Sprintf("/api/registrations/%d", event.ID)
+	req, rec := s.NewRequest(http.MethodPost, u, echo.Map{
+		"child": echo.Map{
+			"name":               name,
+			"surname":            surname,
+			"gender":             gender,
+			"city":               city,
+			"finishedSchoolYear": school,
+			"dateOfBirth":        birth,
+		},
+		"parent": echo.Map{
+			"name":    pname,
+			"surname": psurname,
+			"email":   email,
+			"phone":   phone,
+		},
+		"days": []interface{}{day.ID},
+	})
+
+	s.AssertServerResponseObject(req, rec, http.StatusUnprocessableEntity, func(body echo.Map) {
+		s.Equal(echo.Map{
+			"errors": map[string]interface{}{
+				"event_id": "not active",
+			},
+		}, body)
+	})
+}
+
 func (s *RegistrationSuite) TestRegister_OK() {
 	const (
 		name     = "dano"

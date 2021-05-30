@@ -159,9 +159,16 @@ func (api *API) Register(c echo.Context) error {
 
 	reg, ok, err := api.repo.Register(ctx, &req, eventID)
 	if err != nil {
-		if errors.Cause(err) == sql.ErrNoRows {
+		switch errors.Cause(err) {
+		case sql.ErrNoRows:
 			return echo.ErrNotFound
+		case repository.ErrNotActive:
+			return c.JSON(http.StatusUnprocessableEntity, echo.Map{
+				"errors": map[string]interface{}{
+					"event_id": "not active",
+				}})
 		}
+
 		api.logger.Error("Failed to create a registration", zap.Error(err))
 		return err
 	}
@@ -356,11 +363,7 @@ func (api *API) UpdateRegistration(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := api.repo.UpdateRegistrations(ctx, &model.Registration{
 		ID:        id,
-		Name:      req.Child.Name,
-		Surname:   req.Child.Surname,
-		Email:     req.Parent.Email,
 		Payed:     req.Payed,
-		Discount:  req.Discount,
 		AdminNote: req.AdminNote,
 	}); err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {

@@ -6,9 +6,10 @@ interface Props {
     registration : IExtendedRegistration;
     fields : IViewFields;
     deleteRegByID :(id:number)=>void;
+    editRegByID :()=>void;
 }
 
-const RegistrationEntry :React.FC<Props> = ({fields, registration, deleteRegByID}) => {
+const RegistrationEntry :React.FC<Props> = ({fields, registration, deleteRegByID, editRegByID}) => {
     const {
         id,
         name,
@@ -80,12 +81,14 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration, deleteRegByID
             {isShown("phone") && <td>{phone}</td>}
 
 
-            {isShown("amount") && <td>{amount}</td>}
-            {isShown("payed") && <td>{payed}</td>}
-            {isShown("discount") && <td>{discount}</td>}
+            {isShown("amount") && <td>{amount}€</td>}
+            {isShown("payed") && <td>{payed}€</td>}
+            {isShown("discount") && <td>{discount}€</td>}
 
             {isShown("buttons") && <td>
-            <button>Upravit</button>
+            <button onClick={() => {
+                editRegByID()
+            }}>Upravit</button>
             <button onClick={(e) => {
                 if (window.confirm(`Naozaj chcete vymazat zaznam s ID ${id}?`)) {
                     console.log("Deleting ", id)
