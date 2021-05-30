@@ -166,40 +166,40 @@ class Stepper extends React.Component<StepperProps, StepperState> {
 
         if (page == 1) {
             if (child.name.length < 2){
-                problems.push("Vyplnte meno dieťaťa.");
+                problems.push("Vyplňte meno dieťaťa.");
             }
             if (child.surname.length < 2){
-                problems.push("Vyplnte priezvisko dieťaťa.");
+                problems.push("Vyplňte priezvisko dieťaťa.");
             }
             if (child.gender == null){
-                problems.push("Vyplnte pohlavie dieťaťa.");
+                problems.push("Vyplňte pohlavie dieťaťa.");
             }
             if (child.city.length <= 2){
-                problems.push("Vyplnte mesto/obec trvalého bydliska, nie skratku.");
+                problems.push("Vyplňte mesto/obec trvalého bydliska, nie skratku.");
             }
             if (child.finishedSchoolYear == null){
-                problems.push("Vyplnte ukončený školský rok.");
+                problems.push("Vyplňte ukončený školský rok.");
             }
             if (child.attendedPreviousEvents == null){
-                problems.push("Vyplnte účasť na minuloročných akciách.");
+                problems.push("Vyplňte účasť na minuloročných akciách.");
             }
             if (child.finishedSchoolYear == null){
-                problems.push("Vyplnte ukončený školský rok.");
+                problems.push("Vyplňte ukončený školský rok.");
             }
         }
 
         if (page == 2) {
             if (medicine.takes === null){
-                problems.push("Vyplnte či vaše dieťa berie lieky.");
+                problems.push("Vyplňte či vaše dieťa berie lieky.");
             }
             if (medicine.takes === true && medicine.drugs.length < 2){
-                problems.push("Vyplnte aké lieky berie vaše dieťa.");
+                problems.push("Vyplňte aké lieky berie vaše dieťa.");
             }
             if (health.hasProblmes === null){
-                problems.push("Vyplnte zdravotný stav.");
+                problems.push("Vyplňte zdravotný stav.");
             }
             if (health.hasProblmes === true && health.problems.length < 2){
-                problems.push("Vyplnte zdravotné problémy.");
+                problems.push("Vyplňte zdravotné problémy.");
             }
         }
 
@@ -209,10 +209,10 @@ class Stepper extends React.Component<StepperProps, StepperState> {
 
         if (page == 3) {
             if (parent.name.length < 2){
-                problems.push("Vyplnte meno rodiča.")
+                problems.push("Vyplňte meno rodiča.")
             }
             if (parent.surname.length < 2){
-                problems.push("Vyplnte priezvisko rodiča.")
+                problems.push("Vyplňte priezvisko rodiča.")
             }
             if (!validEmail(parent.email)){
                 problems.push("Nesprávny formát emailu.")
