@@ -64,7 +64,7 @@ const defaultState: StepperState = {
     },
     stats: null,
     event: null,
-    page: 3,
+    page: 0,
     pageCount: 5,
     valid: true,
     canGoBack: true,
