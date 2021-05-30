@@ -360,10 +360,7 @@ func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*mode
 func (repo *PostgresRepo) UpdateRegistrations(ctx context.Context, reg *model.Registration) error {
 	stmt, err := repo.db.PrepareNamedContext(ctx, `
 		UPDATE registrations SET 
-			name = :name,
-			surname = :surname,
 			payed = :payed,
-			discount = :discount,
 			admin_note = :admin_note,
 			updated_at = NOW()
 		WHERE id = :id

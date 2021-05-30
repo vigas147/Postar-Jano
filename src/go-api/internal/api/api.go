@@ -356,11 +356,7 @@ func (api *API) UpdateRegistration(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := api.repo.UpdateRegistrations(ctx, &model.Registration{
 		ID:        id,
-		Name:      req.Child.Name,
-		Surname:   req.Child.Surname,
-		Email:     req.Parent.Email,
 		Payed:     req.Payed,
-		Discount:  req.Discount,
 		AdminNote: req.AdminNote,
 	}); err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
