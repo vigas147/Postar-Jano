@@ -73,7 +73,7 @@ func New(
 		middleware.Recover(),
 		middleware.LoggerWithConfig(middleware.LoggerConfig{
 			Skipper: func(c echo.Context) bool {
-				if c.Request().URL.Path == "/api/stats" {
+				if c.Request().URL.Path == "/api/status" {
 					return true
 				}
 				return false
