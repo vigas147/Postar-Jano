@@ -33,7 +33,7 @@ const IntroInfo: React.FC<IntroInfoProps> = (props) => {
         <IonGrid>
             <IonRow>
                 <IonCol>
-                    <h1>{event.title}</h1>
+                    <h1>{event.title.toUpperCase()}</h1>
                 </IonCol>
             </IonRow>
             {

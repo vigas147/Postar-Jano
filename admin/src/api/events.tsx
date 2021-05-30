@@ -23,7 +23,7 @@ export interface IDay {
 export const listEvents = (token:string|null) => {
     return new Promise<IEvent[]>((resolve, reject) => {
         axios.get<IEvent[]>(
-            'http://localhost:5000/api/events',
+            'https://leto.sbb.sk/api/events',
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ export interface IStat {
 export const getStats = (token:string|null) => {
     return new Promise<IStat[]>((resolve, reject) => {
         axios.get<IStat[]>(
-            'http://localhost:5000/api/stats',
+            'https://leto.sbb.sk/api/stats',
             {
                 headers: {
                     Authorization: `Bearer ${token}`,

@@ -8,6 +8,8 @@ ENV PATH /app/node_modules/.bin:$PATH
 # Block npm ads
 ENV OPEN_SOURCE_CONTRIBUTOR=true
 
+ENV PUBLIC_URL=https://leto.sbb.sk/admin
+
 COPY ./package*.json /app/
 
 # Better npm install https://docs.npmjs.com/cli/ci.html
@@ -18,6 +20,7 @@ COPY ./.env /app/.env
 
 RUN npm run build
 
-FROM nginx:latest
-
-COPY --from=build /app/build/ /usr/share/nginx/html
+FROM nginx:1.21.0-alpine
+COPY --from=build /app/build/ /var/www/admin
+COPY ./nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
