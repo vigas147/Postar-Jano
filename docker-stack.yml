@@ -20,6 +20,9 @@ services:
         - traefik.http.routers.leto-api.tls.certresolver=le
         - traefik.http.routers.leto-api.entrypoints=websecure
         - traefik.http.services.leto-api.loadbalancer.server.port=5000
+        - traefik.http.services.leto-api.loadbalancer.healthCheck.path=/api/status
+        - traefik.http.services.leto-api.loadbalancer.healthCheck.interval=5s
+        - traefik.http.services.leto-api.loadbalancer.healthCheck.timeout=3s
         - traefik.docker.network=traefik-public
         - traefik.enable=true
   form:
