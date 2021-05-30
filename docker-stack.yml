@@ -70,6 +70,8 @@ services:
     volumes:
       - /mnt/backups/db:/backups
     env_file: pgbackups.env
+    networks:
+      - backend
 
 volumes: 
   db-data:
