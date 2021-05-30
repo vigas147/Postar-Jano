@@ -4,10 +4,10 @@ export interface ISignInResponse {
     token :string;
 }
 
-export async function signInUser(username: string, password :string) :Promise<AxiosResponse<ISignInResponse>>  {
+export async function signInUser(apiHost :string, username: string, password :string) :Promise<AxiosResponse<ISignInResponse>>  {
     axios.create()
     return axios.post<ISignInResponse>(
-        'https://leto.sbb.sk/api/sign/in',
+        `${apiHost}/api/sign/in`,
         {username, password},
     )
 }

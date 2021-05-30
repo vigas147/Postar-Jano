@@ -37,10 +37,10 @@ export interface IDay {
     description: string;
 }
 
-export const loadRegistrations = (token:string|null, setToken :React.Dispatch<React.SetStateAction<string|null>>) :Promise<IExtendedRegistration[]> => {
+export const loadRegistrations = (apiHost :string, token:string|null, setToken :React.Dispatch<React.SetStateAction<string|null>>) :Promise<IExtendedRegistration[]> => {
      return new Promise<IExtendedRegistration[]>((resolve, reject) => {
          axios.get<IExtendedRegistration[]>(
-             'https://leto.sbb.sk/api/registrations',
+             `${apiHost}/api/registrations`,
              {
                  headers: {
                      Authorization: `Bearer ${token}`,
