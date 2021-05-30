@@ -20,6 +20,7 @@ services:
         - traefik.http.routers.leto-api.tls.certresolver=le
         - traefik.http.routers.leto-api.entrypoints=websecure
         - traefik.http.services.leto-api.loadbalancer.server.port=5000
+        - traefik.docker.network=traefik-public
         - traefik.enable=true
   form:
     image: marekvigas/sbb-leto-form:latest
