@@ -149,8 +149,35 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         this.setState({...state})
     }
 
-    protected validate = () => {
+    protected validate = async () => {
+        const problems: string[] = [];
 
+        if (this.state.page == 1) {
+            if (this.state.registration.child.name.length < 2){
+                problems.push("Vyplnte meno dieťaťa.");
+            }
+            if (this.state.registration.child.surname.length < 2){
+                problems.push("Vyplnte priezvisko dieťaťa.");
+            }
+            if (this.state.registration.child.gender == null){
+                problems.push("Vyplnte pohlavie dieťaťa.");
+            }
+            if (this.state.registration.child.city.length <= 2){
+                problems.push("Vyplnte mesto/obec trvalého bydliska, nie skratku.");
+            }
+        }
+        
+        if (problems.length > 0) {
+            const sendToast = await toastController.create({
+                duration: 3500,
+                message: problems[0],
+                color: "danger",
+                position: "top"
+            })
+            sendToast.present()
+            return false;
+        }
+        return true;
     }
 
     protected eventFull = (): boolean => {
@@ -354,8 +381,8 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                         <div className="next">
                             {
                                 this.state.page < this.state.pageCount -1 && !this.eventFull() && this.state.event?.active &&
-                                <IonButton expand="full" shape="round" onClick={() => {
-                                    if (this.state.page < this.state.pageCount) {
+                                <IonButton expand="full" shape="round" onClick={async () => {
+                                    if (this.state.page < this.state.pageCount && await this.validate()) {
                                         this.setState({...this.state, page: this.state.page + 1})
                                     }
                                 }}>
