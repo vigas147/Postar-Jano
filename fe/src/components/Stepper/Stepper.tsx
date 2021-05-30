@@ -86,15 +86,19 @@ class Stepper extends React.Component<StepperProps, StepperState> {
         this.state.event = props.event;
         this.state.stats = props.stats;
     }
-    
+
+    protected removeCapslock = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
     protected setValueHandler = (type: ActionType, value: any) => {
         const state = {...this.state};
         switch (type) {
             case ActionType.SET_CHILD_NAME:
-                state.registration.child.name = value;
+                state.registration.child.name = this.removeCapslock(value);
                 break;
             case ActionType.SET_CHILD_SURNAME:
-                state.registration.child.surname = value;
+                state.registration.child.surname = this.removeCapslock(value);
                 break;
             case ActionType.SET_CHILD_GENDER:
                 state.registration.child.gender = value;
@@ -115,10 +119,10 @@ class Stepper extends React.Component<StepperProps, StepperState> {
                 state.registration.days = value;
                 break;
             case ActionType.SET_PARNET_NAME:
-                state.registration.parent.name = value;
+                state.registration.parent.name = this.removeCapslock(value);
                 break;
             case ActionType.SET_PARENT_SURNAME:
-                state.registration.parent.surname = value;
+                state.registration.parent.surname = this.removeCapslock(value);
                 break;
             case ActionType.SET_PARENT_PHONE:
                 state.registration.parent.phone = value;
