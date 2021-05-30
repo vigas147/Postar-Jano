@@ -12,6 +12,7 @@ import { toastController } from '@ionic/core'
 import OtherInfo from '../OtherInfo/OtherInfo';
 import Results from '../Result/Results';
 import { ApiClientContext } from '../../services/apiContext';
+import { isPossiblePhoneNumber } from 'react-phone-number-input'
 
 interface StepperProps {
     event: IEvent,
@@ -63,7 +64,7 @@ const defaultState: StepperState = {
     },
     stats: null,
     event: null,
-    page: 0,
+    page: 3,
     pageCount: 5,
     valid: true,
     canGoBack: true,
@@ -151,28 +152,69 @@ class Stepper extends React.Component<StepperProps, StepperState> {
 
     protected validate = async () => {
         const problems: string[] = [];
+        let page = this.state.page;
+        const { child, medicine, health, parent } = this.state.registration
 
-        if (this.state.page == 1) {
-            if (this.state.registration.child.name.length < 2){
+        const validEmail = (email: string): boolean => {
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        if (page == 1) {
+            if (child.name.length < 2){
                 problems.push("Vyplnte meno dieťaťa.");
             }
-            if (this.state.registration.child.surname.length < 2){
+            if (child.surname.length < 2){
                 problems.push("Vyplnte priezvisko dieťaťa.");
             }
-            if (this.state.registration.child.gender == null){
+            if (child.gender == null){
                 problems.push("Vyplnte pohlavie dieťaťa.");
             }
-            if (this.state.registration.child.city.length <= 2){
+            if (child.city.length <= 2){
                 problems.push("Vyplnte mesto/obec trvalého bydliska, nie skratku.");
             }
-            if (this.state.registration.child.finishedSchoolYear == null){
-                problems.push("Vyplnte mesto/obec trvalého bydliska, nie skratku.");
+            if (child.finishedSchoolYear == null){
+                problems.push("Vyplnte ukončený školský rok.");
             }
-            if (this.state.registration.child.attendedPreviousEvents == null){
+            if (child.attendedPreviousEvents == null){
                 problems.push("Vyplnte účasť na minuloročných akciách.");
             }
-            if (this.state.registration.child.finishedSchoolYear == null){
+            if (child.finishedSchoolYear == null){
                 problems.push("Vyplnte ukončený školský rok.");
+            }
+        }
+
+        if (page == 2) {
+            if (medicine.takes === null){
+                problems.push("Vyplnte či vaše dieťa berie lieky.");
+            }
+            if (medicine.takes === true && medicine.drugs.length < 2){
+                problems.push("Vyplnte aké lieky berie vaše dieťa.");
+            }
+            if (health.hasProblmes === null){
+                problems.push("Vyplnte zdravotný stav.");
+            }
+            if (health.hasProblmes === true && health.problems.length < 2){
+                problems.push("Vyplnte zdravotné problémy.");
+            }
+        }
+
+        if (this.state.event!.days.length > 1) {
+            page -= 1; 
+        }
+
+        if (page == 3) {
+            if (parent.name.length < 2){
+                problems.push("Vyplnte meno rodiča.")
+            }
+            if (parent.surname.length < 2){
+                problems.push("Vyplnte priezvisko rodiča.")
+            }
+            if (!validEmail(parent.email)){
+                problems.push("Nesprávny formát emailu.")
+            }
+            if (!isPossiblePhoneNumber(parent.phone)){
+                problems.push("Nesprávny formát tel. čísla.")
             }
         }
         

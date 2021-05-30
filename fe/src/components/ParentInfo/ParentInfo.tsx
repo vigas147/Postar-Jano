@@ -1,6 +1,9 @@
 import React from 'react';
 import { Registration, ActionType } from '../../types/types';
 import { IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput } from '@ionic/react';
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
+import "./ParentInfo.scss"
 
 interface ParentInfoProps {
     registration: Registration
@@ -48,8 +51,14 @@ const ParentInfo: React.FC<ParentInfoProps> = (props) => {
                 <IonCol>
                     <h4>Tel. číslo</h4>
                     <IonItem>
-                        <IonLabel position="floating"></IonLabel>
-                        <IonInput value={parent.phone} onIonChange={e => props.setValue(ActionType.SET_PARENT_PHONE, e.detail.value)} placeholder="0900 000 000" type="tel" required={true}></IonInput>
+                        <PhoneInput
+                            placeholder="0949 123 789"
+                            value={parent.phone}
+                            defaultCountry="SK"
+                            useNationalFormatForDefaultCountryValue={true}
+                            onChange={(value) => props.setValue(ActionType.SET_PARENT_PHONE, value)}
+                        />
+                        {parent.phone}
                     </IonItem>
                 </IonCol>
             </IonRow>
