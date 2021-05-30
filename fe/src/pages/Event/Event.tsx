@@ -62,13 +62,13 @@ class EventComponent extends React.Component<Props, State> {
             <IonPage>
                 <IonHeader>
                     <IonToolbar>
-                        <IonTitle>{this.state.event?.title}</IonTitle>
+                        <IonTitle>{this.state.event?.title.toUpperCase()}</IonTitle>
                     </IonToolbar>
                 </IonHeader>
                 <IonContent>
                     <IonHeader collapse="condense">
                         <IonToolbar>
-                            <IonTitle size="large">{this.state.event?.title}</IonTitle>
+                            <IonTitle size="large">{this.state.event?.title.toUpperCase()}</IonTitle>
                         </IonToolbar>
                     </IonHeader>
                     {
