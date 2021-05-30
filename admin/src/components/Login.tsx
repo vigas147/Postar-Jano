@@ -1,5 +1,6 @@
-import React, {SetStateAction, useState} from 'react';
+import React, {SetStateAction, useContext, useState} from 'react';
 import {signInUser} from "../api/login";
+import {AppContext} from "../AppContext";
 
 interface Props {
     setToken :React.Dispatch<SetStateAction<string|null>>
@@ -9,11 +10,12 @@ const Login: React.FC<Props> = ({setToken}) => {
     const [username, setUserName] = useState<string>("")
     const [password, setPassword] = useState<string>("")
     const [errs, setErrs] = useState<string>()
-
+    const {apiHost} = useContext(AppContext)
 
     const handleSubmit = async (e :React.FormEvent) => {
         e.preventDefault();
         await signInUser(
+            apiHost,
             username,
             password
         ).then(

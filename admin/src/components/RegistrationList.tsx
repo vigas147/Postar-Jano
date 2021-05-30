@@ -5,11 +5,10 @@ import ViewFilter, {IViewFields} from "./ViewFilter";
 import {useParams} from 'react-router-dom'
 import {AppContext} from "../AppContext";
 import useStorage from "../hooks/useStorage";
-import {Modal, Button} from "react-bootstrap";
 import EditForm from "./EditForm";
 
 const RegistrationList:React.FC = () :JSX.Element => {
-    const {token, setToken} = useContext(AppContext)
+    const {apiHost, token, setToken} = useContext(AppContext)
     const [filter, setFilter] = useState<string>("")
     const [registrations, setRegistrations] = useState<IExtendedRegistration[]>([])
     const [fields, setFields] = useStorage<IViewFields>("VIEW_FILTERS",{
@@ -49,7 +48,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
 
     useEffect(
         () => {
-            loadRegistrations(token, setToken).then(
+            loadRegistrations(apiHost,token, setToken).then(
                 (data) => {
                     setRegistrations(data)
                 }

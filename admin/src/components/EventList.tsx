@@ -5,16 +5,16 @@ import EventEntry from "./EventEntry";
 
 
 const EventList:React.FC = () :JSX.Element => {
-    const {token} = useContext(AppContext)
+    const {apiHost,token} = useContext(AppContext)
     const [events, setEvents] = useState<IEvent[]>([])
     const [stats, setStats] = useState<IStat[]>([])
 
     useEffect(() => {
-        listEvents(token).then((events) => setEvents(events))
+        listEvents(apiHost, token).then((events) => setEvents(events))
     },[token])
 
     useEffect(() => {
-        getStats(token).then((stats) => setStats(stats))
+        getStats(apiHost,token).then((stats) => setStats(stats))
     },[token])
 
     const statsForEvent = (eventID :number) => stats.filter(s => s.event_id === eventID)

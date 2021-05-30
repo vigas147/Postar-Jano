@@ -20,10 +20,10 @@ export interface IDay {
     limit_girls: number|null;
 }
 
-export const listEvents = (token:string|null) => {
+export const listEvents = (apiHost :string,token:string|null) => {
     return new Promise<IEvent[]>((resolve, reject) => {
         axios.get<IEvent[]>(
-            'https://leto.sbb.sk/api/events',
+            `${apiHost}/api/events`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -51,10 +51,10 @@ export interface IStat {
     girls_count: number;
 }
 
-export const getStats = (token:string|null) => {
+export const getStats = (host:string, token:string|null) => {
     return new Promise<IStat[]>((resolve, reject) => {
         axios.get<IStat[]>(
-            'https://leto.sbb.sk/api/stats',
+            `${host}/api/stats`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
