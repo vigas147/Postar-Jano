@@ -363,6 +363,7 @@ func (api *API) UpdateRegistration(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := api.repo.UpdateRegistrations(ctx, &model.Registration{
 		ID:        id,
+		Amount:    req.Amount,
 		Payed:     req.Payed,
 		AdminNote: req.AdminNote,
 	}); err != nil {

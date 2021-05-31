@@ -6,11 +6,11 @@ interface Props {
     show :boolean;
     reg :IExtendedRegistration |null;
     handleChange :(mutator :(prev :IExtendedRegistration) => IExtendedRegistration) => void;
-    handleSubmit :(updated :IExtendedRegistration) => void;
+    handleSubmit :() => void;
     handleClose :() => void;
 }
 
-const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange}) => {
+const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handleSubmit}) => {
     const onClose = () => {
         handleClose()
     }
@@ -65,19 +65,19 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange}) => {
            />
            </Form.Group>
            <Form.Group>
-               <Form.Label>Zľava</Form.Label>
+               <Form.Label>Poznamka admin</Form.Label>
            <Form.Control
-               type="number"
+               type="textarea"
                onChange={
                    (e :React.ChangeEvent<HTMLInputElement>) => {
-                       const val = parseInt(e.target.value) || null
+                       const val = e.target.value
                        onChange((prev :IExtendedRegistration) => {
-                           prev.discount = val
+                           prev.admin_note = val
                            return prev
                        })
                    }
                }
-               value={renderMaybeNumber(r.discount)}
+               value={r.admin_note}
            />
            </Form.Group>
         </Form>
@@ -98,7 +98,9 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange}) => {
 
             <Modal.Footer>
                 <Button variant="secondary" onClick={onClose}>Zrušiť</Button>
-                <Button variant="primary">Uloziť zmeny</Button>
+                <Button variant="primary" onClick={() => {
+                    handleSubmit()
+                }}>Uloziť zmeny</Button>
             </Modal.Footer>
         </Modal>
     </>)

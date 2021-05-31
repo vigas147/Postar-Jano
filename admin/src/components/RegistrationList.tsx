@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState} from 'react';
-import {deleteRegistration, IExtendedRegistration, loadRegistrations} from "../api/registrations";
+import {deleteRegistration, IExtendedRegistration, loadRegistrations, updateRegistration} from "../api/registrations";
 import RegistrationEntry from "./RegistrationEntry";
 import ViewFilter, {IViewFields} from "./ViewFilter";
 import {useParams} from 'react-router-dom'
@@ -89,13 +89,19 @@ const RegistrationList:React.FC = () :JSX.Element => {
         )
     }
 
-    const handleUpdate = (updated :IExtendedRegistration) => {
-        setRegistrations((prevState) => {
-            return prevState.map((r) => {
-                if (r.id !== updated.id) return r
-                return {...r, ...updated}
-            })
-        })
+    const handleUpdate = () => {
+        if (editedRegistration === null) return
+        updateRegistration(apiHost, token, editedRegistration).then(
+            () => {
+                setRegistrations((prevState) => {
+                    return prevState.map((r) => {
+                        if (r.id !== editedRegistration.id) return r
+                        return {...r, ...editedRegistration}
+                    })
+                })
+                setShowEdit(false)
+            }
+        )
     }
 
     const handleEdit = (mutator:(prev :IExtendedRegistration) => IExtendedRegistration) => {
@@ -135,7 +141,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
                             fields={fields}
                             registration={r}
                             deleteRegByID={(id:number) => {
-                                deleteRegistration(token, id).then(()=>{
+                                deleteRegistration(apiHost, token, id).then(()=>{
                                     setRegistrations((prev => prev.filter(r => r.id !== id)))
                                 })
                             }}
