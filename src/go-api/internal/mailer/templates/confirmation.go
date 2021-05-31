@@ -1140,7 +1140,7 @@ const confirmationMail = `<!doctype html>
 
                                                                 <em>Tento email vám poslal automaticky náš robot Poštár Jano.<br>
                                                                     Prosím neodpovedajte na tento email.&nbsp;<br>
-                                                                    Copyright © 2020 Saleziáni Banská Bystrica, Všetky práva vyhradené.</em>
+                                                                    Copyright © 2021 Saleziáni Banská Bystrica, Všetky práva vyhradené.</em>
                                                             </td>
                                                         </tr>
                                                         </tbody></table>
