@@ -14,6 +14,24 @@ interface ChildInfoProps {
 const ChildInfo: React.FC<ChildInfoProps> = (props) => {
     const { child } = props.registration;
 
+    const convertUTCToLocalDate = (date: any) => {
+        if (!date) {
+            return date
+        }
+        date = new Date(date)
+        date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+        return date
+    }
+      
+    const convertLocalToUTCDate = (date: any) => {
+        if (!date) {
+            return date
+        }
+        date = new Date(date)
+        date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+        return date
+    }
+
     return (
         <IonGrid>
             <IonRow>
@@ -58,8 +76,8 @@ const ChildInfo: React.FC<ChildInfoProps> = (props) => {
                 <IonCol>
                     <h4>Dátum narodenia</h4>
                     <DatePicker
-                        onChange={(date) => props.setValue(ActionType.SET_CHILD_BIRTH, date)}
-                        value={child.dateOfBirth}
+                        onChange={(date) => props.setValue(ActionType.SET_CHILD_BIRTH, convertLocalToUTCDate(date))}
+                        value={convertUTCToLocalDate(child.dateOfBirth)}
                         calendarIcon={<IonIcon icon={calendarOutline}></IonIcon>}
                         minDate={new Date(new Date().getFullYear() - props.event.max_age, 8, 15)}
                         maxDate={new Date(new Date().getFullYear() - props.event.min_age, 8, 15)}
