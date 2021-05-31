@@ -63,15 +63,29 @@ export interface IRegistration {
     id :number;
 }
 
-export const deleteRegistration = (token:string|null, id:number) :Promise<IRegistration> => {
+export const deleteRegistration = (apiHost :string, token:string|null, id:number) :Promise<IRegistration> => {
     return new Promise<IRegistration>((resolve, reject) => {
         axios.delete<IRegistration>(
-            `https://leto.sbb.sk/api/registrations/${id}`,
+            `${apiHost}/api/registrations/${id}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             }
         ).then((resp) => resolve(resp.data)).catch(err => reject(err))
+    })
+}
+
+export const updateRegistration = (apiHost :string, token:string|null, reg :IExtendedRegistration) :Promise<number> => {
+    return new Promise<number>((resolve, reject) => {
+        axios.put(
+            `${apiHost}/api/registrations/${reg.id}`,
+            reg,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+        ).then(() => resolve(reg.id)).catch(err => reject(err))
     })
 }

@@ -367,6 +367,7 @@ func (repo *PostgresRepo) FindOwner(ctx context.Context, username string) (*mode
 func (repo *PostgresRepo) UpdateRegistrations(ctx context.Context, reg *model.Registration) error {
 	stmt, err := repo.db.PrepareNamedContext(ctx, `
 		UPDATE registrations SET 
+		    amount = :amount,
 			payed = :payed,
 			admin_note = :admin_note,
 			updated_at = NOW()
@@ -423,6 +424,7 @@ func (repo *PostgresRepo) listRegistrations(ctx context.Context, where string, a
 			r.phone,
 			r.amount,
 			r.payed,
+			r.admin_note,
 			r.created_at,
 			r.token,
 			r.updated_at

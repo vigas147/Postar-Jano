@@ -90,7 +90,7 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration, deleteRegByID
                 editRegByID()
             }}>Upravit</button>
             <button onClick={(e) => {
-                if (window.confirm(`Naozaj chcete vymazat zaznam s ID ${id}?`)) {
+                if (window.confirm(`Naozaj chcete vymazat registraciu ${name} ${surname} (ID ${id})?`)) {
                     console.log("Deleting ", id)
                     deleteRegByID(id)
                 }

@@ -38,6 +38,7 @@ type UpdateReq struct {
 		AttendedActivities string `json:"attendedActivities"`
 	} `json:"memberShip"`
 	Notes     string `json:"notes"`
+	Amount    int    `json:"amount"`
 	Payed     *int   `json:"payed"`
 	Discount  *int   `json:"discount"`
 	AdminNote string `json:"admin_note"`
