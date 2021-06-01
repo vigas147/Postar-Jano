@@ -79,6 +79,7 @@ const ChildInfo: React.FC<ChildInfoProps> = (props) => {
                         onChange={(date) => props.setValue(ActionType.SET_CHILD_BIRTH, convertLocalToUTCDate(date))}
                         value={convertUTCToLocalDate(child.dateOfBirth)}
                         calendarIcon={<IonIcon icon={calendarOutline}></IonIcon>}
+                        format="dd/MM/yyyy"
                         minDate={new Date(new Date().getFullYear() - props.event.max_age, 8, 15)}
                         maxDate={new Date(new Date().getFullYear() - props.event.min_age, 8, 15)}
                     />
