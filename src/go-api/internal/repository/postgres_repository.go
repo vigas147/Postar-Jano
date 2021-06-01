@@ -207,13 +207,13 @@ func (repo *PostgresRepo) Register(ctx context.Context, req *resources.RegisterR
 					break
 				}
 				if req.Child.Gender == "male" && stat.LimitBoys != nil {
-					if stat.BoysCount > *stat.LimitBoys {
+					if stat.BoysCount >= *stat.LimitBoys {
 						break
 					}
 				}
 
 				if req.Child.Gender == "female" && stat.LimitGirls != nil {
-					if stat.GirlsCount > *stat.LimitGirls {
+					if stat.GirlsCount >= *stat.LimitGirls {
 						break
 					}
 				}
