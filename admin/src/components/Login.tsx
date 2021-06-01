@@ -1,4 +1,5 @@
 import React, {SetStateAction, useContext, useState} from 'react';
+import {Button, Alert, Form} from "react-bootstrap";
 import {signInUser} from "../api/login";
 import {AppContext} from "../AppContext";
 
@@ -38,21 +39,27 @@ const Login: React.FC<Props> = ({setToken}) => {
 
     return(
         <div className="login-wrapper">
-            <h1>Prihlaste sa</h1>
-            {errs && <span>{errs}</span>}
-            <form onSubmit={handleSubmit}>
-                <label>
-                    <p>Username</p>
-                    <input type="text" onChange={e => setUserName(e.target.value)}/>
-                </label>
-                <label>
-                    <p>Password</p>
-                    <input type="password" onChange={e => setPassword(e.target.value)} />
-                </label>
-                <div>
-                    <button type="submit" >Submit</button>
-                </div>
-            </form>
+            <h1>Prihláste sa</h1>
+            {errs && <Alert variant="danger">{errs}</Alert>}
+            <Form onSubmit={handleSubmit}>
+                <Form.Group>
+                    <Form.Label>Prihlasovacie meno</Form.Label>
+                    <Form.Control
+                        type="text"
+                        onChange={e => setUserName(e.target.value)}
+                    />
+                </Form.Group>
+
+                <Form.Group>
+                    <Form.Label>Heslo</Form.Label>
+                    <Form.Control
+                        type="password"
+                        onChange={e => setPassword(e.target.value)}
+                    />
+                </Form.Group>
+
+                <Button type="submit" variant="primary">Prihlásiť sa</Button>
+            </Form>
         </div>
     )
 }

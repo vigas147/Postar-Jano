@@ -20,9 +20,8 @@ const EventEntry:React.FC<Props> = (props) :JSX.Element => {
     }
 
     return (
-        <div key={e.id}>
-            <span>{e.title}</span>
-            <span>{e.description}</span>
+        <div className="event-entry-wrapper">
+            <h5>{e.title}</h5>
             {e.days.map(d => (
                 <div key={d.id} >
                     <span>{d.description}</span>
@@ -30,7 +29,7 @@ const EventEntry:React.FC<Props> = (props) :JSX.Element => {
                 </div>
             ))}
             <Link to={`/registrations/${e.id}`}>
-                Prihlaseni
+                Účastníci
             </Link>
         </div>
     )

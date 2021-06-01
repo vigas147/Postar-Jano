@@ -5,6 +5,7 @@ import EventList from "./components/EventList";
 import RegistrationList from "./components/RegistrationList";
 import Login from "./components/Login";
 import {AppContext} from "./AppContext";
+import {Navbar, Nav} from "react-bootstrap";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
@@ -18,16 +19,27 @@ const App: React.FC = () => {
 
     return (
          <div className="wrapper">
-           <h1>Prihlasovanie Leto 2021</h1>
-
            <BrowserRouter basename="/admin">
-               <Link to="/events">
-                   Akcie
-               </Link>
-               <Link to="/registrations">
-                   Prihlaseni
-               </Link>
-               <button onClick={() => setToken(null)}>Odhlasit sa</button>
+               <Navbar bg="light">
+                   <Navbar.Brand>Leto 2021</Navbar.Brand>
+                   <Nav>
+                       <Nav.Link>
+                           <Link to="/events">
+                               Akcie
+                           </Link>
+                       </Nav.Link>
+                       <Nav.Link>
+                           <Link to="/registrations">
+                               Prihlaseni
+                           </Link>
+                       </Nav.Link>
+                       <Nav.Link>
+                            <button
+                                onClick={() => setToken(null)}
+                            >Odhlasit sa</button>
+                       </Nav.Link>
+                   </Nav>
+               </Navbar>
              <Switch>
                 <Route path="/events">
                   <EventList/>
