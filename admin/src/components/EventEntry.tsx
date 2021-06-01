@@ -25,7 +25,7 @@ const EventEntry:React.FC<Props> = (props) :JSX.Element => {
             {e.days.map(d => (
                 <div key={d.id} >
                     <span>{d.description}</span>
-                    <Limit day={d} stat={statForDay(d.id)}/>
+                    {statForDay(d.id) && <Limit day={d} stat={statForDay(d.id)}/>}
                 </div>
             ))}
             <Link to={`/registrations/${e.id}`}>
