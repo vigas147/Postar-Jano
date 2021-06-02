@@ -27,6 +27,11 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handle
        return handleChange(mutator)
     }
 
+    const renderDate = () => {
+        const d = new Date(r.date_of_birth)
+        return `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+    }
+
     const renderForm = () => {
        const renderMaybeNumber = (val :number|null):number =>  val || 0
 
@@ -86,7 +91,7 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handle
     return (<>
         <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>{r.name} {r.surname}</Modal.Title>
+                <Modal.Title>{r.name} {r.surname} {renderDate()}</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
@@ -94,13 +99,19 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handle
                 {days}
                 <br/>
                 {r !== null && renderForm()}
-            </Modal.Body>
-
-            <Modal.Footer>
                 <Button variant="secondary" onClick={onClose}>Zrušiť</Button>
                 <Button variant="primary" onClick={() => {
                     handleSubmit()
                 }}>Uloziť zmeny</Button>
+            </Modal.Body>
+
+            <Modal.Footer>
+                <div className="editForm-readonly-wrapper">
+                    <span>Rodič:</span> <span>{r.parent_name} {r.parent_surname}</span>
+                    <span>Email:</span> <span>{r.email}</span>
+                    <span>Telefon:</span> <span>{r.phone}</span>
+                    <span>Poznamka:</span> <span>{r.notes}</span>
+                </div>
             </Modal.Footer>
         </Modal>
     </>)

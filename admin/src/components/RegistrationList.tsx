@@ -6,6 +6,7 @@ import {useParams} from 'react-router-dom'
 import {AppContext} from "../AppContext";
 import useStorage from "../hooks/useStorage";
 import EditForm from "./EditForm";
+import {Table} from 'react-bootstrap'
 
 const RegistrationList:React.FC = () :JSX.Element => {
     const {apiHost, token, setToken} = useContext(AppContext)
@@ -77,14 +78,14 @@ const RegistrationList:React.FC = () :JSX.Element => {
         if (expandViewFilter) {
             return (
                 <>
-                    <button onClick={()=>setExpandViewFilter(false)}>Skryt</button>
+                    <button onClick={()=>setExpandViewFilter(false)}>Skryť</button>
                     <ViewFilter fields={fields} setFields={setFields}/>
                 </>
             )
         }
         return (
             <>
-                <button onClick={()=>setExpandViewFilter(true)}>Zobrazene stlpce</button>
+                <button onClick={()=>setExpandViewFilter(true)}>Zobrazené stĺpce</button>
             </>
         )
     }
@@ -132,7 +133,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
                 handleClose={() => {setShowEdit(false)}}
             />}
             {renderViewFilter()}
-            <table>
+            <Table>
                 <tbody>
                 {displayedRegistrations().map(
                     r =>
@@ -152,7 +153,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
                         />
                 )}
                 </tbody>
-            </table>
+            </Table>
         </>
     )
 }
