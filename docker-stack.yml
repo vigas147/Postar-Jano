@@ -49,6 +49,8 @@ services:
     deploy:
       labels:
         - traefik.http.routers.leto-admin.rule=Host(`leto.sbb.sk`) && PathPrefix(`/admin`)
+        - traefik.http.middlewares.stripprefix.stripprefix.prefixes=/admin
+        - traefik.http.routers.leto-admin.middlewares=stripprefix@docker
         - traefik.http.routers.leto-admin.tls.certresolver=le
         - traefik.http.routers.leto-admin.entrypoints=websecure
         - traefik.http.services.leto-admin.loadbalancer.server.port=80
