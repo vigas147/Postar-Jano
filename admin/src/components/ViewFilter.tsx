@@ -26,7 +26,7 @@ const ViewFilter: React.FC<Props> = ({fields, setFields}) => {
     }
 
     return (
-        <div>
+        <div className="filters">
             {Object.keys(fields).map(
                 (k,index) => <div key={index}>
                         <input

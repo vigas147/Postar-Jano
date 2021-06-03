@@ -6,6 +6,7 @@ import {useParams} from 'react-router-dom'
 import {AppContext} from "../AppContext";
 import useStorage from "../hooks/useStorage";
 import EditForm from "./EditForm";
+import {Table, Popover, OverlayTrigger} from 'react-bootstrap'
 
 const RegistrationList:React.FC = () :JSX.Element => {
     const {apiHost, token, setToken} = useContext(AppContext)
@@ -77,14 +78,14 @@ const RegistrationList:React.FC = () :JSX.Element => {
         if (expandViewFilter) {
             return (
                 <>
-                    <button onClick={()=>setExpandViewFilter(false)}>Skryt</button>
+                    <button onClick={()=>setExpandViewFilter(false)}>Skryť</button>
                     <ViewFilter fields={fields} setFields={setFields}/>
                 </>
             )
         }
         return (
             <>
-                <button onClick={()=>setExpandViewFilter(true)}>Zobrazene stlpce</button>
+                <button onClick={()=>setExpandViewFilter(true)}>Zobrazené stĺpce</button>
             </>
         )
     }
@@ -115,9 +116,52 @@ const RegistrationList:React.FC = () :JSX.Element => {
         })
     }
 
+    const popover = (
+        <Popover id="popover-basic">
+            <Popover.Title as="h3">Skopirovane!</Popover.Title>
+            <Popover.Content>Pouzi ctrl+v</Popover.Content>
+        </Popover>
+    );
+
+    const copyTable = () => {
+        const elTable = document.querySelector('table');
+
+        let range, sel;
+
+        // Ensure that range and selection are supported by the browsers
+        if (document.createRange && window.getSelection) {
+
+            range = document.createRange();
+            sel = window.getSelection();
+            // unselect any element in the page
+            if (sel != null) {
+                sel.removeAllRanges();
+            }
+
+            if (sel == null) return
+
+            if (elTable == null) return
+            try {
+                range.selectNodeContents(elTable);
+                sel.addRange(range);
+            } catch (e) {
+                range.selectNode(elTable);
+                sel.addRange(range);
+            }
+
+            document.execCommand('copy');
+            sel.removeAllRanges();
+        }
+    }
+
+    const isShown = (name :string): boolean => {
+        const entry = fields[name]
+        if (!entry) return true
+        return entry.show
+    }
 
     return (
-        <>
+        <div>
         <h2>Zoznam prihlasenych</h2>
             <input
                 value={filter}
@@ -132,7 +176,40 @@ const RegistrationList:React.FC = () :JSX.Element => {
                 handleClose={() => {setShowEdit(false)}}
             />}
             {renderViewFilter()}
-            <table>
+            <OverlayTrigger trigger="click" placement="right" overlay={popover}>
+                <button onClick={() => copyTable()}>Kopirovat</button>
+            </OverlayTrigger>
+            <Table>
+                <thead>
+                {isShown("id") && <th>ID</th>}
+                {isShown("name") && <th>Meno</th>}
+                {isShown("surname") && <th>Priezvisko</th>}
+                {isShown("date_of_birth") && <th>Datum narodenia</th>}
+                {isShown("gender") && <th>Pohlavie</th>}
+                {isShown("finished_school") && <th>Ukonceny rocnik</th>}
+                {isShown("attended_previous") && <th>Ucast na predchadzajucich akciach</th>}
+                {isShown("attended_activities") && <th>Navsetvovane aktivity</th>}
+
+                {isShown("city") && <th>Mesto</th>}
+                {isShown("pills") && <th>Lieky</th>}
+                {isShown("problems") && <th>Zdravotne problemy</th>}
+                {isShown("notes") && <th>Poznamky</th>}
+
+                {isShown("title") && <th>Nazov akcie</th>}
+                {isShown("days") && <th>Dni</th>}
+
+                {isShown("parent_name") && <th>Meno rodica</th>}
+                {isShown("parent_surname") && <th>Priezvisko rodica</th>}
+                {isShown("email") && <th>Email</th>}
+                {isShown("phone") && <th>Telefon</th>}
+
+
+                {isShown("amount") && <th>Suma</th>}
+                {isShown("payed") && <th>Zaplatene</th>}
+                {isShown("discount") && <th>Zlava</th>}
+
+                {isShown("buttons") && <th>Upravy </th>}
+                </thead>
                 <tbody>
                 {displayedRegistrations().map(
                     r =>
@@ -152,8 +229,8 @@ const RegistrationList:React.FC = () :JSX.Element => {
                         />
                 )}
                 </tbody>
-            </table>
-        </>
+            </Table>
+        </div>
     )
 }
 export default RegistrationList;
