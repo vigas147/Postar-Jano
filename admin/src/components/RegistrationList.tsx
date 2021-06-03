@@ -154,7 +154,11 @@ const RegistrationList:React.FC = () :JSX.Element => {
         }
     }
 
-
+    const isShown = (name :string): boolean => {
+        const entry = fields[name]
+        if (!entry) return true
+        return entry.show
+    }
 
     return (
         <div>
@@ -176,6 +180,36 @@ const RegistrationList:React.FC = () :JSX.Element => {
                 <button onClick={() => copyTable()}>Kopirovat</button>
             </OverlayTrigger>
             <Table>
+                <thead>
+                {isShown("id") && <th>ID</th>}
+                {isShown("name") && <th>Meno</th>}
+                {isShown("surname") && <th>Priezvisko</th>}
+                {isShown("date_of_birth") && <th>Datum narodenia</th>}
+                {isShown("gender") && <th>Pohlavie</th>}
+                {isShown("finished_school") && <th>Ukonceny rocnik</th>}
+                {isShown("attended_previous") && <th>Ucast na predchadzajucich akciach</th>}
+                {isShown("attended_activities") && <th>Navsetvovane aktivity</th>}
+
+                {isShown("city") && <th>Mesto</th>}
+                {isShown("pills") && <th>Lieky</th>}
+                {isShown("problems") && <th>Zdravotne problemy</th>}
+                {isShown("notes") && <th>Poznamky</th>}
+
+                {isShown("title") && <th>Nazov akcie</th>}
+                {isShown("days") && <th>Dni</th>}
+
+                {isShown("parent_name") && <th>Meno rodica</th>}
+                {isShown("parent_surname") && <th>Priezvisko rodica</th>}
+                {isShown("email") && <th>Email</th>}
+                {isShown("phone") && <th>Telefon</th>}
+
+
+                {isShown("amount") && <th>Suma</th>}
+                {isShown("payed") && <th>Zaplatene</th>}
+                {isShown("discount") && <th>Zlava</th>}
+
+                {isShown("buttons") && <th>Upravy </th>}
+                </thead>
                 <tbody>
                 {displayedRegistrations().map(
                     r =>

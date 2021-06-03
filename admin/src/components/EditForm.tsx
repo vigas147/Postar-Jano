@@ -33,7 +33,7 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handle
     }
 
     const renderForm = () => {
-       const renderMaybeNumber = (val :number|null):number =>  val || 0
+       const renderMaybeNumber = (val :number|null):number|undefined =>  val || undefined
 
        return <Form>
            <Form.Group>
