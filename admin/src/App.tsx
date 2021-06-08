@@ -22,7 +22,7 @@ const App: React.FC = () => {
            <BrowserRouter basename="/admin">
                <Navbar bg="light">
                    <Navbar.Brand>Leto 2021</Navbar.Brand>
-                   <Nav>
+                   <Nav style={{display:'flex', width:'100%'}}>
                        <Nav.Link>
                            <Link to="/events">
                                Akcie
@@ -33,7 +33,7 @@ const App: React.FC = () => {
                                Prihlaseni
                            </Link>
                        </Nav.Link>
-                       <Nav.Link>
+                       <Nav.Link style={{marginInlineStart:'auto'}}>
                             <button
                                 onClick={() => setToken(null)}
                             >Odhlasit sa</button>

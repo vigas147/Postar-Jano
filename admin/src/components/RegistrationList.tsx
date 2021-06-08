@@ -6,7 +6,8 @@ import {useParams} from 'react-router-dom'
 import {AppContext} from "../AppContext";
 import useStorage from "../hooks/useStorage";
 import EditForm from "./EditForm";
-import {Table, Popover, OverlayTrigger} from 'react-bootstrap'
+import {Table} from 'react-bootstrap'
+import CopyButton from "./CopyButton";
 
 const RegistrationList:React.FC = () :JSX.Element => {
     const {apiHost, token, setToken} = useContext(AppContext)
@@ -111,48 +112,10 @@ const RegistrationList:React.FC = () :JSX.Element => {
             const copyVal :IExtendedRegistration = {...p}
 
             const newVal = mutator(copyVal)
-            console.log(newVal)
             return newVal
         })
     }
 
-    const popover = (
-        <Popover id="popover-basic">
-            <Popover.Title as="h3">Skopirovane!</Popover.Title>
-            <Popover.Content>Pouzi ctrl+v</Popover.Content>
-        </Popover>
-    );
-
-    const copyTable = () => {
-        const elTable = document.querySelector('table');
-
-        let range, sel;
-
-        // Ensure that range and selection are supported by the browsers
-        if (document.createRange && window.getSelection) {
-
-            range = document.createRange();
-            sel = window.getSelection();
-            // unselect any element in the page
-            if (sel != null) {
-                sel.removeAllRanges();
-            }
-
-            if (sel == null) return
-
-            if (elTable == null) return
-            try {
-                range.selectNodeContents(elTable);
-                sel.addRange(range);
-            } catch (e) {
-                range.selectNode(elTable);
-                sel.addRange(range);
-            }
-
-            document.execCommand('copy');
-            sel.removeAllRanges();
-        }
-    }
 
     const isShown = (name :string): boolean => {
         const entry = fields[name]
@@ -176,9 +139,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
                 handleClose={() => {setShowEdit(false)}}
             />}
             {renderViewFilter()}
-            <OverlayTrigger trigger="click" placement="right" overlay={popover}>
-                <button onClick={() => copyTable()}>Kopirovat</button>
-            </OverlayTrigger>
+           <CopyButton selector="table"/>
             <Table>
                 <thead>
                 {isShown("id") && <th>ID</th>}

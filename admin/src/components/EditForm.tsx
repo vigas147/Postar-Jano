@@ -29,7 +29,7 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handle
 
     const renderDate = () => {
         const d = new Date(r.date_of_birth)
-        return `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+        return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`
     }
 
     const renderForm = () => {

@@ -46,7 +46,7 @@ const RegistrationEntry :React.FC<Props> = ({fields, registration, deleteRegByID
 
     const renderDate = () => {
         const d = new Date(date_of_birth)
-        return `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+        return `${d.getDate()}/${d.getUTCMonth()+1}/${d.getFullYear()}`
     }
 
     return (
