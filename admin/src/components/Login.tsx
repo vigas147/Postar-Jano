@@ -1,30 +1,20 @@
-import React, {SetStateAction, useContext, useState} from 'react';
+import React, {useState} from 'react';
 import {Button, Alert, Form} from "react-bootstrap";
-import {signInUser} from "../api/login";
-import {AppContext} from "../AppContext";
+import {useAPIClient, useAppDispatch} from "../AppContext";
 
-interface Props {
-    setToken :React.Dispatch<SetStateAction<string|null>>
-}
-
-const Login: React.FC<Props> = ({setToken}) => {
+const Login: React.FC = () => {
     const [username, setUserName] = useState<string>("")
     const [password, setPassword] = useState<string>("")
-    const [errs, setErrs] = useState<string>()
-    const {apiHost} = useContext(AppContext)
 
-    const handleSubmit = async (e :React.FormEvent) => {
+    const [errs, setErrs] = useState<string>()
+    const apiClient = useAPIClient()
+    const dispatch = useAppDispatch()
+
+    const handleSubmit = (e :React.FormEvent) => {
         e.preventDefault();
-        await signInUser(
-            apiHost,
-            username,
-            password
-        ).then(
-            (resp) => {
-                if (resp.data !== undefined) {
-                    setToken(resp.data.token)
-                }
-                setErrs(undefined)
+        apiClient.user.signIn(username, password).then(
+            (data) => {
+                dispatch({type:"SET_TOKEN", token: data.token})
             }
         ).catch(
             (err) => {

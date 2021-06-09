@@ -1,5 +1,5 @@
 import axios from "axios";
-import React from "react";
+import ApiClient from "./apiClient";
 
 export interface IExtendedRegistration {
     id :number;
@@ -32,35 +32,32 @@ export interface IExtendedRegistration {
     admin_note :string;
 }
 
+export interface IRegistration {
+    id :number;
+}
+
 export interface IDay {
     id: number;
     description: string;
 }
 
-export const loadRegistrations = (apiHost :string, token:string|null, setToken :React.Dispatch<React.SetStateAction<string|null>>) :Promise<IExtendedRegistration[]> => {
-     return new Promise<IExtendedRegistration[]>((resolve, reject) => {
-         axios.get<IExtendedRegistration[]>(
-             `${apiHost}/api/registrations`,
-             {
-                 headers: {
-                     Authorization: `Bearer ${token}`,
-                 }
-             }
-         ).then((resp) => resolve(resp.data)).catch(
-             (err) => {
-                 if (err.response.status === 401) {
-                     console.log("Invalid token")
-                     setToken(null)
-                     resolve([])
-                 } else {
-                     reject(err)
-                 }
-             })
-     })
-}
+export class Registrations {
+    constructor(protected client: ApiClient) {}
 
-export interface IRegistration {
-    id :number;
+    public list () :Promise<IExtendedRegistration[]> {
+        return this.client.get<IExtendedRegistration[]>("/api/registrations")
+    }
+
+    public update(reg :IExtendedRegistration) :Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.client.put(`/api/registrations/${reg.id}`, reg)
+                .then(() => resolve(reg.id)).catch(err => reject(err))
+        })
+    }
+
+    public delete(id :number) :Promise<IRegistration> {
+        return this.client.delete<IRegistration>(`/registrations/${id}`)
+    }
 }
 
 export const deleteRegistration = (apiHost :string, token:string|null, id:number) :Promise<IRegistration> => {

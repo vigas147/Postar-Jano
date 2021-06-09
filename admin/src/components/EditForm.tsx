@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {IExtendedRegistration} from "../api/registrations";
 import {Button, Modal, Form} from "react-bootstrap";
 
@@ -17,7 +17,7 @@ const EditForm:React.FC<Props> = ({show, reg:r,handleClose, handleChange, handle
 
     if (r == null) return null
 
-    const days = r.days.length == 1 ?
+    const days = r.days.length === 1 ?
             <span> {r.days[0].description}</span> :
             <ul>
                 {r.days.map((d) => <li key={d.id}>{d.description}</li>)}

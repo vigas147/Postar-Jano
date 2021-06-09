@@ -22,7 +22,7 @@ const Limit:React.FC<Props> = ({day, stat}) => {
             <div>{stat.boys_count}CH + {stat.girls_count}D / {stat.capacity}(max.{stat.limit_boys}CH + max.{stat.limit_girls}D)</div>
         )
     }
-    const percentage = (stat.boys_count + stat.girls_count) == 0 ? 0 : (stat.boys_count + stat.girls_count)/stat.capacity * 100
+    const percentage = (stat.boys_count + stat.girls_count) === 0 ? 0 : (stat.boys_count + stat.girls_count)/stat.capacity * 100
 
     return (
         <div>

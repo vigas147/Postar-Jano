@@ -1,4 +1,4 @@
-import axios from "axios";
+import ApiClient from "./apiClient";
 
 export interface IEvent {
     id :number;
@@ -20,27 +20,6 @@ export interface IDay {
     limit_girls: number|null;
 }
 
-export const listEvents = (apiHost :string,token:string|null) => {
-    return new Promise<IEvent[]>((resolve, reject) => {
-        axios.get<IEvent[]>(
-            `${apiHost}/api/events`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            }
-        ).then((resp) => resolve(resp.data)).catch(
-            (err) => {
-                if (err.response.status === 401) {
-                    console.log("Invalid token")
-                    resolve([])
-                } else {
-                    reject(err)
-                }
-            })
-    })
-}
-
 export interface IStat {
     day_id: number;
     event_id: number;
@@ -51,23 +30,14 @@ export interface IStat {
     girls_count: number;
 }
 
-export const getStats = (host:string, token:string|null) => {
-    return new Promise<IStat[]>((resolve, reject) => {
-        axios.get<IStat[]>(
-            `${host}/api/stats`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            }
-        ).then((resp) => resolve(resp.data)).catch(
-            (err) => {
-                if (err.response.status === 401) {
-                    console.log("Invalid token")
-                    resolve([])
-                } else {
-                    reject(err)
-                }
-            })
-    })
+export class Events {
+    constructor(protected client: ApiClient) {}
+
+    public list () :Promise<IEvent[]> {
+        return this.client.get<IEvent[]>("/api/events")
+    }
+
+    public stats (): Promise<IStat[]> {
+        return this.client.get("/api/stats")
+    }
 }

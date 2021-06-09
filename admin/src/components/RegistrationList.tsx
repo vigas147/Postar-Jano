@@ -1,16 +1,15 @@
-import React, { useContext, useEffect, useState} from 'react';
-import {deleteRegistration, IExtendedRegistration, loadRegistrations, updateRegistration} from "../api/registrations";
+import React, {useEffect, useState} from 'react';
+import {IExtendedRegistration} from "../api/registrations";
 import RegistrationEntry from "./RegistrationEntry";
 import ViewFilter, {IViewFields} from "./ViewFilter";
 import {useParams} from 'react-router-dom'
-import {AppContext} from "../AppContext";
+import {useAPIClient} from "../AppContext";
 import useStorage from "../hooks/useStorage";
 import EditForm from "./EditForm";
 import {Table} from 'react-bootstrap'
 import CopyButton from "./CopyButton";
 
 const RegistrationList:React.FC = () :JSX.Element => {
-    const {apiHost, token, setToken} = useContext(AppContext)
     const [filter, setFilter] = useState<string>("")
     const [registrations, setRegistrations] = useState<IExtendedRegistration[]>([])
     const [fields, setFields] = useStorage<IViewFields>("VIEW_FILTERS",{
@@ -45,23 +44,21 @@ const RegistrationList:React.FC = () :JSX.Element => {
     const [expandViewFilter, setExpandViewFilter] = useState(false)
     const [showEdit, setShowEdit] = useState(false)
     const [editedRegistration, setEditedRegistration] = useState<IExtendedRegistration|null>(null)
-
+    const apiClient = useAPIClient()
     const {event} = useParams<{event:string}>()
 
     useEffect(
         () => {
-            loadRegistrations(apiHost,token, setToken).then(
-                (data) => {
-                    setRegistrations(data)
-                }
+            apiClient.registrations.list().then(
+                (data) => setRegistrations(data)
             )
         }
-    ,[token, setToken])
+    ,[apiClient])
 
     const displayedRegistrations = ():IExtendedRegistration[] => {
         const eventID = parseInt(event || "")
 
-        const byEvent = registrations.filter(r => (!eventID) || r.eventID == eventID)
+        const byEvent = registrations.filter(r => (!eventID) || r.eventID === eventID)
 
         if (filter === "") {
             return byEvent
@@ -93,7 +90,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
 
     const handleUpdate = () => {
         if (editedRegistration === null) return
-        updateRegistration(apiHost, token, editedRegistration).then(
+        apiClient.registrations.update(editedRegistration).then(
             () => {
                 setRegistrations((prevState) => {
                     return prevState.map((r) => {
@@ -179,7 +176,7 @@ const RegistrationList:React.FC = () :JSX.Element => {
                             fields={fields}
                             registration={r}
                             deleteRegByID={(id:number) => {
-                                deleteRegistration(apiHost, token, id).then(()=>{
+                                apiClient.registrations.delete(id).then(()=>{
                                     setRegistrations((prev => prev.filter(r => r.id !== id)))
                                 })
                             }}

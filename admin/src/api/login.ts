@@ -1,13 +1,13 @@
-import axios, {AxiosResponse} from "axios";
+import ApiClient from "./apiClient";
 
 export interface ISignInResponse {
     token :string;
 }
 
-export async function signInUser(apiHost :string, username: string, password :string) :Promise<AxiosResponse<ISignInResponse>>  {
-    axios.create()
-    return axios.post<ISignInResponse>(
-        `${apiHost}/api/sign/in`,
-        {username, password},
-    )
+export class User {
+    constructor(protected client: ApiClient) {}
+
+    public signIn( username: string, password :string) :Promise<ISignInResponse>{
+        return this.client.post<ISignInResponse>("/api/sign/in", {username, password})
+    }
 }

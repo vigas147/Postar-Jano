@@ -1,21 +1,18 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {AppContext} from "../AppContext";
-import {getStats, IEvent, IStat, listEvents} from "../api/events";
+import React, { useEffect, useState} from 'react';
+import {useAPIClient} from "../AppContext";
+import {IEvent, IStat} from "../api/events";
 import EventEntry from "./EventEntry";
 
 
 const EventList:React.FC = () :JSX.Element => {
-    const {apiHost,token} = useContext(AppContext)
+    const apiClient = useAPIClient()
     const [events, setEvents] = useState<IEvent[]>([])
     const [stats, setStats] = useState<IStat[]>([])
 
     useEffect(() => {
-        listEvents(apiHost, token).then((events) => setEvents(events))
-    },[token])
-
-    useEffect(() => {
-        getStats(apiHost,token).then((stats) => setStats(stats))
-    },[token])
+        apiClient.events.list().then((events) => setEvents(events))
+        apiClient.events.stats().then((stats) => setStats(stats))
+    },[apiClient])
 
     const statsForEvent = (eventID :number) => stats.filter(s => s.event_id === eventID)
 
